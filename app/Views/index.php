@@ -51,22 +51,22 @@
 <body class="login-page bg-body-secondary">
     <div class="login-box">
         <div class="login-logo">
-            <a href="<?=base_url()?>"><img src="<?=base_url()?>public/logo/logo-andar.png" alt="logo" class="img-fluid" style="max-width:200px"></a>
+            <a href="<?=base_url()?>"><img src="<?=base_url()?>public/logo/logo-andar-sm.png" alt="logo" class="img-fluid" style="max-width:200px"></a>
         </div>
         <!-- /.login-logo -->
         <div class="card">
             <div class="card-body login-card-body">
-                <p class="login-box-msg fw-bold">Acceso al Sistema</p>
+                <p class="login-box-msg fw-bold">ACCESO AL SISTEMA</p>
 
-                <form action="../index3.html" method="post">
+                <form action="" method="post" id="frmLogin">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Usuario">
+                        <input type="text" class="form-control" placeholder="Usuario" name="usuario" value="<?=old('usuario');?>" autocomplete="off">
                         <div class="input-group-text">
                             <span class="fa-solid fa-user"></span>
                         </div>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="password" class="form-control" placeholder="Password">
+                        <input type="password" class="form-control" placeholder="Password" name="password">
                         <div class="input-group-text">
                             <span class="fa-solid fa-lock"></span>
                         </div>
@@ -75,12 +75,21 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="d-block">
-                                <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                                <button type="submit" class="btn btn-warning w-100">Iniciar Sesión</button>
                             </div>
                         </div>
                     </div>
                     <!--end::Row-->
                 </form>
+
+                <div class="text-center my-3">
+                    <div id="msjlogin">
+                        <div class="text-danger"><?=session('errors.usuario')?></div>
+                        <div class="text-danger"><?=session('errors.password')?></div>
+                        <div class="text-danger"><?=session('msg_login')?></div>
+                    </div>
+                </div>
+
             </div>
             <!-- /.login-card-body -->
         </div>
@@ -96,29 +105,19 @@
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script src="<?=base_url('public/adminlte')?>/dist/js/adminlte.min.js"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-    <script>
-        const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
-        const Default = {
-            scrollbarTheme: "os-theme-light",
-            scrollbarAutoHide: "leave",
-            scrollbarClickScroll: true,
-        };
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-            if (
-                sidebarWrapper &&
-                typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
-            ) {
-                OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-                    scrollbars: {
-                        theme: Default.scrollbarTheme,
-                        autoHide: Default.scrollbarAutoHide,
-                        clickScroll: Default.scrollbarClickScroll,
-                    },
-                });
-            }
-        });
+    <script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+    <script>
+        $(function(){
+            $("#frmLogin").on('submit', function(e){
+                let btn = $("#frmLogin button"),
+                    text = btn.text();
+                    btn.attr('disabled','disabled');
+            })
+        })
     </script>
     <!--end::OverlayScrollbars Configure-->
     <!--end::Script-->
