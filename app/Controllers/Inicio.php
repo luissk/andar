@@ -61,9 +61,11 @@ class Inicio extends BaseController
                      echo "</pre>"; */
                      
                     $datasession = [
-                         'idusuario'     => $result['idusuario'],
-                         'usuario'       => $result['usu_usuario'],
-                         'idtipousuario' => $result['idtipousuario'],
+                        'idusuario'     => $result['idusuario'],
+                        'usuario'       => $result['usu_usuario'],
+                        'idtipousuario' => $result['idtipousuario'],
+                        'nombres'       => $result['usu_nombres']." ".$result['usu_apellidos'],
+                        'tipousu'       => $result['tu_tipo']
                     ];
                     $this->session->set($datasession);
  
@@ -89,12 +91,13 @@ class Inicio extends BaseController
             return redirect()->to('/');
         }
 
-        $data['title']    = 'Bienvenido al Sistema | '.help_nombreWeb();
+        $data['title']          = 'Bienvenido al Sistema | '.help_nombreWeb();
+        $data['dashLinkActive'] = TRUE;
 
         if( session('idtipousuario') == 1 ){
-            return view('admin/index', $data);
+            return view('sistema/index', $data);
         }else if( session('idtipousuario') == 2 ){
-            return view('operador/index', $data);
+            return view('sistema/index', $data);
         }        
     }
 

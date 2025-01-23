@@ -5,7 +5,11 @@ use CodeIgniter\Model;
 
 class UsuarioModel extends Model{
     public function validarLogin($usuario){
-        $query = "select idusuario, usu_dni, usu_nombres, usu_apellidos, usu_usuario, usu_password, idtipousuario from usuario where LOWER(usu_usuario) = LOWER(?)";
+        $query = "select usu.idusuario, usu.usu_dni, usu.usu_nombres, usu.usu_apellidos, usu.usu_usuario, usu.usu_password, usu.idtipousuario,
+        tu.tu_tipo 
+        from usuario usu
+        inner join tipousuario tu on usu.idtipousuario=tu.idtipousuario
+        where LOWER(usu_usuario) = LOWER(?)";
         $st = $this->db->query($query, [$usuario]);
 
         return $st->getRowArray();

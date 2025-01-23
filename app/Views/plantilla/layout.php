@@ -3,9 +3,9 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>AdminLTE v4 | Dashboard</title>
+    <title><?=$title?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="title" content="AdminLTE v4 | Dashboard">
+    <meta name="title" content="Sistema ANDAR">
     <meta name="author" content="ColorlibHQ">
     <meta name="description" content="">
     <meta name="keywords" content="">
@@ -40,6 +40,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="<?=base_url('public/css/styles.css')?>">
+
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -64,13 +66,19 @@
                     <!--begin::User Menu Dropdown-->
                     <li class="nav-item dropdown user-menu">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img src="<?=base_url('public/adminlte')?>/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
+                            <img src="<?=base_url('public/images/nav/user.jpg')?>" class="user-image rounded-circle shadow" alt="User Image">
                             <span class="d-none d-md-inline"><?=session('usuario')?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                            <li class="text-bg-white text-center pt-2">
+                                <p>
+                                    <?=session('nombres')?>
+                                    <small><?=session('tipousu')?></small>
+                                </p>
+                            </li>
                             <li class="user-footer">
-                                <a href="#" class="btn btn-outline-secondary">Mis datos</a>
-                                <a href="./salir" class="btn btn-outline-secondary float-end">Salir</a>
+                                <!-- <a href="#" class="btn btn-outline-secondary">Mis datos</a> -->
+                                <a href="./salir" class="btn btn-sm btn-outline-secondary float-end">Salir</a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -98,63 +106,99 @@
                 <nav class="mt-2">
                     <!--begin::Sidebar Menu-->
                     <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-                        <li class="nav-item menu-open">
-                            <a href="javascript:;" class="nav-link active">
+                        <li class="nav-item">
+                            <a href="<?=base_url('sistema')?>" class="nav-link <?php echo isset($dashLinkActive) ? 'active': ''?>">
                                 <i class="nav-icon fa-solid fa-gauge-high"></i>
+                                <p>DASHBOARD</p>
+                            </a>
+                        </li>
+                        <li class="nav-item menu-open">
+                            <a href="javascript:;" class="nav-link">
+                                <i class="nav-icon fa-solid fa-gear"></i>
                                 <p>
-                                    Dashboard
+                                    MANTENIMIENTOS
                                     <i class="nav-arrow fa-solid fa-angle-right"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="../index.html" class="nav-link active">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>Dashboard v1</p>
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($paramLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-gears"></i>
+                                        <p>Parámetros General</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="../index2.html" class="nav-link">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>Dashboard v2</p>
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($perfilLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-regular fa-user"></i>
+                                        <p>Perfiles</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="../index3.html" class="nav-link">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>Dashboard v3</p>
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($usersLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-user"></i>
+                                        <p>Usuarios</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($transLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-truck"></i>
+                                        <p>Transportistas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($clientesLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-users"></i>
+                                        <p>Clientes</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item menu-open">
+                            <a href="javascript:;" class="nav-link">
+                                <i class="nav-icon fa-solid fa-box-open"></i>
+                                <p>
+                                    MÓDULOS
+                                    <i class="nav-arrow fa-solid fa-angle-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($torresLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-wrench"></i>
+                                        <p>Torres</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($presuLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-calculator"></i>
+                                        <p>Presupuesto</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($guiaLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-file"></i>
+                                        <p>Guía de Remisión</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($factLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-book"></i>
+                                        <p>Facturación</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./" class="nav-link ps-4 <?php echo isset($devolLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-right-left"></i>
+                                        <p>Devolución</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a href="javascript:;" class="nav-link">
-                                <i class="nav-icon fa-solid fa-box-open"></i>
-                                <p>
-                                    Widgets
-                                    <i class="nav-arrow fa-solid fa-angle-right"></i>
-                                </p>
+                            <a href="<?=base_url('salir')?>" class="nav-link">
+                                <i class="nav-icon fa-solid fa-arrow-right-from-bracket"></i>
+                                <p>SALIR</p>
                             </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="../widgets/small-box.html" class="nav-link">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>Small Box</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../widgets/info-box.html" class="nav-link">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>info Box</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../widgets/cards.html" class="nav-link">
-                                        <i class="nav-icon fa-regular fa-circle"></i>
-                                        <p>Cards</p>
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
                     </ul>
                     <!--end::Sidebar Menu-->

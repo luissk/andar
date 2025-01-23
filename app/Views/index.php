@@ -61,14 +61,18 @@
                 <form action="" method="post" id="frmLogin">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" placeholder="Usuario" name="usuario" value="<?=old('usuario');?>" autocomplete="off">
-                        <div class="input-group-text">
-                            <span class="fa-solid fa-user"></span>
+                        <div class="input-group-append" style="display: flex;margin-left:-3px">
+                            <div class="input-group-text">
+                                <span class="fa-solid fa-user"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="input-group mb-3">
                         <input type="password" class="form-control" placeholder="Password" name="password">
-                        <div class="input-group-text">
-                            <span class="fa-solid fa-lock"></span>
+                        <div class="input-group-append" style="display: flex;margin-left:-3px">
+                            <div class="input-group-text">
+                                <span class="fa-solid fa-lock"></span>
+                            </div>
                         </div>
                     </div>
                     <!--begin::Row-->
