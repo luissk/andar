@@ -9,3 +9,7 @@ $routes->get('/', 'Inicio::index');
 $routes->post('/', 'Inicio::index');
 $routes->get('salir', 'Inicio::salir');
 $routes->get('sistema', 'Inicio::sistema');
+
+$routes->get('parametros', 'Parametros::index');
+$routes->post('modificar-parametros', 'Parametros::modificarParametros');
+$routes->post('eliminar-imagen', 'Parametros::eliminarImagen');

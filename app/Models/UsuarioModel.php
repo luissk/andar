@@ -14,4 +14,16 @@ class UsuarioModel extends Model{
 
         return $st->getRowArray();
     }
+
+    public function getUsuario($idusuario){
+        $query = "select usu.idusuario, usu.usu_dni, usu.usu_nombres, usu.usu_apellidos, usu.usu_usuario, usu.usu_password, usu.idtipousuario,
+        tu.tu_tipo 
+        from usuario usu
+        inner join tipousuario tu on usu.idtipousuario=tu.idtipousuario
+        where idusuario = ?";
+
+        $st = $this->db->query($query, [$idusuario]);
+
+        return $st->getRowArray();
+    }
 }

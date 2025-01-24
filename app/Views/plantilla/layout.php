@@ -1,3 +1,10 @@
+<?php
+if(!session('idusuario')){
+    header('location: '.base_url().'');
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -122,7 +129,7 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($paramLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('parametros')?>" class="nav-link ps-4 <?php echo isset($paramLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-gears"></i>
                                         <p>Parámetros General</p>
                                     </a>

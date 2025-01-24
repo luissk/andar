@@ -92,7 +92,7 @@ class Inicio extends BaseController
         }
 
         $data['title']          = 'Bienvenido al Sistema | '.help_nombreWeb();
-        $data['dashLinkActive'] = TRUE;
+        $data['dashLinkActive'] = 1;
 
         if( session('idtipousuario') == 1 ){
             return view('sistema/index', $data);
