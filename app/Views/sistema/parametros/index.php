@@ -2,7 +2,12 @@
 
 <?php echo $this->section('contenido');?>
 
-<?php //print_r($parametro) ?>
+<?php //print_r($parametro) 
+$porc_bd = ($parametro) ? $parametro['par_porcensem'] : '';
+$dire_bd = ($parametro) ? $parametro['par_direcc'] : '';
+$tele_bd = ($parametro) ? $parametro['par_telef'] : '';
+$corr_bd = ($parametro) ? $parametro['par_correo'] : '';
+?>
 
 <div class="app-content-header">
     <div class="container-fluid">
@@ -32,22 +37,22 @@
                             <div class="row">
                                 <div class="col-sm-3 mb-3">
                                     <label for="porcentaje" class="form-label">Porcentaje Semanal (%)</label>
-                                    <input type="text" class="form-control" id="porcentaje" name="porcentaje" value="<?=$parametro['par_porcensem']?>">
+                                    <input type="text" class="form-control" id="porcentaje" name="porcentaje" value="<?=$porc_bd?>">
                                     <div id="msj-porcentaje" class="form-text text-danger"></div>
                                 </div>
                                 <div class="col-sm-9 mb-3">
                                     <label for="direccion" class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="direccion" name="direccion" value="<?=$parametro['par_direcc']?>">
+                                    <input type="text" class="form-control" id="direccion" name="direccion" value="<?=$dire_bd?>">
                                     <div id="msj-direccion" class="form-text text-danger"></div>
                                 </div>
                                 <div class="col-sm-3 mb-3">
                                     <label for="telefono" class="form-label">Teléfono</label>
-                                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?=$parametro['par_telef']?>">
+                                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?=$tele_bd?>">
                                     <div id="msj-telefono" class="form-text text-danger"></div>
                                 </div>
                                 <div class="col-sm-9 mb-3">
                                     <label for="correo" class="form-label">Correo</label>
-                                    <input type="email" class="form-control" id="correo" name="correo" value="<?=$parametro['par_correo']?>">
+                                    <input type="email" class="form-control" id="correo" name="correo" value="<?=$corr_bd?>">
                                     <div id="msj-correo" class="form-text text-danger"></div>
                                 </div>                       
                                 <div class="col-sm-9 mb-3">
@@ -57,7 +62,7 @@
                                 </div>
                                 <div class="col-sm-3 d-flex justify-content-center align-items-center">
                                     <?php
-                                    if( $parametro['par_logo'] != '' ){
+                                    if( $parametro && $parametro['par_logo'] != '' ){
                                         $ruta_logo = 'public/images/logo/'.$parametro['par_logo'];
                                         echo "<img src='$ruta_logo?v=".time()."' class='rounded img-fluid' alt='logo' />";
                                         echo "<a data-id=".$parametro['idparametros']." data-opt='logo' href='javascript:;' class='text-danger eliminaImagen' title='Eliminar Logo'><i class='fa-solid fa-trash'></i></a>";
@@ -71,7 +76,7 @@
                                 </div>
                                 <div class="col-sm-3 d-flex justify-content-center align-items-center">
                                 <?php
-                                    if( $parametro['par_firma'] != '' ){
+                                    if( $parametro && $parametro['par_firma'] != '' ){
                                         $ruta_firma = 'public/images/firma/'.$parametro['par_firma'];
                                         echo "<img src='$ruta_firma?v=".time()."' class='rounded img-fluid' alt='firma' />";
                                         echo "<a data-id=".$parametro['idparametros']." data-opt='firma' href='javascript:;' class='text-danger eliminaImagen' title='Eliminar Firma'><i class='fa-solid fa-trash'></i></a>";
@@ -124,7 +129,7 @@ $(function(){
             contentType: false,
             processData: false,
             success: function(data){
-                console.log(data);
+                //console.log(data);
                 $('[id^="msj-"').text("");                
                 if( data.errors ){                    
                     let errors = data.errors;

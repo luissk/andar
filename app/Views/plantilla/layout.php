@@ -135,7 +135,7 @@ if(!session('idusuario')){
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($perfilLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('perfiles')?>" class="nav-link ps-4 <?php echo isset($perfilLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-regular fa-user"></i>
                                         <p>Perfiles</p>
                                     </a>

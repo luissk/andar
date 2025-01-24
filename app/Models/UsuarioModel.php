@@ -26,4 +26,12 @@ class UsuarioModel extends Model{
 
         return $st->getRowArray();
     }
+
+    public function getPerfiles(){
+        $query = "select * from tipousuario";
+
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
 }

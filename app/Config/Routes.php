@@ -13,3 +13,4 @@ $routes->get('sistema', 'Inicio::sistema');
 $routes->get('parametros', 'Parametros::index');
 $routes->post('modificar-parametros', 'Parametros::modificarParametros');
 $routes->post('eliminar-imagen', 'Parametros::eliminarImagen');
+$routes->get('perfiles', 'Parametros::perfiles');

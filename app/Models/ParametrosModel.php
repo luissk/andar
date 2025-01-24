@@ -44,5 +44,4 @@ class ParametrosModel extends Model{
         $st = $this->db->query($query);
         return $st;
     }
-
 }

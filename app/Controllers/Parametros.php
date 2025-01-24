@@ -20,7 +20,7 @@ class Parametros extends BaseController
             return redirect()->to('/');
         }
 
-        $data['title']           = "Parámetros | ".help_nombreWeb();
+        $data['title']           = "Parámetros del Sistema | ".help_nombreWeb();
         $data['paramLinkActive'] = 1;
 
         $data['parametro'] = $this->modeloParametros->getParametros();
@@ -116,10 +116,16 @@ class Parametros extends BaseController
                     if( $data['logo']->getError() !== 0 ){
                         $rules['logo']['rules'] = 'max_size[logo,2048]|mime_in[logo,image/jpg,image/jpeg]';
                     }
+                    if( $data['logo']->getError() === 0 ){
+                        $validation->setError('logo', 'Ya tienes un logo guardado.');
+                    }
                 }
                 if( $params_bd['par_firma'] != '' ){
                     if( $data['firma']->getError() !== 0 ){
                         $rules['firma']['rules'] = 'max_size[firma,2048]|mime_in[firma,image/jpg,image/jpeg]';
+                    }
+                    if( $data['firma']->getError() === 0 ){
+                        $validation->setError('firma', 'Ya tienes una firma guardada.');
                     }
                 }
             }
@@ -135,7 +141,47 @@ class Parametros extends BaseController
             if( $params_bd ){
                 //MODIFICAR
                 $idparam = $params_bd['idparametros'];
-                echo "MODIFICAR";
+                $data['logo']  = $data['logo']->getError() === 0 ? $data['logo'] : $params_bd['par_logo'];
+                $data['firma'] = $data['firma']->getError() === 0 ?  $data['firma'] : $params_bd['par_firma'];
+                if( $this->request->getFile('logo')->getError() === 0 ){
+                    $logo  = $data['logo'];                    
+    
+                    $log_ext    = $logo->getClientExtension();
+                    $log_nombre = 'logo.'.$log_ext;
+                    $log_folder = "public/images/logo/";                    
+    
+                    $image = \Config\Services::image();
+                    $image->withFile($logo)
+                        ->resize(200, 200, true, 'width')
+                        ->save($log_folder.$log_nombre);                   
+
+                    $data['logo']  = $log_nombre;                    
+                }
+                if( $this->request->getFile('firma')->getError() === 0 ){
+                    $firma = $data['firma'];
+
+                    $fir_ext    = $firma->getClientExtension();
+                    $fir_nombre = 'firma.'.$fir_ext;
+                    $fir_folder = "public/images/firma/";
+
+                    $image = \Config\Services::image();
+                    $image->withFile($firma)
+                    ->resize(200, 200, true, 'width')
+                    ->save($fir_folder.$fir_nombre);
+
+                    $data['firma'] = $fir_nombre;
+                }
+                if( $this->modeloParametros->guardarParametro(2,$data,$idparam) ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Datos Actualizados.",
+                            text: "",
+                            icon: "success",
+                            showConfirmButton: false,
+                        });
+                        setTimeout(function(){ location.reload() },1500);
+                    </script>';
+                }
             }else{
                 //INSERTAR POR PRIMERA VEZ
                 if( $data['logo']->getError() === 0 && $data['firma']->getError() === 0 ){
@@ -202,4 +248,14 @@ class Parametros extends BaseController
             }
         }
     }
+
+    public function perfiles(){
+        $data['title']            = "Perfiles del Sistema | ".help_nombreWeb();
+        $data['perfilLinkActive'] = 1;
+
+        $data['perfiles'] = $this->modeloUsuario->getPerfiles();
+
+        return view('sistema/parametros/perfiles', $data);
+    }
+
 }
