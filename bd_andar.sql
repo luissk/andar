@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-01-2025 a las 14:51:11
+-- Tiempo de generación: 25-01-2025 a las 21:14:27
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -100,13 +100,20 @@ CREATE TABLE `guia` (
 
 CREATE TABLE `parametros` (
   `idparametros` int(10) UNSIGNED NOT NULL,
-  `par_porcensem` int(11) DEFAULT NULL,
+  `par_porcensem` int(11) NOT NULL,
   `par_logo` varchar(100) DEFAULT NULL,
   `par_firma` varchar(100) DEFAULT NULL,
   `par_direcc` varchar(100) DEFAULT NULL,
   `par_telef` varchar(20) DEFAULT NULL,
   `par_correo` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `parametros`
+--
+
+INSERT INTO `parametros` (`idparametros`, `par_porcensem`, `par_logo`, `par_firma`, `par_direcc`, `par_telef`, `par_correo`) VALUES
+(2, 12, 'logo.jpeg', 'firma.jpg', 'Urb Miguel Grau 2da Etapa D2', '975089485', 'alberto_@hotmail.com');
 
 -- --------------------------------------------------------
 
@@ -208,7 +215,18 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `usu_usuario`, `usu_password`, `usu_fechalog`, `idtipousuario`) VALUES
-(1, '45487229', 'Luis Alberto', 'Calderón Sánchez', 'lcalderons', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', NULL, 1);
+(1, '45487229', 'Luis Alberto', 'Calderón Sánchez', 'lcalderons', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', NULL, 1),
+(2, '44945688', 'Max Orlando', 'Perez Rojas', 'shaggy', '12345678', NULL, 2),
+(3, '12345678', 'Peter Pedro', 'Parker Araña', 'peterp', '12345678', NULL, 2),
+(4, '25639874', 'Alland', 'Ortega Reyna', 'alan_or', '12345678', NULL, 1),
+(5, '12345678', 'Arnulfo', 'Gallardo Ram', 'arnulfo', '12345678', NULL, 2),
+(6, '14785236', 'Timoteo', 'Sans Rubio', 'timoteo', '12345678', NULL, 2),
+(7, '15963254', 'Francisco', 'Rodriguez Chao', 'pancho', 'adssadsad', NULL, 2),
+(8, '34345345', 'dsdadassd', 'asdasdasd', 'asasccc', '23234234234', NULL, 2),
+(9, '12324324', 'fsdfsdf', 'sdfsdfsdf', 'asasqqq', 'fsdfsdfsdf', NULL, 2),
+(10, '12434353', 'adsadsa', 'vxzvxcv', 'asasbbb', 'fdfsdfsdfsd', NULL, 2),
+(11, '23545435', 'dszdsadas', 'asdasdasd', 'asaseee', 'asdsadsad', NULL, 2),
+(12, '12365498', 'Andres', 'Hurtado Rosquilla', 'chibolin', '12345678', NULL, 2);
 
 --
 -- Índices para tablas volcadas
@@ -323,7 +341,7 @@ ALTER TABLE `guia`
 -- AUTO_INCREMENT de la tabla `parametros`
 --
 ALTER TABLE `parametros`
-  MODIFY `idparametros` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idparametros` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pieza`
@@ -359,7 +377,7 @@ ALTER TABLE `transportista`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `idusuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idusuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Restricciones para tablas volcadas
