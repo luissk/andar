@@ -51,27 +51,27 @@
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <label for="usuario" class="form-label">Usuario</label>
-                            <input type="text" class="form-control" id="usuario" name="usuario" value="">
+                            <input type="text" class="form-control" id="usuario" name="usuario" value="" maxlength="40">
                             <div id="msj-usuario" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="dni" class="form-label">DNI</label>
-                            <input type="text" class="form-control" id="dni" name="dni" value="">
+                            <input type="text" class="form-control" id="dni" name="dni" value="" maxlength="8">
                             <div id="msj-dni" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="nombres" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="nombres" name="nombres" value="">
+                            <input type="text" class="form-control" id="nombres" name="nombres" value="" maxlength="45">
                             <div id="msj-nombres" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="apellidos" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="apellidos" name="apellidos" value="">
+                            <input type="text" class="form-control" id="apellidos" name="apellidos" value="" maxlength="45">
                             <div id="msj-apellidos" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="perfil" class="form-label">Perfil</label>
-                            <select class="form-select" name="tipo" id="perfil">
+                            <select class="form-select" name="perfil" id="perfil">
                                 <option value="">Seleccione</option>
                                 <?php
                                 foreach( $perfiles as $perfil ){
@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" value="">
+                            <input type="password" class="form-control" id="password" name="password" value="" maxlength="15">
                             <div id="msj-password" class="form-text text-danger"></div>
                         </div>
                     </div>
@@ -92,6 +92,7 @@
                 <div class="modal-footer py-2">
                     <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
                     <button type="submit" class="btn btn-danger" id="btnGuardar">REGISTRAR USUARIO</button>
+                    <input type="hidden" class="form-control" id="id_usuarioe" name="id_usuarioe">
                 </div>
             </form>
         </div>
@@ -115,10 +116,16 @@ function listarUsuarios(page, cri = ''){
 
 listarUsuarios(1);
 
+function limpiarCampos(){
+    $("#frmUsuario")[0].reset();
+    $('[id^="msj-"').text("");
+    $("#id_usuarioe").val("");
+}
+
 $(function(){
     $("#txtBuscar").on('input', function(e){
         let cri = $(this).val();
-        console.log(cri);
+        //console.log(cri);
         if( cri.length > 2 ){            
             listarUsuarios(1,cri);
         }else if( cri.length == 0 ){
@@ -135,11 +142,25 @@ $(function(){
         btn.innerHTML = `${btnHTML} PROCESANDO...`;
 
         $.post('registro-usuario', $(this).serialize(), function(data){
+            $('[id^="msj-"').text("");                
+            if( data.errors ){  
+                let errors = data.errors;
+                for( let err in errors ){
+                    $('#msj-' + err).text(errors[err]);
+                }
+            }
             $("#msj").html(data);
             btn.removeAttribute('disabled');
             btn.innerHTML = txtbtn;
         });
     });
+
+    const myModalEl = document.getElementById('modalUsuario')
+    myModalEl.addEventListener('hidden.bs.modal', event => {
+        $("#btnGuardar").text("REGISTRAR USUARIO");
+        limpiarCampos();
+        $("#msj").html("");
+    })
 })
 </script>
 

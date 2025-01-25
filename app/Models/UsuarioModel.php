@@ -27,6 +27,18 @@ class UsuarioModel extends Model{
         return $st->getRowArray();
     }
 
+    /* public function existeUsuario_por_UsuDni($opt = 1, $criterio){//1->usuario,2->dni
+        if( $opt == 1 ){
+            $query = "select idusuario from usuario where LOWER(usu_usuario) = LOWER(?)";
+        }else if( $opt == 2 ){
+            $query = "select idusuario from usuario where usu_dni = ?";
+        }
+
+        $st = $this->db->query($query, [$criterio]);
+
+        return $st->getRowArray();
+    } */
+
     public function getPerfiles(){
         $query = "select * from tipousuario";
 
@@ -60,6 +72,24 @@ class UsuarioModel extends Model{
         $st = $this->db->query($query);
 
         return $st->getRowArray();
+    }
+
+    public function insertarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password){
+        $query = "insert into usuario(usu_usuario,usu_dni,usu_nombres,usu_apellidos,idtipousuario,usu_password) values(?,?,?,?,?,?)";
+        $st = $this->db->query($query, [
+            $usuario,$dni,$nombres,$apellidos,$perfil,$password
+        ]);
+
+        return $st;
+    }
+
+    public function modificarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password,$idusuario){
+        $query = "update usuario set usu_usuario=?,usu_dni=?,usu_nombres=?,usu_apellidos=?,idtipousuario=?,usu_password=? where idusuario=?";
+        $st = $this->db->query($query, [
+            $usuario,$dni,$nombres,$apellidos,$perfil,$password,$idusuario
+        ]);
+
+        return $st;
     }
 
 }
