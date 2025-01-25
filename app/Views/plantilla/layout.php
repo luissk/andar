@@ -141,7 +141,7 @@ if(!session('idusuario')){
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($usersLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('usuarios')?>" class="nav-link ps-4 <?php echo isset($usersLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-user"></i>
                                         <p>Usuarios</p>
                                     </a>

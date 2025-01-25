@@ -250,6 +250,10 @@ class Parametros extends BaseController
     }
 
     public function perfiles(){
+        if( !session('idusuario') ){
+            return redirect()->to('/');
+        }
+        
         $data['title']            = "Perfiles del Sistema | ".help_nombreWeb();
         $data['perfilLinkActive'] = 1;
 

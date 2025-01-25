@@ -2,3 +2,22 @@
 .sidebar-wrapper .sidebar-menu > .nav-item.menu-open > .nav-link, .sidebar-wrapper .sidebar-menu > .nav-item:hover > .nav-link, .sidebar-wrapper .sidebar-menu > .nav-item > .nav-link:focus{
     background-color: inherit;
 }
+
+/**** CAJA BUSCAR ****/
+.search-container {
+    position: relative;
+}
+.search-input {
+    height: 35px;
+    border-radius: 10px;
+    padding-left: 35px;
+    border: none;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+.search-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #888;
+}
