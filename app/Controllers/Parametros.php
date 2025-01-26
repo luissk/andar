@@ -20,6 +20,8 @@ class Parametros extends BaseController
             return redirect()->to('/');
         }
 
+        if( session('idtipousuario') != 1 ) return redirect()->to('sistema');
+
         $data['title']           = "Parámetros del Sistema | ".help_nombreWeb();
         $data['paramLinkActive'] = 1;
 
@@ -253,6 +255,8 @@ class Parametros extends BaseController
         if( !session('idusuario') ){
             return redirect()->to('/');
         }
+
+        if( session('idtipousuario') != 1 ) return redirect()->to('sistema');
         
         $data['title']            = "Perfiles del Sistema | ".help_nombreWeb();
         $data['perfilLinkActive'] = 1;

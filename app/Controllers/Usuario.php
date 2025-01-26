@@ -17,6 +17,8 @@ class Usuario extends BaseController
         if( !session('idusuario') ){
             return redirect()->to('/');
         }
+
+        if( session('idtipousuario') != 1 ) return redirect()->to('sistema');
         
         $data['title']           = "Usuarios del Sistema | ".help_nombreWeb();
         $data['usersLinkActive'] = 1;
@@ -24,6 +26,68 @@ class Usuario extends BaseController
         $data['perfiles'] = $this->modeloUsuario->getPerfiles();
 
         return view('sistema/usuarios/index', $data);
+    }
+
+    public function misDatos(){
+        if( !session('idusuario') ){
+            return redirect()->to('/');
+        }
+        
+        $data['title'] = "Mis Datos | ".help_nombreWeb();
+
+        $data['misdatos'] = $this->modeloUsuario->getUsuario(session('idusuario'));
+
+        return view('sistema/usuarios/misDatos', $data);
+    }
+
+    public function cambiarPassword(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            $password  = trim($this->request->getVar('password'));
+
+            $validation = \Config\Services::validation();
+
+            $data = [
+                'password'  => $password,
+            ];
+
+            $rules = [
+                'password' => [
+                    'label' => 'Password', 
+                    'rules' => 'required|min_length[8]|max_length[15]',
+                    'errors' => [
+                        'required'   => '* El {field} es requerido.',
+                        'min_length' => '* El {field} debe tener al menos 8 caracteres.',
+                        'max_length' => '* El {field} debe tener hasta 15 caracteres.'
+                    ]
+                ]
+            ];
+            $validation->setRules($rules);
+            if (!$validation->run($data)) {
+                return $this->response->setJson(['errors' => $validation->getErrors()]);
+            }
+
+            $usuario_bd = $this->modeloUsuario->getUsuario(session('idusuario'));
+            if( $usuario_bd ){
+                $hash = '$2a$12$YmtIBS/VsxVywSQHV4A2.upBWJxS2VSqFzUwo1eMU5.tIGOgne6YG';
+                $password = crypt($password, $hash);
+
+                if( $this->modeloUsuario->cambiarPassword(session('idusuario'), $password) ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Se cambió el password",
+                            text: "",
+                            icon: "success",
+                            showConfirmButton: false,
+                        });
+                        setTimeout(function(){ location.reload() },1500);
+                    </script>';
+                }
+            }
+        }
     }
 
     public function listarUsuarios(){
@@ -131,6 +195,9 @@ class Usuario extends BaseController
                 ],
             ];
 
+            $hash = '$2a$12$YmtIBS/VsxVywSQHV4A2.upBWJxS2VSqFzUwo1eMU5.tIGOgne6YG';
+            $password = $password != '' ? crypt($password, $hash) : '';
+
             $usuario_bd = $this->modeloUsuario->getUsuario($idusuario);
             if( $usuario_bd ){
                 if( $password == '' ){
@@ -187,7 +254,7 @@ class Usuario extends BaseController
                     exit();
                 }
 
-                if( $this->modeloUsuario->insertarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password) ){
+                if( $this->modeloUsuario->insertarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password,session('idusuario')) ){
                     echo '<script>
                         Swal.fire({
                             title: "Usuario Registrado",
@@ -204,5 +271,52 @@ class Usuario extends BaseController
 
         }
     }
+
+    public function eliminarUsuario(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idusuario = $this->request->getVar('id');
+
+            if( $idusuario == 1 ) exit();
+
+            $eliminar = FALSE;
+            $mensaje = "";
+
+            $tablas = ['usuario','transportista','cliente','pieza','torre','presupuesto','guia','factura'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloUsuario->verificarUsuTieneRegEnTablas($idusuario,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>El usuario tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            }
+
+            if( $eliminar ){
+                echo '<script>
+                    Swal.fire({
+                        title: "El usuario no puede ser eliminado",
+                        html: "'.$mensaje.'",
+                        icon: "warning",
+                    });
+                </script>';
+                exit();
+            }
+
+            if( $this->modeloUsuario->eliminarUsuario($idusuario) ){
+                echo '<script>
+                    Swal.fire({
+                        title: "Usuario Eliminado",
+                        text: "",
+                        icon: "success",
+                        showConfirmButton: true,
+                    });
+                    listarUsuarios(1);
+                </script>';
+            }
+        }
+    }
+
+    
 
 }

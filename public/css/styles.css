@@ -21,3 +21,8 @@
     transform: translateY(-50%);
     color: #888;
 }
+
+
+.swal2-title {
+    font-size: 24px !important;
+}

@@ -46,7 +46,8 @@ if($usuarios){
             echo "<td>$tipo</td>";
             echo '<td class="d-flex justify-content-center">';
             echo '<a href="javascript:;" class="link-success editar" title="Modificar" data-id='.$id.' data-arr=\''.$arr.'\'><i class="fa-solid fa-pen-to-square"></i></a>';
-            echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
+            if( $id != 1 && $id != session('idusuario') )
+                echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '</td>';
 
             echo "</tr>";
@@ -64,7 +65,7 @@ if($usuarios){
     if( $res > 0 ) $PagUlt = floor($PagUlt) + 1;
     ?>
 
-    <div class="pt-3 <?=$totalRegistros <= 3 ? 'd-none' : ''?>">
+    <div class="pt-3 <?=$totalRegistros <= 10 ? 'd-none' : ''?>">
         <ul class="pagination pagination-sm m-0 float-end">
             <li class="page-item <?=$PagAct > ($PaginasIntervalo + 1) ? '' : 'd-none'?>">
                 <a class="page-link" href="javascript:;" onclick="listarUsuarios(1,'<?=$cri?>')">«</a>
@@ -99,7 +100,7 @@ if($usuarios){
     ';
 }
 ?>
-
+<div id="msjLista"></div>
 
 <script>
 $(".editar").on('click', function(e){
@@ -121,6 +122,21 @@ $(".editar").on('click', function(e){
 $(".eliminar").on('click', function(e){
     e.preventDefault();
     let id = $(this).data('id');
-    console.log(id);
+    
+    Swal.fire({
+        title: "¿Vas a eliminar al usuario?",
+        showCancelButton: true,
+        confirmButtonText: "Confirmar",
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('eliminar-usuario', {
+                id
+            }, function(data){
+                //console.log(data);
+                $('#msjLista').html(data);
+            });
+        }
+    });
 });
 </script>

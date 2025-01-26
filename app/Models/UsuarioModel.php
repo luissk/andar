@@ -15,6 +15,13 @@ class UsuarioModel extends Model{
         return $st->getRowArray();
     }
 
+    public function cambiarPassword($idusuario, $password){
+        $query = "update usuario set usu_password=? where idusuario=?";
+        $st = $this->db->query($query, [$password,$idusuario]);
+
+        return $st;
+    }
+
     public function getUsuario($idusuario){
         $query = "select usu.idusuario, usu.usu_dni, usu.usu_nombres, usu.usu_apellidos, usu.usu_usuario, usu.usu_password, usu.idtipousuario,
         tu.tu_tipo 
@@ -74,10 +81,10 @@ class UsuarioModel extends Model{
         return $st->getRowArray();
     }
 
-    public function insertarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password){
-        $query = "insert into usuario(usu_usuario,usu_dni,usu_nombres,usu_apellidos,idtipousuario,usu_password) values(?,?,?,?,?,?)";
+    public function insertarUsuario($usuario,$dni,$nombres,$apellidos,$perfil,$password,$idusuario2){
+        $query = "insert into usuario(usu_usuario,usu_dni,usu_nombres,usu_apellidos,idtipousuario,usu_password,idusuario2,usu_fechareg) values(?,?,?,?,?,?,?,now())";
         $st = $this->db->query($query, [
-            $usuario,$dni,$nombres,$apellidos,$perfil,$password
+            $usuario,$dni,$nombres,$apellidos,$perfil,$password,$idusuario2
         ]);
 
         return $st;
@@ -88,6 +95,21 @@ class UsuarioModel extends Model{
         $st = $this->db->query($query, [
             $usuario,$dni,$nombres,$apellidos,$perfil,$password,$idusuario
         ]);
+
+        return $st;
+    }
+
+    //VERIFICAR SI TIENE REGISTRO EN TABLAS(usuario,transportista,cliente,pieza,torre,presupuesto,guia,factura) EL USUARIO A ELIMINAR
+    public function verificarUsuTieneRegEnTablas($idusuario, $tabla){
+        $query = "select count(idusuario2) as total from $tabla where idusuario2=?";
+        $st = $this->db->query($query, [$idusuario]);
+
+        return $st->getRowArray();
+    }
+
+    public function eliminarUsuario($idusuario){
+        $query = "delete from usuario where idusuario = ?";
+        $st = $this->db->query($query, [$idusuario]);
 
         return $st;
     }

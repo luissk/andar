@@ -16,5 +16,8 @@ $routes->post('eliminar-imagen', 'Parametros::eliminarImagen');
 $routes->get('perfiles', 'Parametros::perfiles');
 
 $routes->get('usuarios', 'Usuario::index');
+$routes->get('mis-datos', 'Usuario::misDatos');
+$routes->post('cambiar-password', 'Usuario::cambiarPassword');
 $routes->post('listar-usuarios', 'Usuario::listarUsuarios');
 $routes->post('registro-usuario', 'Usuario::registrarUsuario');
+$routes->post('eliminar-usuario', 'Usuario::eliminarUsuario');

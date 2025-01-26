@@ -79,13 +79,13 @@ if(!session('idusuario')){
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                             <li class="text-bg-white text-center pt-2">
                                 <p>
-                                    <?=session('nombres')?>
-                                    <small><?=session('tipousu')?></small>
+                                    <?=session('nombres')?><br>
+                                    <small class="fw-semibold"><?=session('tipousu')?></small>
                                 </p>
                             </li>
                             <li class="user-footer">
-                                <!-- <a href="#" class="btn btn-outline-secondary">Mis datos</a> -->
-                                <a href="./salir" class="btn btn-sm btn-outline-secondary float-end">Salir</a>
+                                <a href="<?=base_url('mis-datos')?>" class="btn btn-sm btn-outline-secondary">Mis datos</a>
+                                <a href="<?=base_url('salir')?>" class="btn btn-sm btn-outline-secondary float-end">Salir</a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -128,6 +128,9 @@ if(!session('idusuario')){
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
+                                <?php
+                                if( session('idtipousuario') == 1 ){
+                                ?>
                                 <li class="nav-item">
                                     <a href="<?=base_url('parametros')?>" class="nav-link ps-4 <?php echo isset($paramLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-gears"></i>
@@ -146,6 +149,9 @@ if(!session('idusuario')){
                                         <p>Usuarios</p>
                                     </a>
                                 </li>
+                                <?php
+                                }
+                                ?>
                                 <li class="nav-item">
                                     <a href="./" class="nav-link ps-4 <?php echo isset($transLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-truck"></i>
