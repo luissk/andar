@@ -153,7 +153,7 @@ if(!session('idusuario')){
                                 }
                                 ?>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($transLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('transportistas')?>" class="nav-link ps-4 <?php echo isset($transLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-truck"></i>
                                         <p>Transportistas</p>
                                     </a>

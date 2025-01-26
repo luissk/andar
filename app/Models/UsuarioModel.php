@@ -55,7 +55,7 @@ class UsuarioModel extends Model{
     }
 
     public function getUsuarios($desde, $hasta, $cri = ''){
-        $sql = $cri != '' ? " and usu.usu_usuario LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+        $sql = $cri != '' ? " and (usu.usu_usuario LIKE '%" . $this->db->escapeLikeString($cri) . "%' or usu.usu_nombres LIKE '%" . $this->db->escapeLikeString($cri) . "%' or usu.usu_apellidos LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select usu.idusuario, usu.usu_dni, usu.usu_nombres, usu.usu_apellidos, usu.usu_usuario, usu.usu_password, usu.idtipousuario,
         tu.tu_tipo 

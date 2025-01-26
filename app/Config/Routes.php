@@ -21,3 +21,8 @@ $routes->post('cambiar-password', 'Usuario::cambiarPassword');
 $routes->post('listar-usuarios', 'Usuario::listarUsuarios');
 $routes->post('registro-usuario', 'Usuario::registrarUsuario');
 $routes->post('eliminar-usuario', 'Usuario::eliminarUsuario');
+
+$routes->get('transportistas', 'Transportista::index');
+$routes->post('listar-transportistas', 'Usuario::listarTransportistas');
+$routes->post('registro-transportista', 'Usuario::registrarTransportista');
+$routes->post('eliminar-transportista', 'Usuario::eliminarTransportista');

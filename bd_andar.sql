@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-01-2025 a las 21:14:27
+-- Tiempo de generación: 26-01-2025 a las 18:44:06
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -32,7 +32,8 @@ CREATE TABLE `cliente` (
   `cli_dniruc` varchar(11) NOT NULL,
   `cli_nombrerazon` varchar(100) NOT NULL,
   `cli_nombrecontact` varchar(100) DEFAULT NULL,
-  `cli_correocontact` varchar(100) DEFAULT NULL
+  `cli_correocontact` varchar(100) DEFAULT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -70,7 +71,8 @@ CREATE TABLE `factura` (
   `idfactura` int(10) UNSIGNED NOT NULL,
   `fact_nro` varchar(20) NOT NULL,
   `fact_fecha` datetime NOT NULL,
-  `idpresupuesto` int(10) UNSIGNED NOT NULL
+  `idpresupuesto` int(10) UNSIGNED NOT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -89,7 +91,8 @@ CREATE TABLE `guia` (
   `gui_ptollegada` varchar(45) DEFAULT NULL,
   `gui_vehiculo` varchar(45) DEFAULT NULL,
   `idpresupuesto` int(10) UNSIGNED NOT NULL,
-  `idtransportista` int(10) UNSIGNED NOT NULL
+  `idtransportista` int(10) UNSIGNED NOT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -113,7 +116,7 @@ CREATE TABLE `parametros` (
 --
 
 INSERT INTO `parametros` (`idparametros`, `par_porcensem`, `par_logo`, `par_firma`, `par_direcc`, `par_telef`, `par_correo`) VALUES
-(2, 12, 'logo.jpeg', 'firma.jpg', 'Urb Miguel Grau 2da Etapa D2', '975089485', 'alberto_@hotmail.com');
+(2, 12, 'logo.jpeg', 'firma.jpg', 'Avenida Petit Thouars Monopoly', '975089485', 'andamios_andar@hotmail.com');
 
 -- --------------------------------------------------------
 
@@ -127,7 +130,8 @@ CREATE TABLE `pieza` (
   `pie_desc` text DEFAULT NULL,
   `pie_peso` decimal(8,2) NOT NULL,
   `pie_precio` decimal(10,2) NOT NULL,
-  `pie_cant` int(11) NOT NULL
+  `pie_cant` int(11) NOT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -145,7 +149,8 @@ CREATE TABLE `presupuesto` (
   `idcliente` int(10) UNSIGNED NOT NULL,
   `pre_porcenprecio` int(11) NOT NULL,
   `pre_periododias` int(11) NOT NULL,
-  `pre_numtorres` int(11) NOT NULL
+  `pre_numtorres` int(11) NOT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -176,7 +181,8 @@ INSERT INTO `tipousuario` (`idtipousuario`, `tu_tipo`) VALUES
 CREATE TABLE `torre` (
   `idtorre` int(10) UNSIGNED NOT NULL,
   `tor_desc` varchar(200) NOT NULL,
-  `tor_plano` varchar(100) NOT NULL
+  `tor_plano` varchar(100) NOT NULL,
+  `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -190,7 +196,9 @@ CREATE TABLE `transportista` (
   `tra_nombres` varchar(45) DEFAULT NULL,
   `tra_apellidos` varchar(45) DEFAULT NULL,
   `tra_dni` char(8) DEFAULT NULL,
-  `tra_telef` varchar(20) DEFAULT NULL
+  `tra_telef` varchar(20) DEFAULT NULL,
+  `idusuario2` int(11) NOT NULL,
+  `tra_fechareg` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -206,27 +214,24 @@ CREATE TABLE `usuario` (
   `usu_apellidos` varchar(45) NOT NULL,
   `usu_usuario` varchar(45) NOT NULL,
   `usu_password` varchar(80) NOT NULL,
-  `usu_fechalog` datetime DEFAULT NULL,
-  `idtipousuario` int(10) UNSIGNED NOT NULL
+  `usu_fechareg` datetime DEFAULT NULL,
+  `idtipousuario` int(10) UNSIGNED NOT NULL,
+  `idusuario2` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `usu_usuario`, `usu_password`, `usu_fechalog`, `idtipousuario`) VALUES
-(1, '45487229', 'Luis Alberto', 'Calderón Sánchez', 'lcalderons', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', NULL, 1),
-(2, '44945688', 'Max Orlando', 'Perez Rojas', 'shaggy', '12345678', NULL, 2),
-(3, '12345678', 'Peter Pedro', 'Parker Araña', 'peterp', '12345678', NULL, 2),
-(4, '25639874', 'Alland', 'Ortega Reyna', 'alan_or', '12345678', NULL, 1),
-(5, '12345678', 'Arnulfo', 'Gallardo Ram', 'arnulfo', '12345678', NULL, 2),
-(6, '14785236', 'Timoteo', 'Sans Rubio', 'timoteo', '12345678', NULL, 2),
-(7, '15963254', 'Francisco', 'Rodriguez Chao', 'pancho', 'adssadsad', NULL, 2),
-(8, '34345345', 'dsdadassd', 'asdasdasd', 'asasccc', '23234234234', NULL, 2),
-(9, '12324324', 'fsdfsdf', 'sdfsdfsdf', 'asasqqq', 'fsdfsdfsdf', NULL, 2),
-(10, '12434353', 'adsadsa', 'vxzvxcv', 'asasbbb', 'fdfsdfsdfsd', NULL, 2),
-(11, '23545435', 'dszdsadas', 'asdasdasd', 'asaseee', 'asdsadsad', NULL, 2),
-(12, '12365498', 'Andres', 'Hurtado Rosquilla', 'chibolin', '12345678', NULL, 2);
+INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `usu_usuario`, `usu_password`, `usu_fechareg`, `idtipousuario`, `idusuario2`) VALUES
+(1, '45487229', 'Luis Alberto', 'Calderón Sánchez', 'lcalderons', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 1, 1),
+(2, '44945688', 'Max Scooby', 'Perez Rojas', 'shaggy', '$2a$12$YmtIBS/VsxVywSQHV4A2.uyIOW9pmw17P2N2OTPIqinUMsQ2DDgFe', '2025-01-25 21:50:43', 2, 1),
+(3, '12345678', 'Peter Pedro', 'Parker Araña', 'peterp', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
+(5, '12345678', 'Arnulfo', 'Gallardo Ram', 'arnulfo', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
+(6, '14785236', 'Timoteo', 'Sans Rubio', 'timoteo', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
+(7, '15963254', 'Francisco', 'Rodriguez Chao', 'pancho', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
+(12, '12365498', 'Andres', 'Hurtado Rosquilla', 'chibolin', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
+(16, '12365478', 'Alland', 'Ortega Reyna', 'alan_or', '$2a$12$YmtIBS/VsxVywSQHV4A2.uBXqGmEtpaMTU34EzRFhVoRl2k2sBK5C', '2025-01-25 21:52:12', 1, 1);
 
 --
 -- Índices para tablas volcadas
@@ -377,7 +382,7 @@ ALTER TABLE `transportista`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `idusuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `idusuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Restricciones para tablas volcadas

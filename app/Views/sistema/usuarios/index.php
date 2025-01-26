@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-sm-5">
                                 <div class="search-container">
-                                    <input type="text" class="form-control search-input" placeholder="Buscar por usuario" id="txtBuscar">
+                                    <input type="text" class="form-control search-input" placeholder="Buscar por usuario o nombres..." id="txtBuscar">
                                     <i class="fas fa-search search-icon"></i>
                                 </div>
                             </div>
@@ -123,14 +123,23 @@ function limpiarCampos(){
 }
 
 $(function(){
+    let timeout;
     $("#txtBuscar").on('input', function(e){
         let cri = $(this).val();
         //console.log(cri);
-        if( cri.length > 2 ){            
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+        	if( cri.length > 2 ){            
+                listarUsuarios(1,cri);
+            }else if( cri.length == 0 ){
+                listarUsuarios(1);
+            }
+      	}, 600);
+        /* if( cri.length > 2 ){            
             listarUsuarios(1,cri);
         }else if( cri.length == 0 ){
             listarUsuarios(1);
-        }
+        } */
     });
 
     $("#frmUsuario").on('submit', function(e){
