@@ -70,7 +70,7 @@ class UsuarioModel extends Model{
     }
 
     public function getUsuariosCount($cri = ''){
-        $sql = $cri != '' ? " and usu.usu_usuario LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+        $sql = $cri != '' ? " and (usu.usu_usuario LIKE '%" . $this->db->escapeLikeString($cri) . "%' or usu.usu_nombres LIKE '%" . $this->db->escapeLikeString($cri) . "%' or usu.usu_apellidos LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select count(usu.idusuario) as total 
         from usuario usu

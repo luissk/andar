@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-01-2025 a las 18:44:06
+-- Tiempo de generación: 27-01-2025 a las 21:09:36
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -33,8 +33,19 @@ CREATE TABLE `cliente` (
   `cli_nombrerazon` varchar(100) NOT NULL,
   `cli_nombrecontact` varchar(100) DEFAULT NULL,
   `cli_correocontact` varchar(100) DEFAULT NULL,
-  `idusuario2` int(11) NOT NULL
+  `cli_telefcontact` varchar(12) NOT NULL,
+  `idusuario2` int(11) NOT NULL,
+  `cli_fechareg` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `cliente`
+--
+
+INSERT INTO `cliente` (`idcliente`, `cli_dniruc`, `cli_nombrerazon`, `cli_nombrecontact`, `cli_correocontact`, `cli_telefcontact`, `idusuario2`, `cli_fechareg`) VALUES
+(1, '20125632148', 'Adecco Consulting S.A.', 'Martin Carlos Oviedo Serna', 'martin_10_88@gmail.com', '951357852', 16, '2025-01-27 14:56:25'),
+(2, '10454872296', 'Luis Alberto Calderón Sánchez', 'Anita Carlota Santiesteban Miranda', 'asantiestebanmiranda@gmail.com', '975089485', 16, '2025-01-27 15:00:19'),
+(3, '20145632145', 'Servicios de Terceros S.A.C.', 'Jorge Zelada Campos', 'jorgito_123456@gmail.com', '985741262', 16, '2025-01-27 15:05:08');
 
 -- --------------------------------------------------------
 
@@ -145,12 +156,11 @@ CREATE TABLE `presupuesto` (
   `pre_numero` varchar(20) NOT NULL,
   `pre_fechareg` datetime NOT NULL,
   `pre_correocontact` varchar(100) DEFAULT NULL,
-  `idusuario` int(10) UNSIGNED NOT NULL,
+  `idusuario2` int(10) UNSIGNED NOT NULL,
   `idcliente` int(10) UNSIGNED NOT NULL,
   `pre_porcenprecio` int(11) NOT NULL,
   `pre_periododias` int(11) NOT NULL,
-  `pre_numtorres` int(11) NOT NULL,
-  `idusuario2` int(11) NOT NULL
+  `pre_numtorres` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -200,6 +210,15 @@ CREATE TABLE `transportista` (
   `idusuario2` int(11) NOT NULL,
   `tra_fechareg` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `transportista`
+--
+
+INSERT INTO `transportista` (`idtransportista`, `tra_nombres`, `tra_apellidos`, `tra_dni`, `tra_telef`, `idusuario2`, `tra_fechareg`) VALUES
+(1, 'Jony', 'Corcuera Sanchez', '47856932', '975089485', 1, '2025-01-27 10:48:34'),
+(2, 'Daryl', 'Dixon Green', '12369854', '975089485', 1, '2025-01-27 10:48:43'),
+(3, 'Eugenio', 'Derbez Martinez', '85236987', '987452313', 1, '2025-01-27 10:51:06');
 
 -- --------------------------------------------------------
 
@@ -292,7 +311,7 @@ ALTER TABLE `pieza`
 ALTER TABLE `presupuesto`
   ADD PRIMARY KEY (`idpresupuesto`),
   ADD UNIQUE KEY `pre_numero_UNIQUE` (`pre_numero`),
-  ADD KEY `fk_presupuesto_usuario1_idx` (`idusuario`),
+  ADD KEY `fk_presupuesto_usuario1_idx` (`idusuario2`),
   ADD KEY `fk_presupuesto_cliente1_idx` (`idcliente`);
 
 --
@@ -328,7 +347,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idcliente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idcliente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
@@ -376,7 +395,7 @@ ALTER TABLE `torre`
 -- AUTO_INCREMENT de la tabla `transportista`
 --
 ALTER TABLE `transportista`
-  MODIFY `idtransportista` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idtransportista` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -420,7 +439,7 @@ ALTER TABLE `guia`
 --
 ALTER TABLE `presupuesto`
   ADD CONSTRAINT `fk_presupuesto_cliente1` FOREIGN KEY (`idcliente`) REFERENCES `cliente` (`idcliente`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_presupuesto_usuario1` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `fk_presupuesto_usuario1` FOREIGN KEY (`idusuario2`) REFERENCES `usuario` (`idusuario`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `usuario`

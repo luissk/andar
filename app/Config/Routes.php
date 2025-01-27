@@ -26,3 +26,8 @@ $routes->get('transportistas', 'Transportista::index');
 $routes->post('listar-transportistas', 'Transportista::listarTransportistas');
 $routes->post('registro-transportista', 'Transportista::registrarTransportista');
 $routes->post('eliminar-transportista', 'Transportista::eliminarTransportista');
+
+$routes->get('clientes', 'Cliente::index');
+$routes->post('listar-clientes', 'Cliente::listarClientes');
+$routes->post('registro-cliente', 'Cliente::registrarCliente');
+$routes->post('eliminar-cliente', 'Cliente::eliminarCliente');
