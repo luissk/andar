@@ -23,6 +23,6 @@ $routes->post('registro-usuario', 'Usuario::registrarUsuario');
 $routes->post('eliminar-usuario', 'Usuario::eliminarUsuario');
 
 $routes->get('transportistas', 'Transportista::index');
-$routes->post('listar-transportistas', 'Usuario::listarTransportistas');
-$routes->post('registro-transportista', 'Usuario::registrarTransportista');
-$routes->post('eliminar-transportista', 'Usuario::eliminarTransportista');
+$routes->post('listar-transportistas', 'Transportista::listarTransportistas');
+$routes->post('registro-transportista', 'Transportista::registrarTransportista');
+$routes->post('eliminar-transportista', 'Transportista::eliminarTransportista');

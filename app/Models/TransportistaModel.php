@@ -25,7 +25,7 @@ class TransportistaModel extends Model{
         return $st->getResultArray();
     }
 
-    public function getUsuariosCount($cri = ''){
+    public function getTransportistasCount($cri = ''){
         $sql = $cri != '' ? " and (tra_nombres LIKE '%" . $this->db->escapeLikeString($cri) . "%' or tra_apellidos LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select count(idtransportista) as total 
