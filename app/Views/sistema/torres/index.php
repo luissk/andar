@@ -14,36 +14,34 @@
 
 <div class="app-content">
     <div class="container-fluid">
-        <div class="row">
+    <div class="row">
             <div class="col-sm-12">
-            <div class="card card-warning card-outline card-tabs">
-                    <div class="card-header p-0 pt-1 border-bottom-0">
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="torres-tab" data-bs-toggle="tab" data-bs-target="#torres-tab-pane" type="button" role="tab" aria-controls="torres-tab-pane" aria-selected="true">Torres</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="piezas-tab" data-bs-toggle="tab" data-bs-target="#piezas-tab-pane" type="button" role="tab" aria-controls="piezas-tab-pane" aria-selected="false">Piezas</button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="torres-tab-pane" role="tabpanel" aria-labelledby="torres-tab" tabindex="0">
-                                TORRES
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="search-container">
+                                    <input type="search" class="form-control search-input" placeholder="Buscar por torre..." id="txtBuscar">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
                             </div>
-                            <div class="tab-pane fade" id="piezas-tab-pane" role="tabpanel" aria-labelledby="piezas-tab" tabindex="">
-                                PIEZAS
+                            <div class="col-sm-7 text-end">
+                                <a class="btn btn-warning" role="button" data-bs-toggle="modal" data-bs-target="#modalTorre">Nueva Torre</a>
                             </div>
                         </div>
                     </div>
-                    <!-- /.card -->
+                    <div class="card-body table-responsive" id="divListar">
+                        
                     </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<?php echo $this->endSection();?>
+
+<?php echo $this->section('scripts');?>
 
 
 

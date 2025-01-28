@@ -32,4 +32,9 @@ $routes->post('listar-clientes', 'Cliente::listarClientes');
 $routes->post('registro-cliente', 'Cliente::registrarCliente');
 $routes->post('eliminar-cliente', 'Cliente::eliminarCliente');
 
+$routes->get('piezas', 'Pieza::index');
+$routes->post('listar-piezas', 'Pieza::listarPiezas');
+$routes->post('registro-pieza', 'Pieza::registrarPieza');
+$routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
+
 $routes->get('torres', 'Torre::index');

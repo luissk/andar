@@ -163,6 +163,11 @@ if(!session('idusuario')){
                                         <i class="nav-icon fa-solid fa-users"></i>
                                         <p>Clientes</p>
                                     </a>
+                                </li><li class="nav-item">
+                                    <a href="<?=base_url('piezas')?>" class="nav-link ps-4 <?php echo isset($piezasLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-wrench"></i>
+                                        <p>Piezas</p>
+                                    </a>
                                 </li>
                             </ul>
                         </li>
@@ -177,7 +182,7 @@ if(!session('idusuario')){
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="<?=base_url('torres')?>" class="nav-link ps-4 <?php echo isset($torresLinkActive) ? 'active': ''?>">
-                                        <i class="nav-icon fa-solid fa-wrench"></i>
+                                        <i class="fa-solid fa-tower-observation"></i>
                                         <p>Torres</p>
                                     </a>
                                 </li>
