@@ -176,7 +176,7 @@ if(!session('idusuario')){
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($torresLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('torres')?>" class="nav-link ps-4 <?php echo isset($torresLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-wrench"></i>
                                         <p>Torres</p>
                                     </a>

@@ -31,3 +31,5 @@ $routes->get('clientes', 'Cliente::index');
 $routes->post('listar-clientes', 'Cliente::listarClientes');
 $routes->post('registro-cliente', 'Cliente::registrarCliente');
 $routes->post('eliminar-cliente', 'Cliente::eliminarCliente');
+
+$routes->get('torres', 'Torre::index');
