@@ -38,3 +38,4 @@ $routes->post('registro-pieza', 'Pieza::registrarPieza');
 $routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
 
 $routes->get('torres', 'Torre::index');
+$routes->get('piezas-select-ajax', 'Torre::listarPiezasAjaxSelect2');

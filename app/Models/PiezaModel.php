@@ -19,6 +19,17 @@ class PiezaModel extends Model{
         return $st->getRowArray();
     }
 
+    public function getPiezasAjax($cri = ''){
+        $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
+
+        $query = "select * from pieza 
+        where idpieza is not null $sql order by pie_desc asc";
+
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
+
     public function getPiezas($desde, $hasta, $cri = ''){
         $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 

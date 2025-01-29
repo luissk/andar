@@ -77,7 +77,7 @@ class Pieza extends BaseController
             $rules = [
                 'desc' => [
                     'label' => 'Descripción', 
-                    'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\- 0-9]+$/]|max_length[200]',
+                    'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\-\",\/ 0-9]+$/]|max_length[200]',
                     'errors' => [
                         'required'    => '* La {field} es requerida.',
                         'regex_match' => '* La {field} no es válida.',
@@ -86,11 +86,11 @@ class Pieza extends BaseController
                 ],
                 'codigo' => [
                     'label' => 'Código', 
-                    'rules' => 'required|regex_match[/^[0-9]+$/]|exact_length[12]',
+                    'rules' => 'required|regex_match[/^[0-9]+$/]|max_length[12]',
                     'errors' => [
-                        'required'     => '* El {field} es requerido.',
-                        'exact_length' => '* El {field} es de 12 números.',
-                        'regex_match'  => '* El {field} sólo contiene números.'
+                        'required'    => '* El {field} es requerido.',
+                        'max_length'  => '* El {field} 12 número máximo.',
+                        'regex_match' => '* El {field} sólo contiene números.'
                     ]
                 ],
                 'peso' => [

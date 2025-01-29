@@ -49,6 +49,8 @@ if(!session('idusuario')){
 
     <link rel="stylesheet" href="<?=base_url('public/css/styles.css')?>">
 
+    <?php echo $this->renderSection("css");?>
+
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
