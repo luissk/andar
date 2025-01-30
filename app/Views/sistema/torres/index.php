@@ -63,7 +63,7 @@
                             <div id="msj-desc" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <label for="plano" class="form-label">Plano de torre</label>
+                            <label for="plano" class="form-label">Plano de torre <span id="divplano"></span></label>
                             <input type="file" class="form-control" id="plano" name="plano" accept="application/pdf">
                             <div id="msj-plano" class="form-text text-danger"></div>
                         </div>
@@ -155,6 +155,17 @@ function eliminarItem(id){
     dibujaFilas();
 }
 
+function listarTorres(page, cri = ''){
+    $("#divListar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> CARGANDO DATOS');
+    $.post('listar-torres', {
+        page,cri
+    }, function(data){
+        $("#divListar").html(data);
+    })
+}
+
+listarTorres(1);
+
 function limpiarCampos(){
     items = [];
     dibujaFilas();
@@ -162,11 +173,26 @@ function limpiarCampos(){
     $("#frmTorre")[0].reset();
     $('#piezas').val(null).trigger('change');
     $('[id^="msj-"').text("");
-    $("#id_torree").val("");
+    $("#id_torree").val("");   
     
+    $("#divplano").html("");
 }
 
 $(function(){
+    let timeout;
+    $("#txtBuscar").on('input', function(e){
+        let cri = $(this).val();
+        //console.log(cri);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+        	if( cri.length > 2 ){            
+                listarTorres(1,cri);
+            }else if( cri.length == 0 ){
+                listarTorres(1);
+            }
+      	}, 600);
+    });
+
     $( '#piezas' ).select2( {
         theme: 'bootstrap-5',
         dropdownParent: $("#modalTorre"),
@@ -198,7 +224,7 @@ $(function(){
 
         if( id == '' || id == undefined ) return;
 
-        item = {
+        let item = {
             id,
             text,
             cant:1

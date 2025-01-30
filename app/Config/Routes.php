@@ -39,5 +39,8 @@ $routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
 
 $routes->get('torres', 'Torre::index');
 $routes->get('piezas-select-ajax', 'Torre::listarPiezasAjaxSelect2');
-
+$routes->post('listar-torres', 'Torre::listarTorres');
 $routes->post('registro-torre', 'Torre::registrarTorre');
+$routes->post('eliminar-torre', 'Torre::eliminarTorre');
+$routes->post('eliminar-plano', 'Torre::eliminarPlano');
+$routes->post('detalle-torre-modal', 'Torre::modalDetalleTorre');

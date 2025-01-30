@@ -4,6 +4,35 @@ namespace App\Models;
 use CodeIgniter\Model;
 
 class TorreModel extends Model{
+
+    public function getTorre($idtorre){
+        $query = "select * from torre where idtorre = ?";
+
+        $st = $this->db->query($query, [$idtorre]);
+
+        return $st->getRowArray();
+    }
+
+    public function getTorres($desde, $hasta, $cri = ''){
+        $sql = $cri != '' ? " and tor_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+
+        $query = "select * from torre where idtorre is not null $sql
+        limit ?,?";
+
+        $st = $this->db->query($query, [$desde, $hasta]);
+
+        return $st->getResultArray();
+    }
+
+    public function getTorresCount($cri = ''){
+        $sql = $cri != '' ? " and tor_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+
+        $query = "select count(idtorre) as total from torre where idtorre is not null $sql";
+
+        $st = $this->db->query($query);
+
+        return $st->getRowArray();
+    }
     
     public function insertarTorre($desc, $nombre_plano, $idusuario2){
         $query = "insert into torre(tor_desc,tor_plano,idusuario2,tor_fechareg) values(?,?,?,now())";
@@ -21,6 +50,52 @@ class TorreModel extends Model{
         return $st;
     }
 
+    public function modificarTorre($desc, $nombre_plano, $idtorre){
+        $query = "update torre set tor_desc=?,tor_plano=? where idtorre=?";
 
+        $st = $this->db->query($query, [$desc, $nombre_plano, $idtorre]);
+
+        return $st;
+    }
+
+    public function getDetalleTorre($idtorre){
+        $query = "select dt.idtorre,dt.idpieza,dt.dt_cantidad,pi.pie_desc
+        from detalle_torre dt
+        inner join pieza pi on dt.idpieza=pi.idpieza
+        where dt.idtorre=?";
+
+        $st = $this->db->query($query,[$idtorre]);
+
+        return $st->getResultArray();
+    }
+
+    //VERIFICAR SI TIENE REGISTRO EN TABLAS(detalle_presupuesto) la torre A ELIMINAR
+    public function verificarTorTieneRegEnTablas($idtorre, $tabla){
+        $query = "select count(idtorre) as total from $tabla where idtorre=?";
+        $st = $this->db->query($query, [$idtorre]);
+
+        return $st->getRowArray();
+    }
+
+    public function eliminarTorre($idtorre){
+        $query = "delete from torre where idtorre = ?";
+        $st = $this->db->query($query, [$idtorre]);
+
+        return $st;
+    }
+
+    public function eliminarDetalle($idtorre){
+        $query = "delete from detalle_torre where idtorre = ?";
+        $st = $this->db->query($query, [$idtorre]);
+
+        return $st;
+    }
+
+    public function eliminarPlano($idtorre){
+        $query = "update torre set tor_plano=''  where idtorre = ?";
+        $st = $this->db->query($query, [$idtorre]);
+
+        return $st;
+    }
 
 }
