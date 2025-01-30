@@ -64,7 +64,7 @@
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="plano" class="form-label">Plano de torre</label>
-                            <input type="file" class="form-control" id="plano" name="plano">
+                            <input type="file" class="form-control" id="plano" name="plano" accept="application/pdf">
                             <div id="msj-plano" class="form-text text-danger"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
@@ -89,13 +89,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tbl_deta">
-                                    <!-- <tr>
-                                        <td>1</td>
-                                        <td>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quos nulla saepe sequi, cupiditate obcaecati voluptatem quas velit natus quo accusantium possimus eum sapiente itaque provident corrupti tenetur autem cumque aut.</td>
-                                        <td>
-                                            <input type="text" class="form-control">
-                                        </td>
-                                    </tr> -->
                                 </tbody>
                             </table>
                         </div>
@@ -123,23 +116,23 @@ let items = [];
 let fila = document.querySelector('#tbl_deta');
 
 function dibujaFilas(){
-    let tr = document.createElement('tr'),
-        filahtml = '';
+    let filahtml = '';
     
     let cont = 0;
     for(let i of items){
         cont++;
-        filahtml = `
+        filahtml += `
+            <tr>
             <td id="${i.id}">
                 ${cont}
             </td>
             <td>${i.text}</td>
-            <td><input type="text" value="${i.cant}" id="c${i.id}" class="form-control form-control-sm numerosindecimal"></td>
+            <td><input type="text" value="${i.cant}" id="c${i.id}" data-id=${i.id} class="form-control form-control-sm numerosindecimal"></td>
             <td class='text-center'><a onclick="eliminarItem(${i.id})"><i class='fas fa-trash-alt'></i></a></td>
+            </tr>
         `;
     }
-    tr.innerHTML = filahtml;
-    fila.appendChild(tr);
+    fila.innerHTML = filahtml;    
 
     $(".numerosindecimal").on("keypress keyup blur",function (event) {    
         $(this).val($(this).val().replace(/[^\d].+/, ""));
@@ -147,12 +140,30 @@ function dibujaFilas(){
             event.preventDefault();
         }
     });
+
+    $(".numerosindecimal").on("input",function (event) {    
+        let id = event.currentTarget.dataset.id;
+        let indice = items.findIndex(x => x.id == id);
+        items[indice].cant = $("#c"+id).val();
+    });
 }
 
 function eliminarItem(id){
     let indice = items.findIndex(x => x.id == id);
     items.splice(indice, 1);
-    $('table td[id='+id+']').parent().remove();
+    $('#tbl_deta').html("");
+    dibujaFilas();
+}
+
+function limpiarCampos(){
+    items = [];
+    dibujaFilas();
+
+    $("#frmTorre")[0].reset();
+    $('#piezas').val(null).trigger('change');
+    $('[id^="msj-"').text("");
+    $("#id_torree").val("");
+    
 }
 
 $(function(){
@@ -162,7 +173,6 @@ $(function(){
         //minimumInputLength: 2,
         //minimumResultsForSearch: 10,
         ajax: {
-            //type: "POST",
             url: "piezas-select-ajax",
             dataType: 'json',
             data: function(params){
@@ -173,7 +183,6 @@ $(function(){
                 return query;
             },
             processResults: function(data){
-                //console.log(data);
                 return {
                     results: data
                 }
@@ -186,6 +195,8 @@ $(function(){
     $("#piezas").on('change', function(e){
         let id = $(this).val(),
             text = $("#piezas option:selected").text();
+
+        if( id == '' || id == undefined ) return;
 
         item = {
             id,
@@ -202,106 +213,76 @@ $(function(){
                 title: "La pieza ya fue agregada.",
                 icon: "error"
             });
-        }
-        //console.log(items);
-        
+        }        
     });
 
 
-    $("#btnSalida").on('click', function(e){
+    $("#frmTorre").on('submit', function(e){
         e.preventDefault();
-        
-        let btn = document.querySelector('#btnSalida'),
-                txtbtn = btn.textContent,
-                btnHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-            btn.setAttribute('disabled', 'disabled');
-            btn.innerHTML = `${btnHTML} Guardando`;
-        
-        let fechareg = $("#fechareg").val(),
-            documento = $("#documento").val(),
-            comentario = $("#comentario").val(),
-            area = $("#area").val();
-        
-        if(fechareg == ''){
-            swal_alert('Alerta', 'Seleccione una fecha', 'info', 'Aceptar');
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }else if(documento.trim() == ''){
-            swal_alert('Alerta', 'Ingrese un documento', 'info', 'Aceptar');
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }else if(comentario.trim() == ''){
-            swal_alert('Alerta', 'Ingrese un comentario', 'info', 'Aceptar');
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }else if(area == ''){
-            swal_alert('Alerta', 'Seleccione una área', 'info', 'Aceptar');
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }else if(items.length == 0){
-            swal_alert('Alerta', 'Productos sin agregar', 'info', 'Aceptar');
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }else{
-            //agregando cantidades
-            for(let i of items){
-                let cantidad = $("#c"+i.idproducto).val();
-                if(cantidad <= 0){
-                    swal_alert('Atención', `Cantidad inválida del producto ${i.codigo}`, 'info', 'Aceptar');
-                    btn.removeAttribute('disabled');
-                    btn.innerHTML = txtbtn;
-                    return;
-                }            
-                if(cantidad > i.stock){
-                    swal_alert('Atención', `Cantidad sobrepasa al stock del producto ${i.codigo}`, 'info', 'Aceptar');
-                    btn.removeAttribute('disabled');
-                    btn.innerHTML = txtbtn;
-                    return;
+        let btn = document.querySelector('#btnGuardar'),
+            txtbtn = btn.textContent,
+            btnHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+        btn.setAttribute('disabled', 'disabled');
+        btn.innerHTML = `${btnHTML} PROCESANDO...`;
+
+        let formData = new FormData(this);
+        formData.append('items', JSON.stringify(items));
+
+        $.ajax({
+            method: 'POST',
+            url: 'registro-torre',
+            data: formData,
+            cache:false,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                //console.log(data);
+                $('[id^="msj-"').text("");                
+                if( data.errors ){                    
+                    let errors = data.errors;
+                    for( let err in errors ){
+                        $('#msj-' + err).text(errors[err]);
+                    }
                 }
-                i.cantidad = cantidad;
+                btn.removeAttribute('disabled');
+                btn.innerHTML = txtbtn; 
+                $('#msj').html(data);
             }
-            //console.log(items);
+        });
 
-            let formData = new FormData;
-            formData.append('fechareg', fechareg);
-            formData.append('documento', documento);
-            formData.append('comentario', comentario);
-            formData.append('area', area);
-            formData.append('items', JSON.stringify(items));
-
-            let objConfirm = {
-                title: 'REGISTRAR SALIDA',
-                text: "¿Vas a registrar la salida?",
-                icon: 'warning',
-                confirmButtonText: 'Sí',
-                cancelButtonText: 'No',
-                funcion: function(){
-                    $.ajax({
-                        beforeSend: function(){
-                            //         
-                        },
-                        url: 'salida/saveSalida',
-                        type:"POST",
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function(data){
-                            if(data == 1){
-                                btn.setAttribute('disabled', 'disabled');
-                                alert('SALIDA EXITOSA..!')
-                                location.reload();
-                            }else{
-                                swal_alert('Atención', data, 'warning', 'Aceptar');
-                            }                 
-                        }
-                    });
-                }
-            }            
-            swal_confirm(objConfirm);
-            btn.removeAttribute('disabled');
-            btn.innerHTML = txtbtn;
-        }    
     });
+
+    const myModalEl = document.getElementById('modalTorre')
+    myModalEl.addEventListener('hidden.bs.modal', event => {
+        $("#btnGuardar").text("REGISTRAR TORRE");
+        limpiarCampos();
+        $("#msj").html("");
+    });
+
+    $('#plano').on('change', function(){
+        let tipos = ['application/pdf'];
+        let file = this.files[0];
+        let tipofile = file.type;
+        let sizefile = file.size;
+
+        if(!tipos.includes(tipofile)){
+            Swal.fire({
+                text: "El plano debe ser un pdf",
+                icon: "info"
+            });
+            $(this).val('');
+            return false;
+        }
+        if(sizefile >= 2097152){
+            Swal.fire({
+                text: "El documento de debe ser mayor 2MB",
+                icon: "info"
+            });
+            $(this).val('');
+            return false;
+        }
+    });
+
 });
 </script>
 

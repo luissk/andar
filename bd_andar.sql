@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-01-2025 a las 19:21:23
+-- Tiempo de generación: 30-01-2025 a las 01:13:38
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -71,6 +71,18 @@ CREATE TABLE `detalle_torre` (
   `idpieza` int(10) UNSIGNED NOT NULL,
   `dt_cantidad` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_torre`
+--
+
+INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
+(2, 7, 6),
+(2, 66, 5),
+(2, 114, 7),
+(3, 9, 1),
+(3, 34, 1),
+(3, 65, 1);
 
 -- --------------------------------------------------------
 
@@ -320,6 +332,14 @@ CREATE TABLE `torre` (
   `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `torre`
+--
+
+INSERT INTO `torre` (`idtorre`, `tor_desc`, `tor_plano`, `tor_fechareg`, `idusuario2`) VALUES
+(2, 'Torre 1', 'plano_jm9sg74o52.pdf', '2025-01-29 18:58:08', 1),
+(3, 'Torre 2', 'plano_qd6xtr3j30.pdf', '2025-01-29 19:10:07', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -514,7 +534,7 @@ ALTER TABLE `tipousuario`
 -- AUTO_INCREMENT de la tabla `torre`
 --
 ALTER TABLE `torre`
-  MODIFY `idtorre` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idtorre` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `transportista`

@@ -12,8 +12,8 @@ if(!function_exists('help_nombreWeb')){
     }
 }
 
-if(!function_exists('stringAleatorio')){
-    function stringAleatorio($length = 5, $case = 1){
+if(!function_exists('help_stringRandom')){
+    function help_stringRandom($length = 5, $case = 1){
 		$characters       = $case == 1 ? '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '0123456789abcdefghijklmnopqrstuvwxyz';
 		$charactersLength = strlen($characters);
 		$randomString     = '';
