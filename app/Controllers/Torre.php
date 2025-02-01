@@ -45,6 +45,7 @@ class Torre extends BaseController
                         $data['id']     = $p['idpieza'];
                         $data['text']   = $p['pie_desc'];
                         $data['codigo'] = $p['pie_codigo'];
+                        $data['cant']   = $p['pie_cant'];
 
                         array_push($pData, $data);
                     }

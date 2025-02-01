@@ -189,7 +189,7 @@ if(!session('idusuario')){
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($presuLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('presupuestos')?>" class="nav-link ps-4 <?php echo isset($presuLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-calculator"></i>
                                         <p>Presupuesto</p>
                                     </a>
