@@ -77,4 +77,16 @@ class ClienteModel extends Model{
         return $st;
     }
 
+
+    public function getClientesAjax($cri = ''){
+        $sql = $cri != '' ? " and cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+
+        $query = "select * from cliente 
+        where idcliente is not null $sql order by cli_nombrerazon asc";
+
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
+
 }

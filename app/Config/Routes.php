@@ -47,3 +47,5 @@ $routes->post('detalle-torre-modal', 'Torre::modalDetalleTorre');
 
 $routes->get('presupuestos', 'Presupuesto::index');
 $routes->get('nuevo-presupuesto', 'Presupuesto::nuevoPresupuesto');
+$routes->get('clientes-select-ajax', 'Presupuesto::listarClientesAjaxSelect2');
+$routes->get('torres-select-ajax', 'Presupuesto::listarTorresAjaxSelect2');

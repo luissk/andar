@@ -42,10 +42,67 @@ class Presupuesto extends BaseController
         $data['title']           = "Nuevo presupuesto | ".help_nombreWeb();
         $data['presuLinkActive'] = 1;
 
+        $data['nroPre'] = $this->modeloPresupuesto->nroPresupuesto();
+        $data['param']  = $this->modeloParametros->getParametros();
+
         return view('sistema/presupuestos/nuevoPresupuesto', $data);
     }
 
+    public function listarClientesAjaxSelect2(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
 
+            if( !empty($this->request->getVar('type')) && $this->request->getVar('type') == 'clientes' ){
+                $cri = !empty( trim( $this->request->getVar('search') ) ) ? trim( $this->request->getVar('search') ) : '';
+
+                $piezas = $this->modeloCliente->getClientesAjax($cri);
+
+                if( $piezas ){
+                    $pData = array();
+                    foreach( $piezas as $p ){
+                        $data['id']     = $p['idcliente'];
+                        $data['text']   = $p['cli_nombrerazon'];
+                        $data['dniruc'] = $p['cli_dniruc'];
+
+                        array_push($pData, $data);
+                    }
+
+                    echo json_encode($pData);
+                }                
+            }         
+
+        }
+    }
+
+    public function listarTorresAjaxSelect2(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            if( !empty($this->request->getVar('type')) && $this->request->getVar('type') == 'torres' ){
+                $cri = !empty( trim( $this->request->getVar('search') ) ) ? trim( $this->request->getVar('search') ) : '';
+
+                $torres = $this->modeloTorre->getTorresAjax($cri);
+
+                if( $torres ){
+                    $pData = array();
+                    foreach( $torres as $t ){
+                        $data['id']    = $t['idtorre'];
+                        $data['text']  = $t['tor_desc'];
+                        $data['total'] = $t['total'];
+
+                        array_push($pData, $data);
+                    }
+
+                    echo json_encode($pData);
+                }                
+            }         
+
+        }
+    }
 
 
 }

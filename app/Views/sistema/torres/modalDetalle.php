@@ -51,6 +51,7 @@ echo "</pre>"; */
                                 <th style="width: 20px;">#</th>
                                 <th>Pieza</th>
                                 <th style="width: 90px;">Cantidad</th>
+                                <th>Precio</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -63,6 +64,7 @@ echo "</pre>"; */
                                 echo '<td>'.$c.'</td>';
                                 echo '<td>'.$d['pie_desc'].'</td>';
                                 echo '<td>'.$d['dt_cantidad'].'</td>';
+                                echo '<td>'.$d['pie_precio'].'</td>';
 
                                 echo '</tr>';
                             }

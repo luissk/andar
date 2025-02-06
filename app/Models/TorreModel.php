@@ -59,7 +59,7 @@ class TorreModel extends Model{
     }
 
     public function getDetalleTorre($idtorre){
-        $query = "select dt.idtorre,dt.idpieza,dt.dt_cantidad,pi.pie_desc
+        $query = "select dt.idtorre,dt.idpieza,dt.dt_cantidad,pi.pie_desc,pi.pie_precio
         from detalle_torre dt
         inner join pieza pi on dt.idpieza=pi.idpieza
         where dt.idtorre=?";
@@ -96,6 +96,24 @@ class TorreModel extends Model{
         $st = $this->db->query($query, [$idtorre]);
 
         return $st;
+    }
+
+    public function getTorresAjax($cri = ''){
+        $sql = $cri != '' ? " and tor.tor_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+
+        /* $query = "select * from torre 
+        where idtorre is not null $sql order by tor_desc asc"; */
+
+        $query = "select tor.idtorre,tor.tor_desc,sum(pie.pie_precio) as total
+        from torre tor
+        inner join detalle_torre dt on tor.idtorre=dt.idtorre
+        inner join pieza pie on dt.idpieza=pie.idpieza
+        where tor.idtorre is not null $sql 
+        GROUP by tor.idtorre, tor.tor_desc";
+
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
     }
 
 }
