@@ -34,6 +34,47 @@ class Presupuesto extends BaseController
         return view('sistema/presupuestos/index', $data);
     }
 
+    public function listarPresupuestos(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            
+            $page = $this->request->getVar('page');
+            $cri  = trim($this->request->getVar('cri'));
+
+            $desde        = $page * 10 - 10;
+            $hasta        = 10;
+            $data['page'] = $page;
+
+            $cri = strlen($cri) > 2 ? $cri : '';
+            $data['cri'] = $cri;
+
+            $data['presupuestos']   = $this->modeloPresupuesto->getPresupuestos($desde, $hasta, $cri);
+            $data['totalRegistros'] = $this->modeloPresupuesto->getPresupuestosCount($cri)['total'];
+
+            return view('sistema/presupuestos/listar', $data);
+        }
+    }
+
+    public function modalDetallePresu(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            $idpresu = $_POST['id'];
+            $presupuesto = $this->modeloPresupuesto->getPresupuesto($idpresu);
+            $detalle     = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
+
+            $data['presupuesto'] = $presupuesto;
+            $data['detalle']     = $detalle;
+
+            return view('sistema/presupuestos/modalDetalle', $data);
+
+        }
+    }
+
     public function nuevoPresupuesto(){
         if( !session('idusuario') ){
             return redirect()->to('/');
@@ -100,6 +141,77 @@ class Presupuesto extends BaseController
                     echo json_encode($pData);
                 }                
             }         
+
+        }
+    }
+
+    public function registrarPresupuesto(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            $items     = json_decode($this->request->getVar('items'), true);
+            $count_items = count($items);
+            if( $count_items == 0 ){
+                echo "ITEMS VACIO";exit();
+            }
+
+            $nroPre  = $this->modeloPresupuesto->nroPresupuesto()['nro'];
+            $porcsem = $this->modeloParametros->getParametros()['par_porcensem'];
+
+            $porcpre    = $this->request->getVar('porcpre');
+            $periodo    = $this->request->getVar('periodo');
+            $nroperiodo = $this->request->getVar('nroperiodo');
+            $cliente    = $this->request->getVar('cliente');
+
+            $arrDT = [];
+            foreach( $items as $i ){
+                $idtorre = $i['id'];
+                $cant    = $i['cant'];
+                $tmonto  = $i['tmonto'];
+
+                $dtTorre = $this->modeloTorre->getDetalleTorre($idtorre);
+                
+                foreach( $dtTorre as $dtT ){
+                    $a = [
+                        'idpieza'    => $dtT['idpieza'],
+                        'dt_cant'    => $dtT['dt_cantidad'],
+                        'pie_precio' => $dtT['pie_precio'],
+                    ];
+                    array_push($arrDT, $a);
+                }            
+            }
+            $arrDT = json_encode($arrDT);
+
+            if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT) ){
+                $res = FALSE;
+                foreach( $items as $i ){
+                    $idtorre = $i['id'];
+                    $cant    = $i['cant'];
+                    $tmonto  = $i['tmonto'];
+                    
+                    if( $this->modeloPresupuesto->insertarDetallePresu($idpre,$idtorre,$cant,$tmonto) ){
+                        $res = TRUE;
+                    }
+                }
+                if( $res ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Presupuesto Generado",
+                            text: "",
+                            icon: "success",
+                            showConfirmButton: true,
+                        });
+                        setTimeout(function(){location.reload()},1500)
+                    </script>';
+                }
+            }
+            
+            /* echo "<pre>";
+            print_r($_POST);
+            print_r($items);
+            echo "</pre>"; */
 
         }
     }

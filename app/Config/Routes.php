@@ -46,6 +46,9 @@ $routes->post('eliminar-plano', 'Torre::eliminarPlano');
 $routes->post('detalle-torre-modal', 'Torre::modalDetalleTorre');
 
 $routes->get('presupuestos', 'Presupuesto::index');
+$routes->post('listar-presupuestos', 'Presupuesto::listarPresupuestos');
 $routes->get('nuevo-presupuesto', 'Presupuesto::nuevoPresupuesto');
 $routes->get('clientes-select-ajax', 'Presupuesto::listarClientesAjaxSelect2');
 $routes->get('torres-select-ajax', 'Presupuesto::listarTorresAjaxSelect2');
+$routes->post('registro-presu', 'Presupuesto::registrarPresupuesto');
+$routes->post('detalle-presu-modal', 'Presupuesto::modalDetallePresu');

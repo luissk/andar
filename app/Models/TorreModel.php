@@ -104,7 +104,7 @@ class TorreModel extends Model{
         /* $query = "select * from torre 
         where idtorre is not null $sql order by tor_desc asc"; */
 
-        $query = "select tor.idtorre,tor.tor_desc,sum(pie.pie_precio) as total
+        $query = "select tor.idtorre,tor.tor_desc,sum(pie.pie_precio * dt.dt_cantidad) as total
         from torre tor
         inner join detalle_torre dt on tor.idtorre=dt.idtorre
         inner join pieza pie on dt.idpieza=pie.idpieza

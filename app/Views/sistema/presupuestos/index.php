@@ -2,8 +2,7 @@
 
 <?php echo $this->section('css');?>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
 
 <?php echo $this->endSection();?>
 
@@ -29,7 +28,7 @@
                         <div class="row">
                             <div class="col-sm-5">
                                 <div class="search-container">
-                                    <input type="search" class="form-control search-input" placeholder="Buscar por ..." id="txtBuscar">
+                                    <input type="search" class="form-control search-input" placeholder="Buscar por nro ..." id="txtBuscar">
                                     <i class="fas fa-search search-icon"></i>
                                 </div>
                             </div>
@@ -52,8 +51,34 @@
 
 <?php echo $this->section('scripts');?>
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
+<script>
+function listarPresupuestos(page, cri = ''){
+    $("#divListar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> CARGANDO DATOS');
+    $.post('listar-presupuestos', {
+        page,cri
+    }, function(data){
+        $("#divListar").html(data);
+    })
+}
 
+listarPresupuestos(1);
+
+$(function(){
+    let timeout;
+    $("#txtBuscar").on('input', function(e){
+        let cri = $(this).val();
+        //console.log(cri);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+        	if( cri.length > 2 ){            
+                listarPresupuestos(1,cri);
+            }else if( cri.length == 0 ){
+                listarPresupuestos(1);
+            }
+      	}, 600);
+    });
+
+});
+</script>
 
 <?php echo $this->endSection();?>

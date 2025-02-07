@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-01-2025 a las 18:54:35
+-- Tiempo de generación: 07-02-2025 a las 23:53:24
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -60,6 +60,16 @@ CREATE TABLE `detalle_presupuesto` (
   `dp_precio` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `detalle_presupuesto`
+--
+
+INSERT INTO `detalle_presupuesto` (`idpresupuesto`, `idtorre`, `dp_cant`, `dp_precio`) VALUES
+(1, 2, 3, '2708.46'),
+(1, 5, 5, '43655.02'),
+(2, 2, 5, '5735.18'),
+(2, 5, 4, '44371.01');
+
 -- --------------------------------------------------------
 
 --
@@ -84,7 +94,7 @@ INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
 (5, 84, 21),
 (5, 90, 10),
 (5, 111, 28),
-(6, 74, 41),
+(6, 74, 14),
 (6, 88, 8),
 (6, 90, 6);
 
@@ -299,9 +309,20 @@ CREATE TABLE `presupuesto` (
   `idusuario2` int(10) UNSIGNED NOT NULL,
   `idcliente` int(10) UNSIGNED NOT NULL,
   `pre_porcenprecio` int(11) NOT NULL,
-  `pre_periododias` int(11) NOT NULL,
-  `pre_numtorres` int(11) NOT NULL
+  `pre_porcsem` int(11) NOT NULL,
+  `pre_periodo` char(1) NOT NULL,
+  `pre_periodonro` tinyint(4) NOT NULL,
+  `pre_piezas` text NOT NULL,
+  `pre_status` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `presupuesto`
+--
+
+INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_status`) VALUES
+(1, '0001-2025', '2025-02-07 14:45:53', NULL, 1, 2, 11, 12, 's', 6, '[{\"idpieza\":\"10\",\"dt_cant\":\"20\",\"pie_precio\":\"4.34\"},{\"idpieza\":\"37\",\"dt_cant\":\"15\",\"pie_precio\":\"68.88\"},{\"idpieza\":\"84\",\"dt_cant\":\"21\",\"pie_precio\":\"71.64\"},{\"idpieza\":\"90\",\"dt_cant\":\"10\",\"pie_precio\":\"53.78\"},{\"idpieza\":\"111\",\"dt_cant\":\"28\",\"pie_precio\":\"67.14\"},{\"idpieza\":\"66\",\"dt_cant\":\"5\",\"pie_precio\":\"81.19\"},{\"idpieza\":\"114\",\"dt_cant\":\"7\",\"pie_precio\":\"16.49\"}]', 1),
+(2, '0002-2025', '2025-02-07 14:51:30', NULL, 1, 3, 10, 12, 'm', 2, '[{\"idpieza\":\"10\",\"dt_cant\":\"20\",\"pie_precio\":\"4.34\"},{\"idpieza\":\"37\",\"dt_cant\":\"15\",\"pie_precio\":\"68.88\"},{\"idpieza\":\"84\",\"dt_cant\":\"21\",\"pie_precio\":\"71.64\"},{\"idpieza\":\"90\",\"dt_cant\":\"10\",\"pie_precio\":\"53.78\"},{\"idpieza\":\"111\",\"dt_cant\":\"28\",\"pie_precio\":\"67.14\"},{\"idpieza\":\"66\",\"dt_cant\":\"5\",\"pie_precio\":\"81.19\"},{\"idpieza\":\"114\",\"dt_cant\":\"7\",\"pie_precio\":\"16.49\"}]', 1);
 
 -- --------------------------------------------------------
 
@@ -527,7 +548,7 @@ ALTER TABLE `pieza`
 -- AUTO_INCREMENT de la tabla `presupuesto`
 --
 ALTER TABLE `presupuesto`
-  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `tipousuario`

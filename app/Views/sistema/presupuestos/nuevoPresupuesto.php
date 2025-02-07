@@ -24,21 +24,32 @@
                         </div>
                     </div>
                     <div class="card-body" id="cbody">
+                        <form id="frmPresu">
                         <div class="row">
-                            <div class="col-sm-3 mb-3">
-                                <label for="nropre" class="form-label">Nro Presupuesto</label>
+                            <div class="col-sm-2 mb-3">
+                                <label for="nropre" class="form-label">N° Presupuesto</label>
                                 <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre['nro']?>" maxlength="10" disabled>
                                 <div id="msj-nropre" class="form-text text-danger"></div>
                             </div>                            
                             <div class="col-sm-2 mb-3">
-                                <label for="porcpre" class="form-label">% de Precio</label>
+                                <label for="porcpre" class="form-label">% Precio</label>
                                 <input type="text" class="form-control" id="porcpre" name="porcpre" value="" maxlength="2">
                                 <div id="msj-porcpre" class="form-text text-danger"></div>
-                            </div>
+                            </div> 
                             <div class="col-sm-2 mb-3">
-                                <label for="dias" class="form-label">N° Días</label>
-                                <input type="text" class="form-control" id="dias" name="dias" value="" maxlength="3">
-                                <div id="msj-dias" class="form-text text-danger"></div>
+                                <label for="dias" class="form-label">Periodo</label>
+                                <select class="form-select" name="periodo" id="periodo">
+                                    <option value=""></option>
+                                    <option value="d">Día</option>
+                                    <option value="s">Semana</option>
+                                    <option value="m">Mes</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-1 mb-3">
+                                <label for="nroperiodo" class="form-label">N° Per.</label>
+                                <select class="form-select" name="nroperiodo" id="nroperiodo">
+                                    <option value=""></option>
+                                </select>
                             </div>
                             <div class="col-sm-5 mb-3">
                                 <label for="cliente" class="form-label">Buscar Cliente</label>
@@ -73,7 +84,9 @@
                                         <tr>
                                             <th style="width: 15px">#</th>
                                             <th>Torres</th>
-                                            <th style="width: 100px;">Cantidad</th>
+                                            <th style="width: 80px;">Cantidad</th>
+                                            <th style="width: 90px;">Precio(S/.)</th>
+                                            <th style="width: 90px;">Total(S/.)</th>
                                             <th style="width: 80px;">Quitar</th>
                                         </tr>
                                     </thead>
@@ -82,9 +95,20 @@
                                 </table>
                             </div>
                             <div class="col-sm-12 text-end">
-                                SUB TOTAL: S/. <span id="subT">0.00</span>
+                                <div class="fw-bolder">SUB TOTAL: S/. <span id="subT">0.00</span></div>
+                                <div class="fw-bolder">IGV(18%): S/. <span id="igv">0.00</span></div>
+                                <div class="fw-bolder">TOTAL: S/. <span id="total">0.00</span></div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-sm-12 text-center">
+                                <button id="btnPresu" class="btn btn-warning">GENERAR PRESUPUESTO</button>
+                            </div>
+                        </div>
+
+                        <div id="msj"></div>
+                        </form>
 
                     </div>
                 </div>
@@ -118,6 +142,8 @@ function dibujaFilas(){
             </td>
             <td>${i.text}</td>
             <td>${i.cant}</td>
+            <td>${i.monto}</td>
+            <td>${i.tmonto}</td>
             <td class='text-center'><a onclick="eliminarItem(${i.id})"><i class='fas fa-trash-alt'></i></a></td>
             </tr>
         `;
@@ -130,18 +156,91 @@ function eliminarItem(id){
     items.splice(indice, 1);
     $('#tbl_deta').html("");
     dibujaFilas();
-    calcular();
+    calcular(id);
 }
 
-function calcular(){
-    let suma = 0.00;
+function calcular(id){
+    let periodo    = $("#periodo").val();
+    let nroperiodo = $("#nroperiodo").val();
+    let porcsem    = $("#porcsem").val();
+    let porcpre    = $("#porcpre").val();
+    let suma       = 0.00;
+
+    let p_pre = (1 + porcpre/100),
+        p_sem = (1 + porcsem/100);
+
+    let monto, tmonto; //para los items
+
     for( let i of items ){
-        suma += i.total * i.cant;   
+        let pre_cant = i.total * i.cant;
+
+        if( periodo == 'd' && nroperiodo <= 6 ){
+            suma += pre_cant / 4 * p_pre * p_sem;
+            monto  = (pre_cant / 4 * p_pre * p_sem) / i.cant;//para items
+            tmonto = pre_cant / 4 * p_pre * p_sem;//para items
+        }else if( periodo == 's' ){
+            if( nroperiodo < 4 ){
+                suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
+                monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem) / i.cant;//para items
+                tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem;//para items
+            }
+            if( nroperiodo % 4 == 0 ){//es mes
+                let nromes = nroperiodo / 4;
+                suma += pre_cant * nromes * p_pre;
+                monto  = (pre_cant * nromes * p_pre) / i.cant;//para items
+                tmonto = pre_cant * nromes * p_pre;//para items
+            }
+            if( nroperiodo > 4 && nroperiodo % 4 != 0 ){
+                let res = nroperiodo / 4;
+                let mes = Math.trunc(res);
+                let dec = res - mes;
+                let sem = 4 * dec;
+
+                suma += (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);
+                monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem)) / i.cant;//para items
+                tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);//para items
+            }
+        }else if( periodo == 'm' ){
+            suma += pre_cant * nroperiodo * p_pre;
+            monto  = (pre_cant * nroperiodo * p_pre) / i.cant;//para items
+            tmonto = pre_cant * nroperiodo * p_pre;//para items
+        }
+
+        let indice = items.findIndex(x => x.id == id);
+        if( indice > -1 ){
+            items[indice].monto = monto.toFixed(2);
+            items[indice].tmonto = tmonto.toFixed(2);
+        }
     }
     $("#subT").text(suma.toFixed(2));
+    $("#igv").text((suma * 0.18).toFixed(2));
+    $("#total").text((suma * 1.18).toFixed(2));
+}
+
+function llenaNroPeriodo(n){
+    let select = document.querySelector('#nroperiodo');
+    let option = "<option value=''></option>";
+    for( let i = 1; i <= n; i++ ){
+        option += `<option value=${i}>${i}</option>`;
+    }
+    select.innerHTML = option;
 }
 
 $(function(){
+    $("#periodo").on('change', function(e){
+        let _this = $(this);
+
+        if( _this.val() == '' ){
+            llenaNroPeriodo(0);
+        }else if( _this.val() == 'd' ){
+            llenaNroPeriodo(6);
+        }else if( _this.val() == 's' ){
+            llenaNroPeriodo(52);
+        }else if( _this.val() == 'm' ){
+            llenaNroPeriodo(12);
+        }
+    });
+
     $( '#cliente' ).select2( {
         theme: 'bootstrap-5',
         width: '100%',
@@ -214,7 +313,8 @@ $(function(){
         
         let men = '';
         if( $("#porcpre").val().trim() == '' ) men = 'Ingrese un porcentaje de precio';
-        else if( $("#dias").val().trim() == '' ) men = 'Ingrese el Número de días';
+        else if( $("#periodo").val() == '' ) men = 'Seleccione el periodo';
+        else if( $("#nroperiodo").val() == '' ) men = 'Seleccione el Numero de periodo';
         else if( $("#cliente option:selected").text() == '' ) men = 'Seleccione un cliente';
         else if( id == '' || id == undefined ) men = 'Seleccione una torre';
         else if( cant == '' || cant == undefined ) men = 'Ingrese una cantidad';
@@ -229,18 +329,55 @@ $(function(){
             text,
             cant,
             total,
+            monto:1,
+            tmonto:1
         }
 
         let existe = items.find(x => x.id === id);
         if(existe === undefined && id != ''){
             items.push(item);
+            calcular(id);
             dibujaFilas();
-            calcular();
             $("#cantidad").val('');
             $('#torre').val('').trigger('change');
         }else{
             Swal.fire({title: "La torre ya fue agregada.", icon: "error"});
         }
+
+    });
+
+    $("#frmPresu").on('submit', function(e){
+        e.preventDefault();
+        let btn = document.querySelector('#btnPresu'),
+            txtbtn = btn.textContent,
+            btnHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+        btn.setAttribute('disabled', 'disabled');
+        btn.innerHTML = `${btnHTML} PROCESANDO...`;
+
+        if( items.length == 0 ){
+            Swal.fire({title: "Por favor, rellena los campos", icon: "error"});
+            btn.removeAttribute('disabled');
+            btn.innerHTML = txtbtn;
+            return;
+        }
+
+        let formData = new FormData(this);
+        formData.append('items', JSON.stringify(items));
+
+        $.ajax({
+            method: 'POST',
+            url: 'registro-presu',
+            data: formData,
+            cache:false,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                console.log(data);
+                btn.removeAttribute('disabled');
+                btn.innerHTML = txtbtn; 
+                $('#msj').html(data);
+            }
+        });
 
     });
 
