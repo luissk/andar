@@ -42,7 +42,7 @@ if($presupuestos){
             echo "<td>$pre_numero</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo '<td class="d-flex justify-content-center">';
-            echo '<a href="javascript:;" class="link-success editar" title="Modificar" data-id='.$id.' data-arr=\''.$id.'\' data-arrd=\''.$id.'\'><i class="fa-solid fa-pen-to-square"></i></a>';
+            echo '<a href="editar-presupuesto-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
             echo '</td>';
@@ -114,37 +114,6 @@ if($presupuestos){
 </div>
 
 <script>
-$(".editar").on('click', function(e){
-    e.preventDefault();
-    let id = $(this).data('id'),
-        arr = $(this).data('arr'),
-        arrd = $(this).data('arrd');
-    //console.log(arr);
-
-    for( let i of arrd ){
-        let item = {
-            id:i.idpieza,
-            text:i.pie_desc,
-            cant:i.dt_cantidad
-        }
-        items.push(item);//items fue declarado en el index.php
-    }
-    dibujaFilas();
-
-    //plano
-    if( arr[1] != '' ){
-        let html = `<a href="javascript:;" class="eliminarPlano" data-id=${id}>(eliminar plano)</a>`;
-        $("#divplano").html(html);
-    }
-    //fin plano
-
-    $("#desc").val(arr[0]);
-
-    $("#id_torree").val(id);
-    $("#btnGuardar").text("MODIFICAR TORRE");
-    $("#modalTorre").modal('show');
-});
-
 $(".eliminar").on('click', function(e){
     e.preventDefault();
     let id = $(this).data('id');

@@ -98,11 +98,8 @@ class TorreModel extends Model{
         return $st;
     }
 
-    public function getTorresAjax($cri = ''){
+    public function getTorresCbo($cri = ''){
         $sql = $cri != '' ? " and tor.tor_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
-
-        /* $query = "select * from torre 
-        where idtorre is not null $sql order by tor_desc asc"; */
 
         $query = "select tor.idtorre,tor.tor_desc,sum(pie.pie_precio * dt.dt_cantidad) as total
         from torre tor

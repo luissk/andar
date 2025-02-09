@@ -78,7 +78,7 @@ class ClienteModel extends Model{
     }
 
 
-    public function getClientesAjax($cri = ''){
+    public function getClientesCbo($cri = ''){
         $sql = $cri != '' ? " and cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
 
         $query = "select * from cliente 

@@ -75,21 +75,36 @@ class Presupuesto extends BaseController
         }
     }
 
-    public function nuevoPresupuesto(){
+    public function nuevoPresupuesto($id = ''){
         if( !session('idusuario') ){
             return redirect()->to('/');
         }
+
+        if( $id != '' ){
+            if( $presu = $this->modeloPresupuesto->getPresupuesto($id) ){
+                
+                $data['nroPre']   = $presu['pre_numero'];
+                $data['presu_bd'] = $presu;
+                $data['deta_bd']  = $this->modeloPresupuesto->getDetallePresupuesto($id);
+                $data['title']    = "Editar presupuesto | ".help_nombreWeb();
+            }else{
+                return redirect()->to('/');
+            }
+        }else{                       
+            $data['nroPre'] = $this->modeloPresupuesto->nroPresupuesto()['nro'];
+            $data['title']  = "Nuevo presupuesto | ".help_nombreWeb();  
+        } 
         
-        $data['title']           = "Nuevo presupuesto | ".help_nombreWeb();
         $data['presuLinkActive'] = 1;
 
-        $data['nroPre'] = $this->modeloPresupuesto->nroPresupuesto();
-        $data['param']  = $this->modeloParametros->getParametros();
+        $data['clientesCbo'] = $this->modeloCliente->getClientesCbo();//para llebar combobox
+        $data['torresCbo']   = $this->modeloTorre->getTorresCbo();//para llebar combobox
+        $data['param']       = $this->modeloParametros->getParametros();
 
         return view('sistema/presupuestos/nuevoPresupuesto', $data);
     }
 
-    public function listarClientesAjaxSelect2(){
+    /* public function listarClientesAjaxSelect2(){
         if( $this->request->isAJAX() ){
             if(!session('idusuario')){
                 exit();
@@ -115,9 +130,9 @@ class Presupuesto extends BaseController
             }         
 
         }
-    }
+    } */
 
-    public function listarTorresAjaxSelect2(){
+    /* public function listarTorresAjaxSelect2(){
         if( $this->request->isAJAX() ){
             if(!session('idusuario')){
                 exit();
@@ -143,7 +158,7 @@ class Presupuesto extends BaseController
             }         
 
         }
-    }
+    } */
 
     public function registrarPresupuesto(){
         if( $this->request->isAJAX() ){
@@ -164,7 +179,9 @@ class Presupuesto extends BaseController
             $periodo    = $this->request->getVar('periodo');
             $nroperiodo = $this->request->getVar('nroperiodo');
             $cliente    = $this->request->getVar('cliente');
+            $idpre_e    = $this->request->getVar('idpre');
 
+            //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
             foreach( $items as $i ){
                 $idtorre = $i['id'];
@@ -175,38 +192,75 @@ class Presupuesto extends BaseController
                 
                 foreach( $dtTorre as $dtT ){
                     $a = [
-                        'idpieza'    => $dtT['idpieza'],
-                        'dt_cant'    => $dtT['dt_cantidad'],
-                        'pie_precio' => $dtT['pie_precio'],
+                        'idtor'  => $dtT['idtorre'],
+                        'idpie'  => $dtT['idpieza'],
+                        'dtcan'  => $dtT['dt_cantidad'],
+                        'piepre' => $dtT['pie_precio'],
                     ];
                     array_push($arrDT, $a);
                 }            
             }
             $arrDT = json_encode($arrDT);
+            //FIN PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
 
-            if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT) ){
-                $res = FALSE;
-                foreach( $items as $i ){
-                    $idtorre = $i['id'];
-                    $cant    = $i['cant'];
-                    $tmonto  = $i['tmonto'];
-                    
-                    if( $this->modeloPresupuesto->insertarDetallePresu($idpre,$idtorre,$cant,$tmonto) ){
-                        $res = TRUE;
+            if( $presu_bd = $this->modeloPresupuesto->getPresupuesto($idpre_e) ){
+                //EDITAR
+                //exit();
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e) ){
+                    if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
+                        $res = FALSE;
+                        foreach( $items as $i ){
+                            $idtorre = $i['id'];
+                            $cant    = $i['cant'];
+                            $tmonto  = $i['tmonto'];
+                            
+                            if( $this->modeloPresupuesto->insertarDetallePresu($idpre_e,$idtorre,$cant,$tmonto) ){
+                                $res = TRUE;
+                            }
+                        }
+                        if( $res ){
+                            echo '<script>
+                                Swal.fire({
+                                    title: "Presupuesto Modificado",
+                                    text: "",
+                                    icon: "success",
+                                    showConfirmButton: true,
+                                });
+                                setTimeout(function(){location.reload()},1500)
+                            </script>';
+                        }
                     }
                 }
-                if( $res ){
-                    echo '<script>
-                        Swal.fire({
-                            title: "Presupuesto Generado",
-                            text: "",
-                            icon: "success",
-                            showConfirmButton: true,
-                        });
-                        setTimeout(function(){location.reload()},1500)
-                    </script>';
+            }else{                
+
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT) ){
+                    $res = FALSE;
+                    foreach( $items as $i ){
+                        $idtorre = $i['id'];
+                        $cant    = $i['cant'];
+                        $tmonto  = $i['tmonto'];
+                        
+                        if( $this->modeloPresupuesto->insertarDetallePresu($idpre,$idtorre,$cant,$tmonto) ){
+                            $res = TRUE;
+                        }
+                    }
+                    if( $res ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Presupuesto Generado",
+                                text: "",
+                                icon: "success",
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                            });
+                            setTimeout(function(){location.reload()},1500)
+                        </script>';
+                    }
                 }
+
             }
+
+            
             
             /* echo "<pre>";
             print_r($_POST);

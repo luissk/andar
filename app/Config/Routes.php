@@ -52,3 +52,5 @@ $routes->get('clientes-select-ajax', 'Presupuesto::listarClientesAjaxSelect2');
 $routes->get('torres-select-ajax', 'Presupuesto::listarTorresAjaxSelect2');
 $routes->post('registro-presu', 'Presupuesto::registrarPresupuesto');
 $routes->post('detalle-presu-modal', 'Presupuesto::modalDetallePresu');
+
+$routes->get('editar-presupuesto-(:num)', 'Presupuesto::nuevoPresupuesto/$1');

@@ -9,6 +9,68 @@
 
 
 <?php echo $this->section('contenido');?>
+<?php
+if( isset($presu_bd) && $presu_bd ){
+    /* echo "<pre>";
+    print_r($presu_bd);
+    print_r($deta_bd);
+    echo "</pre>"; */
+
+    $idpre      = $presu_bd['idpresupuesto'];
+    $pre_numero = $presu_bd['pre_numero'];
+    $periodo    = $presu_bd['pre_periodo'];
+    $periodonro = $presu_bd['pre_periodonro'];
+    $porcprecio = $presu_bd['pre_porcenprecio'];
+    $porcsem    = $presu_bd['pre_porcsem'];
+    $idcliente  = $presu_bd['idcliente'];
+
+    $titulo   = "Modificar";
+    $btnTexto = "MODIFICAR PRESUPUESTO";
+
+    $piezas_pre = $presu_bd['pre_piezas'];
+    $piezas_enc = json_decode($piezas_pre, true);
+    /* echo "<pre>";
+    print_r($piezas_enc);
+    echo "</pre>"; */
+    
+    $items = [];
+    foreach($deta_bd as $d){
+        $to = 0;
+        foreach( $piezas_enc as $pe ){
+            if( $d['idtorre'] == $pe['idtor'] ){
+                $to += $pe['piepre'] * $pe['dtcan'];
+            }
+        }
+        //echo $to;
+        $item = array(
+            'id'     => $d['idtorre'],
+            'text'   => $d['tor_desc'],
+            'cant'   => $d['dp_cant'],
+            'total'  => $to,
+            'monto'  => $d['dp_precio'] / $d['dp_cant'],
+            'tmonto' => $d['dp_precio'],
+        );
+        array_push($items, $item);
+    }
+
+    $items = json_encode($items);
+    //print_r($items);
+
+}else{
+    $idpre      = "";
+    $pre_numero = "";
+    $periodo    = "";
+    $periodonro = "";
+    $porcprecio = "";
+    $porcsem    = "";
+    $idcliente  = "";
+
+    $titulo   = "Realizar";
+    $btnTexto = "GENERAR PRESUPUESTO";
+
+    $items = json_encode([]);
+}
+?>
 
 <div class="app-content pt-3">
     <div class="container-fluid">
@@ -16,7 +78,7 @@
             <div class="col-sm-12">
                 <div class="card card-outline card-warning">
                     <div class="card-header">
-                        <h3 class="card-title">Realizar Presupuesto</h3>
+                        <h3 class="card-title"><?=$titulo?> Presupuesto</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
                                 <i class="fa-solid fa-minus"></i>
@@ -28,38 +90,59 @@
                         <div class="row">
                             <div class="col-sm-2 mb-3">
                                 <label for="nropre" class="form-label">N° Presupuesto</label>
-                                <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre['nro']?>" maxlength="10" disabled>
+                                <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre?>" maxlength="10" disabled>
                                 <div id="msj-nropre" class="form-text text-danger"></div>
                             </div>                            
                             <div class="col-sm-2 mb-3">
                                 <label for="porcpre" class="form-label">% Precio</label>
-                                <input type="text" class="form-control" id="porcpre" name="porcpre" value="" maxlength="2">
+                                <input type="text" class="form-control" id="porcpre" name="porcpre" value="<?=$porcprecio?>" maxlength="2">
                                 <div id="msj-porcpre" class="form-text text-danger"></div>
                             </div> 
                             <div class="col-sm-2 mb-3">
                                 <label for="dias" class="form-label">Periodo</label>
                                 <select class="form-select" name="periodo" id="periodo">
                                     <option value=""></option>
-                                    <option value="d">Día</option>
-                                    <option value="s">Semana</option>
-                                    <option value="m">Mes</option>
+                                    <option value="d" <?=$periodo != '' && $periodo == 'd' ? 'selected' : ''?>>Día</option>
+                                    <option value="s" <?=$periodo != '' && $periodo == 's' ? 'selected' : ''?>>Semana</option>
+                                    <option value="m" <?=$periodo != '' && $periodo == 'm' ? 'selected' : ''?>>Mes</option>
                                 </select>
                             </div>
                             <div class="col-sm-1 mb-3">
                                 <label for="nroperiodo" class="form-label">N° Per.</label>
                                 <select class="form-select" name="nroperiodo" id="nroperiodo">
-                                    <option value=""></option>
                                 </select>
                             </div>
                             <div class="col-sm-5 mb-3">
                                 <label for="cliente" class="form-label">Buscar Cliente</label>
                                 <select class="form-select" name="cliente" id="cliente">
+                                    <option value="">Seleccione</option>
+                                    <?php
+                                    foreach( $clientesCbo as $cli ){
+                                        $idcli = $cli['idcliente'];
+                                        $nom   = $cli['cli_nombrerazon'];
+                                        $dni   = $cli['cli_dniruc'];
+
+                                        $sel_cli = $idcliente == $idcli ? 'selected' : '';
+
+                                        echo "<option value='$idcli' $sel_cli>$nom ($dni)</option>";
+                                    }
+                                    ?>
                                 </select>
                                 <div id="msj-cliente" class="form-text text-danger"></div>
                             </div>
                             <div class="col-sm-5 mb-3">
                                 <label for="torre" class="form-label">Buscar Torre</label>
                                 <select class="form-select" name="torre" id="torre">
+                                    <option value="">Seleccione</option>
+                                    <?php
+                                    foreach( $torresCbo as $tor ){
+                                        $idtor     = $tor['idtorre'];
+                                        $tor_desc  = $tor['tor_desc'];
+                                        $tor_total = $tor['total'];
+
+                                        echo "<option value='$idtor' data-total='$tor_total'>$tor_desc</option>";
+                                    }
+                                    ?>
                                 </select>
                                 <div id="msj-torre" class="form-text text-danger"></div>
                             </div>
@@ -103,7 +186,8 @@
 
                         <div class="row">
                             <div class="col-sm-12 text-center">
-                                <button id="btnPresu" class="btn btn-warning">GENERAR PRESUPUESTO</button>
+                                <input type="hidden" name="idpre" id="idpre" value="<?=$idpre?>">
+                                <button id="btnPresu" class="btn btn-warning"><?=$btnTexto?></button>
                             </div>
                         </div>
 
@@ -126,7 +210,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
 
 <script>
-let items = [];
+let items = <?=$items?>;
 let fila = document.querySelector('#tbl_deta');
 
 function dibujaFilas(){
@@ -156,16 +240,16 @@ function eliminarItem(id){
     items.splice(indice, 1);
     $('#tbl_deta').html("");
     dibujaFilas();
-    calcular(id);
+    calcular();
 }
 
-function calcular(id){
+function calcular(){
     let periodo    = $("#periodo").val();
     let nroperiodo = $("#nroperiodo").val();
     let porcsem    = $("#porcsem").val();
     let porcpre    = $("#porcpre").val();
-    let suma       = 0.00;
-
+    let suma       = 0;
+    
     let p_pre = (1 + porcpre/100),
         p_sem = (1 + porcsem/100);
 
@@ -206,29 +290,47 @@ function calcular(id){
             tmonto = pre_cant * nroperiodo * p_pre;//para items
         }
 
-        let indice = items.findIndex(x => x.id == id);
+        let indice = items.findIndex(x => x.id == i.id);
         if( indice > -1 ){
             items[indice].monto = monto.toFixed(2);
             items[indice].tmonto = tmonto.toFixed(2);
         }
     }
-    $("#subT").text(suma.toFixed(2));
-    $("#igv").text((suma * 0.18).toFixed(2));
-    $("#total").text((suma * 1.18).toFixed(2));
+    let tt = items.reduce((acc,el) => acc + Number(el.tmonto),0);
+    $("#subT").text(tt.toFixed(2));
+    $("#igv").text((tt * 0.18).toFixed(2));
+    $("#total").text((tt * 1.18).toFixed(2));
 }
 
 function llenaNroPeriodo(n){
     let select = document.querySelector('#nroperiodo');
-    let option = "<option value=''></option>";
+    let option = "";
     for( let i = 1; i <= n; i++ ){
         option += `<option value=${i}>${i}</option>`;
     }
     select.innerHTML = option;
 }
 
+/* function actDesCampos($opt = true){//cuando se tiene agregado items y quiere camabir porcentaje,periodo,periodonro
+    if( $opt ){
+        $("#porcpre").attr('disabled',true);
+        $("#periodo").attr('disabled',true);
+        $("#nroperiodo").attr('disabled',true);
+    }else{
+        $("#porcpre").removeAttr('disabled');
+        $("#periodo").removeAttr('disabled');
+        $("#nroperiodo").removeAttr('disabled');
+    }
+} */
+
 $(function(){
     $("#periodo").on('change', function(e){
         let _this = $(this);
+
+        if( items.length > 0 ){
+            calcular();
+            dibujaFilas();
+        }
 
         if( _this.val() == '' ){
             llenaNroPeriodo(0);
@@ -241,68 +343,28 @@ $(function(){
         }
     });
 
+    $("#nroperiodo").on('change', function(e){
+        if( items.length > 0 ){
+            calcular();
+            dibujaFilas();
+        }
+    });
+
+    $("#porcpre").on('input', function(e){
+        if( items.length > 0 ){
+            calcular();
+            dibujaFilas();
+        }
+    });
+
     $( '#cliente' ).select2( {
         theme: 'bootstrap-5',
         width: '100%',
-        allowClear: true,
-        ajax: {
-            url: "clientes-select-ajax",
-            dataType: 'json',
-            data: function(params){
-                let query = {
-                    search: params.term,
-                    type: 'clientes'
-                };
-                return query;
-            },
-            processResults: function(data){
-                return {
-                    results: data
-                }
-            }
-        },
-        cache: true,
-        placeholder: 'Buscar clientes...',
-        templateResult: function(data){
-            //console.log(data);
-            if (!data.id) {
-                    return data.text;
-            }
-            var $state = $(
-                `<div>${data.text}<br>${data.dniruc}</div>`
-            );
-            return $state;
-        }
     });
 
     $( '#torre' ).select2( {
         theme: 'bootstrap-5',
         width: '100%',
-        allowClear: true,
-        ajax: {
-            url: "torres-select-ajax",
-            dataType: 'json',
-            data: function(params){
-                let query = {
-                    search: params.term,
-                    type: 'torres'
-                };
-                return query;
-            },
-            processResults: function(data){
-                //console.log(data)
-                return {
-                    results: data
-                }
-            }
-        },
-        cache: true,
-        placeholder: 'Buscar torres...',
-    });
-
-    $('#torre').on("select2:select", function(e) {
-        let data = $("#torre").select2('data')[0];
-        $("#torre option[value="+data.id+"]").attr('data-total', data.total);
     });
 
     $("#btnAdd").on('click', function(e){
@@ -315,7 +377,7 @@ $(function(){
         if( $("#porcpre").val().trim() == '' ) men = 'Ingrese un porcentaje de precio';
         else if( $("#periodo").val() == '' ) men = 'Seleccione el periodo';
         else if( $("#nroperiodo").val() == '' ) men = 'Seleccione el Numero de periodo';
-        else if( $("#cliente option:selected").text() == '' ) men = 'Seleccione un cliente';
+        else if( $("#cliente").val() == '' ) men = 'Seleccione un cliente';
         else if( id == '' || id == undefined ) men = 'Seleccione una torre';
         else if( cant == '' || cant == undefined ) men = 'Ingrese una cantidad';
 
@@ -336,7 +398,7 @@ $(function(){
         let existe = items.find(x => x.id === id);
         if(existe === undefined && id != ''){
             items.push(item);
-            calcular(id);
+            calcular();
             dibujaFilas();
             $("#cantidad").val('');
             $('#torre').val('').trigger('change');
@@ -380,6 +442,20 @@ $(function(){
         });
 
     });
+
+
+    //editar
+    <?php
+    if( $periodo != '' ){
+        echo "$('#periodo').val('$periodo').trigger('change');";
+        echo "$('#nroperiodo').val($periodonro);";
+        echo "
+            calcular();
+            dibujaFilas();
+        ";
+    }
+    ?>
+    //fin editar
 
 });
 

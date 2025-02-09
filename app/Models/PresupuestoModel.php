@@ -29,6 +29,14 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
+    public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu){
+        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=? where idpresupuesto = ?";
+
+        $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu]);
+
+        return $st;
+    }
+
     public function getPresupuestos($desde, $hasta, $cri = ''){
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
@@ -61,8 +69,8 @@ class PresupuestoModel extends Model{
     }
 
     public function getPresupuesto($idpresu){
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,
-        cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,
+        cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
@@ -83,6 +91,14 @@ class PresupuestoModel extends Model{
         $st = $this->db->query($query, [$idpresu]);
 
         return $st->getResultArray();
+    }
+
+    public function borrarDetallePresupuesto($idpresu){
+        $query = "delete from detalle_presupuesto where idpresupuesto=?";
+
+        $st = $this->db->query($query, [$idpresu]);
+
+        return $st;
     }
     
 
