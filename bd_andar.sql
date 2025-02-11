@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-02-2025 a las 23:53:24
+-- Tiempo de generación: 11-02-2025 a las 01:34:06
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -65,10 +65,16 @@ CREATE TABLE `detalle_presupuesto` (
 --
 
 INSERT INTO `detalle_presupuesto` (`idpresupuesto`, `idtorre`, `dp_cant`, `dp_precio`) VALUES
-(1, 2, 3, '2708.46'),
-(1, 5, 5, '43655.02'),
-(2, 2, 5, '5735.18'),
-(2, 5, 4, '44371.01');
+(3, 2, 2, '1147.04'),
+(3, 5, 3, '16639.13'),
+(4, 2, 1, '153.29'),
+(4, 6, 2, '1092.66'),
+(5, 2, 1, '1094.90'),
+(5, 5, 1, '10588.54'),
+(6, 2, 2, '3786.47'),
+(8, 2, 1, '300.73'),
+(9, 2, 1, '1063.62'),
+(10, 2, 2, '1074.04');
 
 -- --------------------------------------------------------
 
@@ -153,7 +159,7 @@ CREATE TABLE `parametros` (
 --
 
 INSERT INTO `parametros` (`idparametros`, `par_porcensem`, `par_logo`, `par_firma`, `par_direcc`, `par_telef`, `par_correo`) VALUES
-(2, 12, 'logo.jpeg', 'firma.jpg', 'Avenida Petit Thouars Monopoly', '975089485', 'andamios_andar@hotmail.com');
+(2, 12, 'logo.jpeg', 'firma.jpg', 'Av. Tomas Marsano N° 4674 Lima - Lima - Santiago de Surco', '996044983', 'ventas@andamiosandar.com');
 
 -- --------------------------------------------------------
 
@@ -321,8 +327,13 @@ CREATE TABLE `presupuesto` (
 --
 
 INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_status`) VALUES
-(1, '0001-2025', '2025-02-07 14:45:53', NULL, 1, 2, 11, 12, 's', 6, '[{\"idpieza\":\"10\",\"dt_cant\":\"20\",\"pie_precio\":\"4.34\"},{\"idpieza\":\"37\",\"dt_cant\":\"15\",\"pie_precio\":\"68.88\"},{\"idpieza\":\"84\",\"dt_cant\":\"21\",\"pie_precio\":\"71.64\"},{\"idpieza\":\"90\",\"dt_cant\":\"10\",\"pie_precio\":\"53.78\"},{\"idpieza\":\"111\",\"dt_cant\":\"28\",\"pie_precio\":\"67.14\"},{\"idpieza\":\"66\",\"dt_cant\":\"5\",\"pie_precio\":\"81.19\"},{\"idpieza\":\"114\",\"dt_cant\":\"7\",\"pie_precio\":\"16.49\"}]', 1),
-(2, '0002-2025', '2025-02-07 14:51:30', NULL, 1, 3, 10, 12, 'm', 2, '[{\"idpieza\":\"10\",\"dt_cant\":\"20\",\"pie_precio\":\"4.34\"},{\"idpieza\":\"37\",\"dt_cant\":\"15\",\"pie_precio\":\"68.88\"},{\"idpieza\":\"84\",\"dt_cant\":\"21\",\"pie_precio\":\"71.64\"},{\"idpieza\":\"90\",\"dt_cant\":\"10\",\"pie_precio\":\"53.78\"},{\"idpieza\":\"111\",\"dt_cant\":\"28\",\"pie_precio\":\"67.14\"},{\"idpieza\":\"66\",\"dt_cant\":\"5\",\"pie_precio\":\"81.19\"},{\"idpieza\":\"114\",\"dt_cant\":\"7\",\"pie_precio\":\"16.49\"}]', 1);
+(3, '0001-2025', '2025-02-08 17:17:08', NULL, 1, 2, 10, 12, 's', 4, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"20\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"15\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"21\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"10\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"28\",\"piepre\":\"67.14\"}]', 1),
+(4, '0002-2025', '2025-02-08 17:17:54', NULL, 1, 1, 5, 12, 'd', 5, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"14\",\"piepre\":\"95.41\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"8\",\"piepre\":\"24.98\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\"}]', 1),
+(5, '0003-2025', '2025-02-08 18:23:09', NULL, 1, 3, 5, 12, 'm', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"20\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"15\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"21\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"10\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"28\",\"piepre\":\"67.14\"}]', 1),
+(6, '0004-2025', '2025-02-08 20:59:35', NULL, 1, 2, 2, 12, 's', 14, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
+(8, '0005-2025', '2025-02-08 21:04:36', NULL, 1, 1, 3, 12, 's', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
+(9, '0006-2025', '2025-02-08 21:26:32', NULL, 1, 1, 2, 12, 'm', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
+(10, '0007-2025', '2025-02-08 21:27:35', NULL, 1, 1, 3, 12, 's', 4, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1);
 
 -- --------------------------------------------------------
 
@@ -548,7 +559,7 @@ ALTER TABLE `pieza`
 -- AUTO_INCREMENT de la tabla `presupuesto`
 --
 ALTER TABLE `presupuesto`
-  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `tipousuario`

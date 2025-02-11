@@ -66,10 +66,9 @@ class Parametros extends BaseController
                 ],
                 'direccion' => [
                     'label' => 'Dirección', 
-                    'rules' => 'required|alpha_numeric_punct|max_length[150]',
+                    'rules' => 'required|max_length[150]',
                     'errors' => [
                         'required'            => '* La {field} es requerida.',
-                        'alpha_numeric_punct' => '* La {field} no es válida.',
                         'max_length'          => '* La {field} debe contener máximo 150 caracteres.'
                     ]
                 ],

@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 class PresupuestoModel extends Model{
 
     public function nroPresupuesto(){
-        $query = " select concat( LPAD(count(idpresupuesto) + 1, 4, '0'),'-',YEAR(now()) ) as nro from presupuesto where YEAR(pre_fechareg) = YEAR(now()) ";
+        $query = " select concat( LPAD(count(idpresupuesto) + 1, 4, '0'),'-',YEAR(now()) ) as nro from presupuesto where YEAR(pre_fechareg) = YEAR(now()) order by idpresupuesto desc ";
         $st = $this->db->query($query);
 
         return $st->getRowArray();
@@ -71,7 +71,7 @@ class PresupuestoModel extends Model{
     public function getPresupuesto($idpresu){
         $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
-        usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
+        usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
         inner join usuario usu on pre.idusuario2=usu.idusuario

@@ -10,7 +10,7 @@ if($presupuestos){
             <th>Fecha</th>
             <th>Nro</th>
             <th>Cliente</th>
-            <th style="width: 100px">Opciones</th>
+            <th style="width: 120px">Opciones</th>
         </tr>
     </thead>
     <tbody>
@@ -45,6 +45,7 @@ if($presupuestos){
             echo '<a href="editar-presupuesto-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
+            echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
             echo '</td>';
 
             echo "</tr>";
@@ -113,6 +114,20 @@ if($presupuestos){
     </div>
 </div>
 
+<div class="modal fade" id="modalPdfPresu" tabindex="-1" aria-labelledby="modalPdfPresuLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h1 class="modal-title fs-5" id="tituloModal">Presupuesto PDF</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" id="pdf_div">
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 $(".eliminar").on('click', function(e){
     e.preventDefault();
@@ -144,5 +159,15 @@ $(".detalle").on('click', function(e){
     }, function(data){
         $('#detalle_presu').html(data);
     });
+});
+
+$('.pdf').click(function(e) {
+    e.preventDefault();
+    let id = $(this).data('id');
+    $("#modalPdfPresu").modal('show');
+    
+    var iframe = $('<iframe width="100%" height="600px">');
+    iframe.attr('src','pdf-presupuesto-'+id);
+    $('#pdf_div').html(iframe);
 });
 </script>
