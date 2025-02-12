@@ -6,7 +6,15 @@ use CodeIgniter\Model;
 class PresupuestoModel extends Model{
 
     public function nroPresupuesto(){
-        $query = " select concat( LPAD(count(idpresupuesto) + 1, 4, '0'),'-',YEAR(now()) ) as nro from presupuesto where YEAR(pre_fechareg) = YEAR(now()) order by idpresupuesto desc ";
+        $query = "select 
+        concat( 
+            LPAD(
+                case when convert(substring(max(pre_numero),1,4),DECIMAL) is NULL then 0 else convert(substring(max(pre_numero),1,4),DECIMAL) end + 1
+                , 4, '0'
+            ), '-',YEAR(now())
+        ) as nro
+        from presupuesto 
+        where substring(pre_numero,6,4) = YEAR(now())";
         $st = $this->db->query($query);
 
         return $st->getRowArray();
@@ -101,5 +109,20 @@ class PresupuestoModel extends Model{
         return $st;
     }
     
+    //VERIFICAR SI TIENE REGISTRO EN TABLAS(guia,detalle_factura) el presupuesto A ELIMINAR
+    public function verificarPresuTieneRegEnTablas($idpresu, $tabla){
+        $query = "select count(idpresupuesto) as total from $tabla where idpresupuesto=?";
+        $st = $this->db->query($query, [$idpresu]);
+
+        return $st->getRowArray();
+    }
+
+    public function eliminarPresupuesto($idpresu){
+        $query = "delete from presupuesto where idpresupuesto=?";
+
+        $st = $this->db->query($query, [$idpresu]);
+
+        return $st;
+    }
 
 }

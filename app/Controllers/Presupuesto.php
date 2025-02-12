@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ParametrosModel;
 use CodeIgniter\Model;
-use Fpdf\Fpdf;
+use Dompdf\Dompdf;
 
 class Presupuesto extends BaseController
 {
@@ -262,9 +262,7 @@ class Presupuesto extends BaseController
                     }
                 }
 
-            }
-
-            
+            }          
             
             /* echo "<pre>";
             print_r($_POST);
@@ -275,164 +273,72 @@ class Presupuesto extends BaseController
     }
 
 
-    public function pdfPresu($idpresu){     
-        $pdf = new PDF();
-        $pdf->AliasNbPages();
-        $pdf->AddPage();
-        $pdf->SetAutoPageBreak(true, 20);
-        $pdf->SetTopMargin(15);
-        $pdf->SetLeftMargin(15);
-        $pdf->SetRightMargin(10);
+    public function pdfPresu($id){
+        $options = new \Dompdf\Options();
+        $options->setIsRemoteEnabled(true);
+        $dompdf = new \Dompdf\Dompdf($options);
 
-        $presu = $this->modeloPresupuesto->getPresupuesto($idpresu);
-        $prenum     = $presu['pre_numero'];
-        $prefecha   = $presu['pre_fechareg'];
-        $periodo    = $presu['pre_periodo'];
-        $nperiodo   = $presu['pre_periodonro'];
-        $porcprecio = $presu['pre_porcenprecio'];
-        $porcsem    = $presu['pre_porcsem'];
-        $piezas     = $presu['pre_piezas'];
+        $data['params'] = $this->modeloParametros->getParametros();
+        $data['presu'] = $this->modeloPresupuesto->getPresupuesto($id);
+        $data['detalle'] = $this->modeloPresupuesto->getDetallePresupuesto($id);
 
-        $cliente    = $presu['cli_nombrerazon'];
-        $dniruc     = $presu['cli_dniruc'];
-        $nomcontact = $presu['cli_nombrecontact'];
-        $corcontact = $presu['cli_correocontact'];
-        $telcontact = $presu['cli_telefcontact'];
+        $dompdf->loadHtml(view('sistema/presupuestos/pdf', $data));
 
-        $nomusuario = $presu['usu_nombres']." ".$presu['usu_apellidos'];
-        $dniusu     = $presu['usu_dni'];
+        // (Optional) Setup the paper size and orientation
+        $dompdf->setPaper('A4', 'portrait');
 
-        $peri = '';
-        if( $periodo == 'd' ) $peri = 'Día';
-        if( $periodo == 's' ) $peri = 'Semana';
-        if( $periodo == 'm' ) $peri = 'Mes';
+        // Render the HTML as PDF
+        $dompdf->render();
 
-        $detalle = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
-        //print_r($presu);exit;
-
-        $pdf->setY(40);$pdf->setX(135);
-            $pdf->Ln();
-        //CABECERAS
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Cliente:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(80, 5, utf8_decode($cliente),0,0,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Vendedor:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0, 5, utf8_decode($nomusuario),0,1,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Dni/Ruc:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(80, 5, utf8_decode($dniruc),0,0,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Dni:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0, 5, utf8_decode($dniusu),0,1,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Contacto:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(80, 5, utf8_decode($nomcontact),0,0,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Fecha:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(80, 5, date('d/m/Y',strtotime($prefecha)),0,1,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Correo:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0, 5, utf8_decode($corcontact),0,1,'L',0);
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(20, 5, utf8_decode('Teléfono:'),0,0,'L',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0, 5, utf8_decode($telcontact),0,1,'L',0);
-
-        $pdf->Ln();
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0, 5, utf8_decode('Estimado Cliente, le hacemos llegar el siguiente presupuesto.'),0,1,'L',0);
-
-        $pdf->SetFont('Arial','B',10);
-        $pdf->Cell(10, 7, utf8_decode('Item'),1,0,'L',0);
-        $pdf->Cell(90, 7, utf8_decode('Descripción'),1,0,'C',0);
-        $pdf->Cell(16, 7, utf8_decode($peri),1,0,'C',0);
-        $pdf->Cell(12, 7, utf8_decode('Cant.'),1,0,'C',0);
-        $pdf->Cell(25, 7, utf8_decode('Precio Unit.'),1,0,'C',0);
-        $pdf->Cell(0, 7, utf8_decode('Precio Total'),1,1,'C',0);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(10, 7, utf8_decode('Item'),1,0,'L',0);
-        $pdf->MultiCell(90, 8, utf8_decode('Estimado Cliente, le hacemos llegar el siguiente presupuesto.'),1,'T');
-        $pdf->Cell(16, 7, utf8_decode($peri),1,0,'C',0);
-        $pdf->Cell(12, 7, utf8_decode('Cant.'),1,0,'C',0);
-        $pdf->Cell(25, 7, utf8_decode('Precio Unit.'),1,0,'C',0);
-        $pdf->Cell(0, 7, utf8_decode('Precio Total'),1,0,'C',0);
-        
-
-        $pdf->Ln();
-
-
-
-        //// Apartir de aqui esta la tabla con los subtotales y totales
-
-        $pdf->Ln(10);
-
-                $pdf->setX(95);
-                $pdf->Cell(40,6,'Subtotal',1,0);
-                $pdf->Cell(60,6,'4000','1',1,'R');
-                $pdf->setX(95);
-                $pdf->Cell(40,6,'Descuento',1,0);
-                $pdf->Cell(60,6,'4000','1',1,'R');
-                $pdf->setX(95);
-                $pdf->Cell(40,6,'Impuesto',1,0);
-                $pdf->Cell(60,6,'4000','1',1,'R');
-                $pdf->setX(95);
-                $pdf->Cell(40,6,'Total',1,0);
-                $pdf->Cell(60,6,'4000','1',1,'R');
-        
-
-
-
-        $pdf->Output();
-        exit();
+        // Output the generated PDF to Browser
+        $dompdf->stream("presupuesto.pdf", array("Attachment" => false));
+        //exit();
     }
 
+    public function eliminarPresu(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
 
-}
+            $idpresu = $this->request->getVar('id');
 
+            $eliminar = FALSE;
+            $mensaje = "";
 
-class PDF extends Fpdf{
+            $tablas = ['guia','detalle_factura'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloPresupuesto->verificarPresuTieneRegEnTablas($idpresu,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>El presupuesto tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            }
 
-    function Header()
-    {
-
-        $this->setY(18);
-        $this->setX(10);
-        
-        $params = model('ParametrosModel')->getParametros();
-        $logo   = $params['par_logo'];
-        $direc  = $params['par_direcc'];
-        $telef  = $params['par_telef'];
-        $correo = $params['par_correo'];
-
-        $this->Image('public/images/logo/'.$logo,10,5,50);
-        
-        $this->SetFont('Arial', 'B', 16); 
-        $this->Text(78, 15, utf8_decode('ANDAMIOS ANDAR'));
-
-        $this->SetFont('Arial', '', 10);
-        $this->Text(60, 21, utf8_decode($direc));
-        $this->Text(86,26, utf8_decode('Celular: '. $telef));
-        $this->Text(72,31, utf8_decode('Correo: '.$correo));   
-                
-        $this->Ln(20);
-    }
-
-    function Footer()
-    {
-        $this->SetFont('helvetica', 'B', 8);
-        $this->SetY(-15);
-        $this->Cell(95,5,utf8_decode('Página ').$this->PageNo().' / {nb}',0,0,'L');
-        /* $this->Cell(95,5,date('d/m/Y | g:i:a') ,00,1,'R');
-        $this->Line(10,287,200,287);
-        $this->Cell(0,5,utf8_decode("© Todos los derechos reservados."),0,0,"C"); */
+            if( $eliminar ){
+                echo '<script>
+                    Swal.fire({
+                        title: "El presupuesto no puede ser eliminado",
+                        html: "'.$mensaje.'",
+                        icon: "warning",
+                    });
+                </script>';
+                exit();
+            }
             
+            if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpresu) ){
+                if( $this->modeloPresupuesto->eliminarPresupuesto($idpresu) ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Presupuesto eliminado",
+                            text: "",
+                            icon: "success",
+                            showConfirmButton: true,
+                        });
+                        listarPresupuestos(1);
+                    </script>';
+                }
+            }
+        }
     }
+
+
 }

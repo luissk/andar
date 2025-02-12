@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-02-2025 a las 01:34:06
+-- Tiempo de generación: 12-02-2025 a las 01:24:25
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -50,6 +50,17 @@ INSERT INTO `cliente` (`idcliente`, `cli_dniruc`, `cli_nombrerazon`, `cli_nombre
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `detalle_factura`
+--
+
+CREATE TABLE `detalle_factura` (
+  `idpresupuesto` int(10) UNSIGNED NOT NULL,
+  `idfactura` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `detalle_presupuesto`
 --
 
@@ -65,16 +76,13 @@ CREATE TABLE `detalle_presupuesto` (
 --
 
 INSERT INTO `detalle_presupuesto` (`idpresupuesto`, `idtorre`, `dp_cant`, `dp_precio`) VALUES
-(3, 2, 2, '1147.04'),
-(3, 5, 3, '16639.13'),
-(4, 2, 1, '153.29'),
-(4, 6, 2, '1092.66'),
-(5, 2, 1, '1094.90'),
-(5, 5, 1, '10588.54'),
-(6, 2, 2, '3786.47'),
-(8, 2, 1, '300.73'),
-(9, 2, 1, '1063.62'),
-(10, 2, 2, '1074.04');
+(1, 5, 2, '5452.64'),
+(1, 6, 3, '6008.64'),
+(2, 2, 3, '736.74'),
+(2, 5, 2, '860.48'),
+(2, 6, 1, '316.07'),
+(3, 2, 4, '16914.96'),
+(3, 5, 2, '14816.95');
 
 -- --------------------------------------------------------
 
@@ -93,16 +101,17 @@ CREATE TABLE `detalle_torre` (
 --
 
 INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
-(2, 66, 5),
-(2, 114, 7),
-(5, 10, 20),
-(5, 37, 15),
-(5, 84, 21),
-(5, 90, 10),
-(5, 111, 28),
-(6, 74, 14),
-(6, 88, 8),
-(6, 90, 6);
+(2, 6, 5),
+(2, 66, 3),
+(2, 114, 2),
+(5, 10, 5),
+(5, 37, 4),
+(5, 84, 3),
+(5, 90, 6),
+(5, 111, 8),
+(6, 74, 7),
+(6, 88, 5),
+(6, 90, 4);
 
 -- --------------------------------------------------------
 
@@ -114,7 +123,6 @@ CREATE TABLE `factura` (
   `idfactura` int(10) UNSIGNED NOT NULL,
   `fact_nro` varchar(20) NOT NULL,
   `fact_fecha` datetime NOT NULL,
-  `idpresupuesto` int(10) UNSIGNED NOT NULL,
   `idusuario2` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
@@ -327,13 +335,9 @@ CREATE TABLE `presupuesto` (
 --
 
 INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_status`) VALUES
-(3, '0001-2025', '2025-02-08 17:17:08', NULL, 1, 2, 10, 12, 's', 4, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"20\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"15\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"21\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"10\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"28\",\"piepre\":\"67.14\"}]', 1),
-(4, '0002-2025', '2025-02-08 17:17:54', NULL, 1, 1, 5, 12, 'd', 5, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"14\",\"piepre\":\"95.41\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"8\",\"piepre\":\"24.98\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\"}]', 1),
-(5, '0003-2025', '2025-02-08 18:23:09', NULL, 1, 3, 5, 12, 'm', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"20\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"15\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"21\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"10\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"28\",\"piepre\":\"67.14\"}]', 1),
-(6, '0004-2025', '2025-02-08 20:59:35', NULL, 1, 2, 2, 12, 's', 14, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
-(8, '0005-2025', '2025-02-08 21:04:36', NULL, 1, 1, 3, 12, 's', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
-(9, '0006-2025', '2025-02-08 21:26:32', NULL, 1, 1, 2, 12, 'm', 2, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1),
-(10, '0007-2025', '2025-02-08 21:27:35', NULL, 1, 1, 3, 12, 's', 4, '[{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"5\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"7\",\"piepre\":\"16.49\"}]', 1);
+(1, '0001-2025', '2025-02-11 19:20:51', NULL, 1, 3, 8, 12, 's', 7, '[{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\"}]', 1),
+(2, '0002-2025', '2025-02-11 19:22:32', NULL, 1, 1, 12, 12, 'd', 4, '[{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\"},{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\"}]', 1),
+(3, '0003-2025', '2025-02-11 19:23:00', NULL, 1, 2, 8, 12, 'm', 5, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\"}]', 1);
 
 -- --------------------------------------------------------
 
@@ -445,6 +449,14 @@ ALTER TABLE `cliente`
   ADD PRIMARY KEY (`idcliente`);
 
 --
+-- Indices de la tabla `detalle_factura`
+--
+ALTER TABLE `detalle_factura`
+  ADD PRIMARY KEY (`idpresupuesto`,`idfactura`),
+  ADD KEY `fk_presupuesto_has_factura_factura1_idx` (`idfactura`),
+  ADD KEY `fk_presupuesto_has_factura_presupuesto1_idx` (`idpresupuesto`);
+
+--
 -- Indices de la tabla `detalle_presupuesto`
 --
 ALTER TABLE `detalle_presupuesto`
@@ -464,8 +476,7 @@ ALTER TABLE `detalle_torre`
 -- Indices de la tabla `factura`
 --
 ALTER TABLE `factura`
-  ADD PRIMARY KEY (`idfactura`),
-  ADD KEY `fk_factura_presupuesto1_idx` (`idpresupuesto`);
+  ADD PRIMARY KEY (`idfactura`);
 
 --
 -- Indices de la tabla `guia`
@@ -559,7 +570,7 @@ ALTER TABLE `pieza`
 -- AUTO_INCREMENT de la tabla `presupuesto`
 --
 ALTER TABLE `presupuesto`
-  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tipousuario`
@@ -590,6 +601,13 @@ ALTER TABLE `usuario`
 --
 
 --
+-- Filtros para la tabla `detalle_factura`
+--
+ALTER TABLE `detalle_factura`
+  ADD CONSTRAINT `fk_presupuesto_has_factura_factura1` FOREIGN KEY (`idfactura`) REFERENCES `factura` (`idfactura`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_presupuesto_has_factura_presupuesto1` FOREIGN KEY (`idpresupuesto`) REFERENCES `presupuesto` (`idpresupuesto`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
 -- Filtros para la tabla `detalle_presupuesto`
 --
 ALTER TABLE `detalle_presupuesto`
@@ -602,12 +620,6 @@ ALTER TABLE `detalle_presupuesto`
 ALTER TABLE `detalle_torre`
   ADD CONSTRAINT `fk_torre_has_pieza_pieza1` FOREIGN KEY (`idpieza`) REFERENCES `pieza` (`idpieza`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_torre_has_pieza_torre1` FOREIGN KEY (`idtorre`) REFERENCES `torre` (`idtorre`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Filtros para la tabla `factura`
---
-ALTER TABLE `factura`
-  ADD CONSTRAINT `fk_factura_presupuesto1` FOREIGN KEY (`idpresupuesto`) REFERENCES `presupuesto` (`idpresupuesto`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `guia`

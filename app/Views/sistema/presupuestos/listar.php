@@ -115,7 +115,7 @@ if($presupuestos){
 </div>
 
 <div class="modal fade" id="modalPdfPresu" tabindex="-1" aria-labelledby="modalPdfPresuLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <h1 class="modal-title fs-5" id="tituloModal">Presupuesto PDF</h1>
@@ -166,8 +166,29 @@ $('.pdf').click(function(e) {
     let id = $(this).data('id');
     $("#modalPdfPresu").modal('show');
     
-    var iframe = $('<iframe width="100%" height="600px">');
+    var iframe = $('<iframe width="100%" height="100%">');
     iframe.attr('src','pdf-presupuesto-'+id);
     $('#pdf_div').html(iframe);
+});
+
+$(".eliminar").on('click', function(e){
+    e.preventDefault();
+    let id = $(this).data('id');
+    
+    Swal.fire({
+        title: "¿Vas a eliminar el presupuesto?",
+        showCancelButton: true,
+        confirmButtonText: "Confirmar",
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('eliminar-presupuesto', {
+                id
+            }, function(data){
+                //console.log(data);
+                $('#msjLista').html(data);
+            });
+        }
+    });
 });
 </script>

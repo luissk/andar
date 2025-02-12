@@ -55,3 +55,4 @@ $routes->post('detalle-presu-modal', 'Presupuesto::modalDetallePresu');
 
 $routes->get('editar-presupuesto-(:num)', 'Presupuesto::nuevoPresupuesto/$1');
 $routes->get('pdf-presupuesto-(:num)', 'Presupuesto::pdfPresu/$1');
+$routes->post('eliminar-presupuesto', 'Presupuesto::eliminarPresu');
