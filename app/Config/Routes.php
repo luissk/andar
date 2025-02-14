@@ -52,7 +52,12 @@ $routes->get('clientes-select-ajax', 'Presupuesto::listarClientesAjaxSelect2');
 $routes->get('torres-select-ajax', 'Presupuesto::listarTorresAjaxSelect2');
 $routes->post('registro-presu', 'Presupuesto::registrarPresupuesto');
 $routes->post('detalle-presu-modal', 'Presupuesto::modalDetallePresu');
-
 $routes->get('editar-presupuesto-(:num)', 'Presupuesto::nuevoPresupuesto/$1');
 $routes->get('pdf-presupuesto-(:num)', 'Presupuesto::pdfPresu/$1');
 $routes->post('eliminar-presupuesto', 'Presupuesto::eliminarPresu');
+
+$routes->get('guias', 'Guia::index');
+$routes->post('listar-guias', 'Guia::listarGuias');
+$routes->post('listar-presu', 'Guia::listarPresu');
+$routes->get('nueva-guia-(:any)-(:num)', 'Guia::nuevaGuia/$1/$2');
+$routes->get('editar-guia-(:any)-(:num)', 'Guia::nuevaGuia/$1/$2');

@@ -195,19 +195,19 @@ if(!session('idusuario')){
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($guiaLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('guias')?>" class="nav-link ps-4 <?php echo isset($guiaLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-file"></i>
                                         <p>Guía de Remisión</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($factLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('facturas')?>" class="nav-link ps-4 <?php echo isset($factLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-book"></i>
                                         <p>Facturación</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="./" class="nav-link ps-4 <?php echo isset($devolLinkActive) ? 'active': ''?>">
+                                    <a href="<?=base_url('devoluciones')?>" class="nav-link ps-4 <?php echo isset($devolLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-right-left"></i>
                                         <p>Devolución</p>
                                     </a>

@@ -45,7 +45,7 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function getPresupuestos($desde, $hasta, $cri = ''){
+    public function getPresupuestos($desde, $hasta, $cri = '', $status = [1,2,3]){//1->activo, 2->con guía, 3->entregado,4->devuelto
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,
@@ -54,10 +54,10 @@ class PresupuestoModel extends Model{
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
         inner join usuario usu on pre.idusuario2=usu.idusuario
-        where pre.idpresupuesto is not null $sql order by pre.pre_fechareg desc
+        where pre.idpresupuesto is not null and pre.pre_status in ? $sql order by pre.pre_fechareg desc
         limit ?,?";
 
-        $st = $this->db->query($query, [$desde, $hasta]);
+        $st = $this->db->query($query, [$status, $desde, $hasta]);
 
         return $st->getResultArray();
     }
@@ -76,16 +76,16 @@ class PresupuestoModel extends Model{
         return $st->getRowArray();
     }
 
-    public function getPresupuesto($idpresu){
+    public function getPresupuesto($idpresu, $status = [1,2,3]){
         $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
         inner join usuario usu on pre.idusuario2=usu.idusuario
-        where pre.idpresupuesto = ?";
+        where pre.idpresupuesto = ? and pre.pre_status in ?";
 
-        $st = $this->db->query($query, [$idpresu]);
+        $st = $this->db->query($query, [$idpresu, $status]);
 
         return $st->getRowArray();
     }
@@ -123,6 +123,37 @@ class PresupuestoModel extends Model{
         $st = $this->db->query($query, [$idpresu]);
 
         return $st;
+    }
+
+    public function getDetaPresuParaGuia($idpresu){
+        $query = "select dp.idpresupuesto,dp.dp_cant,dp.idtorre,tor.tor_desc,pie.idpieza,pie.pie_codigo,pie.pie_desc,pie.pie_cant stock_ini,
+        dt.dt_cantidad,(dp.dp_cant * dt.dt_cantidad) cant_req,
+        (
+            select ifnull(sum(dtor.dt_cantidad * dpre.dp_cant), 0)
+            from detalle_presupuesto dpre
+            inner join presupuesto pres on dpre.idpresupuesto=pres.idpresupuesto
+            inner join torre torr on dpre.idtorre=torr.idtorre
+            inner join detalle_torre dtor on torr.idtorre=dtor.idtorre
+            inner join pieza piez on dtor.idpieza=piez.idpieza 
+            where piez.idpieza=pie.idpieza and pres.pre_status in(2,3)
+        ) nro_salidas,
+        (
+            select ifnull(sum(dtor.dt_cantidad * dpre.dp_cant), 0)
+            from detalle_presupuesto dpre
+            inner join presupuesto pres on dpre.idpresupuesto=pres.idpresupuesto
+            inner join torre torr on dpre.idtorre=torr.idtorre
+            inner join detalle_torre dtor on torr.idtorre=dtor.idtorre
+            inner join pieza piez on dtor.idpieza=piez.idpieza 
+            where piez.idpieza=pie.idpieza and pres.pre_status in(4)
+        ) nro_entregados
+        from detalle_presupuesto dp
+        inner join torre tor on dp.idtorre=tor.idtorre
+        inner join detalle_torre dt on tor.idtorre=dt.idtorre
+        inner join pieza pie on dt.idpieza=pie.idpieza 
+        where dp.idpresupuesto=?";
+        $st = $this->db->query($query, [$idpresu]);
+
+        return $st->getResultArray();
     }
 
 }
