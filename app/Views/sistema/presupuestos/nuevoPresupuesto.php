@@ -10,6 +10,8 @@
 
 <?php echo $this->section('contenido');?>
 <?php
+$torreModel = model('TorreModel');
+
 if( isset($presu_bd) && $presu_bd ){
     /* echo "<pre>";
     print_r($presu_bd);
@@ -23,6 +25,7 @@ if( isset($presu_bd) && $presu_bd ){
     $porcprecio = $presu_bd['pre_porcenprecio'];
     $porcsem    = $presu_bd['pre_porcsem'];
     $idcliente  = $presu_bd['idcliente'];
+    $verP       = $presu_bd['pre_verpiezas'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -42,6 +45,13 @@ if( isset($presu_bd) && $presu_bd ){
             }
         }
         //echo $to;
+
+        $dt_torre   = $torreModel->getDetalleTorre($d['idtorre']);
+        $arrDT = [];
+        foreach( $dt_torre as $dtt ){
+            array_push($arrDT,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total']]);
+        }
+
         $item = array(
             'id'     => $d['idtorre'],
             'text'   => $d['tor_desc'],
@@ -49,6 +59,7 @@ if( isset($presu_bd) && $presu_bd ){
             'total'  => $to,
             'monto'  => $d['dp_precio'] / $d['dp_cant'],
             'tmonto' => $d['dp_precio'],
+            'piezas' => $arrDT,
         );
         array_push($items, $item);
     }
@@ -64,6 +75,7 @@ if( isset($presu_bd) && $presu_bd ){
     $porcprecio = "";
     $porcsem    = "";
     $idcliente  = "";
+    $verP       = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -139,8 +151,16 @@ if( isset($presu_bd) && $presu_bd ){
                                         $idtor     = $tor['idtorre'];
                                         $tor_desc  = $tor['tor_desc'];
                                         $tor_total = $tor['total'];
+                                        
+                                        $dt_torre   = $torreModel->getDetalleTorre($idtor);
 
-                                        echo "<option value='$idtor' data-total='$tor_total'>$tor_desc</option>";
+                                        $arr = [];
+                                        foreach( $dt_torre as $dtt ){
+                                            array_push($arr,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total']]);
+                                        }
+                                        $arr = json_encode($arr);
+
+                                        echo "<option value='$idtor' data-total='$tor_total' data-pie='$arr'>$tor_desc</option>";
                                     }
                                     ?>
                                 </select>
@@ -154,6 +174,10 @@ if( isset($presu_bd) && $presu_bd ){
                             <div class="col-sm-2 mt-2 d-flex align-items-center">
                                 <input type="hidden" id="porcsem" name="porcsem" value="<?=$param['par_porcensem']?>">
                                 <a class="btn btn-outline-secondary btn-sm" id="btnAdd">Agregar</a>
+                            </div>
+
+                            <div class="col-sm-3 mt-2 d-flex align-items-center">
+                                <input name="verP" id="verP" type="checkbox" onclick="$('#tbl_deta .piezasOcultas').toggle()" <?=$verP == 1 ? 'checked': ''?> />&nbsp;Ver piezas de la torre
                             </div>
                         </div>
 
@@ -221,7 +245,7 @@ function dibujaFilas(){
         cont++;
         filahtml += `
             <tr>
-            <td id="${i.id}">
+            <td id="${i.id}" style='font-weight:600'>
                 ${cont}
             </td>
             <td>${i.text}</td>
@@ -231,6 +255,21 @@ function dibujaFilas(){
             <td class='text-center'><a onclick="eliminarItem(${i.id})"><i class='fas fa-trash-alt'></i></a></td>
             </tr>
         `;
+        cont2 = 0;
+        for(let j of i.piezas){
+            cont2++;
+            const isChecked = $("#verP").is(":checked") ? '' : 'none';
+            filahtml += `
+            <tr style='color:#666; font-size:15px; display:${isChecked}' id='piezas${i.id}' class='piezasOcultas'>
+                <td>${cont}.${cont2}</td>
+                <td>${j[0]}</td>                
+                <td>${j[2]}</td>
+                <td>${j[4].toFixed(2)}</td>
+                <td>${(i.cant * j[4]).toFixed(2)}</td>
+                <td></td>
+            </tr>
+            `;
+        }
     }
     fila.innerHTML = filahtml;    
 }
@@ -243,12 +282,22 @@ function eliminarItem(id){
     calcular();
 }
 
-function calcular(){
+function calcularEnPrecioPiezas(callback){
+    for( let i of items ){
+        //console.log(i.text)
+        for(let j of i.piezas){
+            let totalPrecioPiezaTorre = j[3];//del detalle de torre(cant piezas para torre * precio de pieza)
+            callback(j, totalPrecioPiezaTorre);
+        }
+    }
+}
+
+function calcular(){//calcularEnPrecioPiezas();
     let periodo    = $("#periodo").val();
     let nroperiodo = $("#nroperiodo").val();
     let porcsem    = $("#porcsem").val();
     let porcpre    = $("#porcpre").val();
-    let suma       = 0;
+    //let suma       = 0;
     
     let p_pre = (1 + porcpre/100),
         p_sem = (1 + porcsem/100);
@@ -259,20 +308,26 @@ function calcular(){
         let pre_cant = i.total * i.cant;
 
         if( periodo == 'd' && nroperiodo <= 6 ){
-            suma += pre_cant / 4 * p_pre * p_sem;
+            //suma += pre_cant / 4 * p_pre * p_sem;
             monto  = (pre_cant / 4 * p_pre * p_sem) / i.cant;//para items
             tmonto = pre_cant / 4 * p_pre * p_sem;//para items
+
+            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * p_pre * p_sem });
         }else if( periodo == 's' ){
             if( nroperiodo < 4 ){
-                suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
+                //suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
                 monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem) / i.cant;//para items
                 tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem;//para items
+
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * nroperiodo * p_pre * p_sem });
             }
             if( nroperiodo % 4 == 0 ){//es mes
                 let nromes = nroperiodo / 4;
-                suma += pre_cant * nromes * p_pre;
+                //suma += pre_cant * nromes * p_pre;
                 monto  = (pre_cant * nromes * p_pre) / i.cant;//para items
                 tmonto = pre_cant * nromes * p_pre;//para items
+
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nromes * p_pre });
             }
             if( nroperiodo > 4 && nroperiodo % 4 != 0 ){
                 let res = nroperiodo / 4;
@@ -280,14 +335,18 @@ function calcular(){
                 let dec = res - mes;
                 let sem = 4 * dec;
 
-                suma += (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);
+                //suma += (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);
                 monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem)) / i.cant;//para items
                 tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);//para items
+
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem) });
             }
         }else if( periodo == 'm' ){
-            suma += pre_cant * nroperiodo * p_pre;
+            //suma += pre_cant * nroperiodo * p_pre;
             monto  = (pre_cant * nroperiodo * p_pre) / i.cant;//para items
             tmonto = pre_cant * nroperiodo * p_pre;//para items
+
+            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nroperiodo * p_pre });
         }
 
         let indice = items.findIndex(x => x.id == i.id);
@@ -371,7 +430,8 @@ $(function(){
         let id = $("#torre").val(),
             text = $("#torre option:selected").text(),
             cant = $("#cantidad").val(),
-            total = $("#torre option:selected").data('total');
+            total = $("#torre option:selected").data('total'),
+            piezas = $("#torre option:selected").data('pie');
         
         let men = '';
         if( $("#porcpre").val().trim() == '' ) men = 'Ingrese un porcentaje de precio';
@@ -392,7 +452,8 @@ $(function(){
             cant,
             total,
             monto:1,
-            tmonto:1
+            tmonto:1,
+            piezas
         }
 
         let existe = items.find(x => x.id === id);
