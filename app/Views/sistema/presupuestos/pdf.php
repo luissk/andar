@@ -11,6 +11,7 @@ $nperiodo   = $presu['pre_periodonro'];
 $porcprecio = $presu['pre_porcenprecio'];
 $porcsem    = $presu['pre_porcsem'];
 $piezas     = $presu['pre_piezas'];
+$verPiezas  = $presu['pre_verpiezas'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -88,6 +89,9 @@ if( $periodo == 'm' ) $peri = 'Mes';
     #table_items tr td.price{
         text-align: right;
     }
+    #table_items tr.piezas td{
+        color: #666;
+    }
     #table_items tfoot.pie_price tr th{
         padding: 3px 2px;
     }
@@ -122,7 +126,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
         </table>
     </footer>
 
-    <div style="">
+    <div>
         <table cellspacing="0" style=" font-size: 13px" width="100%">
             <tr>
                 <td width="50%">
@@ -191,6 +195,10 @@ if( $periodo == 'm' ) $peri = 'Mes';
             </thead>
             <tbody>
                 <?php
+                $piezaModel = model('PiezaModel');
+
+                $piezas     = json_decode($piezas, true);
+
                 $c = 0;
                 $sum = 0;
                 foreach($detalle as $d){
@@ -206,6 +214,25 @@ if( $periodo == 'm' ) $peri = 'Mes';
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'],2,".",",")."</td>";
 
                     echo "</tr>";
+
+                    if( $verPiezas == 1 ){
+                        $piezasFilter = array_filter($piezas, fn($p) => $p['idtor'] == $d['idtorre']);
+                        $c2 = 0;
+                        foreach( $piezasFilter as $pi ){
+                            $c2++;
+                            $pieza_bd = $piezaModel->getPieza($pi['idpie']);//solo para sacar los nombres de las piezas, porque los precios de las piezas se obtienen del presupuesto guardado, ya que con esos precios se grabaron
+                            $preciop = $pi['piepre'] * $pi['dtcan'];
+
+                            echo "<tr class='piezas'>";
+                            echo "<td>$c.$c2</td>";
+                            echo "<td>".$pieza_bd['pie_desc']."</td>";
+                            echo "<td></td>";
+                            echo "<td>".$pi['dtcan']."</td>";
+                            echo "<td class='price'>S/. ".number_format(help_calcularPresu($preciop,$periodo,$nperiodo,$porcprecio,$porcsem),2,".","")."</td>";
+                            echo "<td class='price'>S/. ".number_format(help_calcularPresu($preciop,$periodo,$nperiodo,$porcprecio,$porcsem) * $d['dp_cant'],2,".","")."</td>";
+                            echo "</tr>";
+                        }                                    
+                    }
                 }
                 ?>
             </tbody>
