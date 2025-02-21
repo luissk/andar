@@ -206,6 +206,7 @@ class Presupuesto extends BaseController
                         'idpie'  => $dtT['idpieza'],
                         'dtcan'  => $dtT['dt_cantidad'],
                         'piepre' => $dtT['pie_precio'],
+                        'dpcant' => $cant
                     ];
                     array_push($arrDT, $a);
                 }            

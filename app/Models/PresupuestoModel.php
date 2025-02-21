@@ -45,38 +45,42 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function getPresupuestos($desde, $hasta, $cri = '', $status = [1,2,3]){//1->activo, 2->con guía, 3->entregado,4->devuelto
+    public function getPresupuestos($desde = '', $hasta = '', $cri = '', $status = [1,2,3,4]){//1->activo, 2->con guía, 3->entregado,4->devuelto
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_verpiezas,
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
         inner join usuario usu on pre.idusuario2=usu.idusuario
-        where pre.idpresupuesto is not null and pre.pre_status in ? $sql order by pre.pre_fechareg desc
-        limit ?,?";
+        where pre.idpresupuesto is not null and pre.pre_status in ? $sql order by pre.pre_fechareg desc";
 
-        $st = $this->db->query($query, [$status, $desde, $hasta]);
+        if( $desde != '' && $hasta != ''){
+            $query .= " limit ?,?";
+            $st = $this->db->query($query, [$status, $desde, $hasta]);
+        }else{
+            $st = $this->db->query($query, [$status]);
+        }
 
         return $st->getResultArray();
     }
 
-    public function getPresupuestosCount($cri = ''){
+    public function getPresupuestosCount($cri = '', $status = [1,2,3,4]){
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select count(pre.idpresupuesto) as total
         from presupuesto pre 
         inner join cliente cli on pre.idcliente=cli.idcliente
         inner join usuario usu on pre.idusuario2=usu.idusuario
-        where pre.idpresupuesto is not null $sql";
+        where pre.idpresupuesto is not null and pre.pre_status in ? $sql";
 
-        $st = $this->db->query($query);
+        $st = $this->db->query($query,[$status]);
 
         return $st->getRowArray();
     }
 
-    public function getPresupuesto($idpresu, $status = [1,2,3]){
+    public function getPresupuesto($idpresu, $status = [1,2,3,4]){
         $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
@@ -125,7 +129,7 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function getDetaPresuParaGuia($idpresu){
+    /* public function getDetaPresuParaGuia($idpresu){
         $query = "select dp.idpresupuesto,dp.dp_cant,dp.idtorre,tor.tor_desc,pie.idpieza,pie.pie_codigo,pie.pie_desc,pie.pie_cant stock_ini,
         dt.dt_cantidad,(dp.dp_cant * dt.dt_cantidad) cant_req,
         (
@@ -154,6 +158,37 @@ class PresupuestoModel extends Model{
         $st = $this->db->query($query, [$idpresu]);
 
         return $st->getResultArray();
+    } */
+
+    public function getDetaPresuParaGuia($idpresu){
+        $query = "select dp.idpresupuesto,dp.dp_cant,dp.idtorre,tor.tor_desc,pie.idpieza,pie.pie_codigo,pie.pie_desc,pie.pie_cant stock_ini,
+        dt.dt_cantidad,(dp.dp_cant * dt.dt_cantidad) cant_req
+        from detalle_presupuesto dp
+        inner join torre tor on dp.idtorre=tor.idtorre
+        inner join detalle_torre dt on tor.idtorre=dt.idtorre
+        inner join pieza pie on dt.idpieza=pie.idpieza 
+        where dp.idpresupuesto=?";
+        $st = $this->db->query($query, [$idpresu]);
+
+        return $st->getResultArray();
+    }
+
+    public function getStockPieza($idpieza, $status = [1,2,3,4]){
+        //extraer de los presupuesto las piezas
+        $presus = $this->getPresupuestos('','','',$status);
+        $suma = 0;
+        foreach( $presus as $pre ){
+            $piezas  = json_decode($pre['pre_piezas'], true);
+
+            foreach( $piezas as $pi ){
+                if( $pi['idpie'] == $idpieza ){
+                    $suma += $pi['dtcan'] * $pi['dpcant'];
+                }
+            }
+
+        }
+
+        return $suma;
     }
 
 }
