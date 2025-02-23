@@ -16,6 +16,7 @@ class Guia extends BaseController
     protected $modeloPresupuesto;
     protected $modeloGuia;
     protected $modeloTransportista;
+    protected $modeloUbigeo;
     protected $helpers = ['funciones'];
 
     public function __construct(){
@@ -27,6 +28,7 @@ class Guia extends BaseController
         $this->modeloPresupuesto   = model('PresupuestoModel');
         $this->modeloGuia          = model('GuiaModel');
         $this->modeloTransportista = model('TransportistaModel');
+        $this->modeloUbigeo = model('UbigeoModel');
         $this->session;
     }
 
@@ -87,9 +89,7 @@ class Guia extends BaseController
         
         $data['guiaLinkActive'] = 1;
 
-       /*  $data['clientesCbo'] = $this->modeloCliente->getClientesCbo();//para llebar combobox
-        $data['torresCbo']   = $this->modeloTorre->getTorresCbo();//para llebar combobox
-        $data['param']       = $this->modeloParametros->getParametros(); */
+        $data['departamentos'] = $this->modeloUbigeo->listarDepartamentos();
 
         return view('sistema/guias/nuevaGuia', $data);
     }
@@ -110,6 +110,65 @@ class Guia extends BaseController
         }
     }
 
+    public function listarProvincias(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
 
+            $iddepa = $this->request->getVar('iddepa');
+
+            $provincias = $this->modeloUbigeo->listarProvincias($iddepa);
+            if( $provincias ){
+                echo "<option value=''>Seleccione</option>";
+                foreach( $provincias as $prov ){
+                    $idprov    = $prov['idprov'];
+                    $provincia = $prov['provincias'];
+    
+                    echo "<option value=$idprov>$provincia</option>";
+                }
+            }else{
+                echo "<option value=''>Seleccione</option>";
+            }
+            
+        }
+    }
+
+    public function listarDistritos(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            $iddepa = $this->request->getVar('iddepa');
+            $idprov = $this->request->getVar('idprov');
+
+            $distritos = $this->modeloUbigeo->listarDistritos($idprov,$iddepa);
+            if( $distritos ){
+                echo "<option value=''>Seleccione</option>";
+                foreach( $distritos as $prov ){
+                    $iddist   = $prov['iddist'];
+                    $distrito = $prov['dist'];
+    
+                    echo "<option value=$iddist>$distrito</option>";
+                }
+            }else{
+                echo "<option value=''>Seleccione</option>";
+            }
+            
+        }
+    }
+
+    public function generarGuia(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            echo "<pre>";
+            print_r($_POST);
+            echo "</pre>";
+        }
+    }
 
 }
