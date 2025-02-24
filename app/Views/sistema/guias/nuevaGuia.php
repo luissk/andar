@@ -45,6 +45,9 @@ if( isset($presu_bd) && $presu_bd ){
                             <div class="">
                                 Fecha: <b><?=date("d/m/Y h:i a", strtotime($presupuesto['pre_fechareg']))?></b>
                             </div>
+                            <div class="">
+                                Guía: <b><?=$nroGuia?></b>
+                            </div>
                         </div>
 
                         <div class="row pt-3">
@@ -79,7 +82,7 @@ if( isset($presu_bd) && $presu_bd ){
                             </div>
                             <div class="col-sm-4 mb-3">
                                 <label for="desc_trasl" class="form-label">Descripción Traslado</label>
-                                <input type="text" class="form-control" name="desc_trasl" id="desc_trasl" disabled maxlength="200">
+                                <input type="text" class="form-control" name="desc_trasl" id="desc_trasl" disabled maxlength="100">
                             </div>
                             <div class="col-sm-3 mb-3">
                                 <label for="departamentop" class="form-label">Departamento (partida)</label>
@@ -108,7 +111,7 @@ if( isset($presu_bd) && $presu_bd ){
                             </div>
                             <div class="col-sm-3 mb-3">
                                 <label for="direccionp" class="form-label">Dirección (partida)</label>
-                                <input type="text" class="form-control" name="direccionp" id="direccionp">
+                                <input type="text" class="form-control" name="direccionp" id="direccionp" maxlength="100">
                             </div>
                             <div class="col-sm-3 mb-3">
                                 <label for="departamentoll" class="form-label">Departamento (llegada)</label>
@@ -137,11 +140,11 @@ if( isset($presu_bd) && $presu_bd ){
                             </div>
                             <div class="col-sm-3 mb-3">
                                 <label for="direccionll" class="form-label">Dirección (llegada)</label>
-                                <input type="text" class="form-control" name="direccionll" id="direccionll">
+                                <input type="text" class="form-control" name="direccionll" id="direccionll" maxlength="100">
                             </div>
                             <div class="col-sm-3 mb-3">
                                 <label for="placa" class="form-label">Placa del vehículo</label>
-                                <input type="text" class="form-control" name="placa" id="placa">
+                                <input type="text" class="form-control" name="placa" id="placa" maxlength="20">
                             </div>
                         </div>
 
@@ -185,7 +188,7 @@ if( isset($presu_bd) && $presu_bd ){
                                         $cantReq       = $dg['cant_req'];                                        
                                         $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [4]);
                                         $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3]);
-                                        $stockAct      = $stockIni + $nroEntregados - $nroSalidas;
+                                        $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
                                         $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
                                         
                                         
@@ -194,7 +197,7 @@ if( isset($presu_bd) && $presu_bd ){
                                             $arr_e = array_filter($arr_existentes, fn($pie) => $pie[0] == $idpieza);
                                             $arr_e = array_values($arr_e);
                                             if( count($arr_e) > 0 ){
-                                                $stockAct = $stockAct - $arr_e[0][1];
+                                                $stockAct = ($stockAct - $arr_e[0][1]) <= 0 ? 0 : ($stockAct - $arr_e[0][1]);
                                                 $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
                                             }
 
@@ -303,16 +306,16 @@ $(function(){
         let transportista = $("#transportista").val(),
         fechatrasl     = $("#fechatrasl").val(),
         motivo         = $("#motivo").val(),
-        desc_trasl     = $("#desc_trasl").val(),
+        desc_trasl     = $("#desc_trasl").val().trim(),
         departamentop  = $("#departamentop").val(),
         provinciap     = $("#provinciap").val(),
         distritop      = $("#distritop").val(),
-        direccionp     = $("#direccionp").val(),
+        direccionp     = $("#direccionp").val().trim(),
         departamentoll = $("#departamentoll").val(),
         provinciall    = $("#provinciall").val(),
         distritoll     = $("#distritoll").val(),
-        direccionll    = $("#direccionll").val(),
-        placa = $("#placa").val(),
+        direccionll    = $("#direccionll").val().trim(),
+        placa = $("#placa").val().trim(),
         idpre = $("#idpre").val(),
         opt = $(this).data('opt');
 
@@ -333,6 +336,8 @@ $(function(){
 
         if( men != '' ){
             Swal.fire({title: men, icon: "error"});
+            $(".btnGuia").removeAttr('disabled');
+            _this.text(textBtn);
             return;
         }
 
@@ -342,7 +347,7 @@ $(function(){
         }, function(data){
             $(".btnGuia").removeAttr('disabled');
             _this.text(textBtn);
-            $("#msj").html(data);            
+            $("#msj").html(data);       
         });
 
     });

@@ -74,21 +74,28 @@ class Guia extends BaseController
 
         if( $cri == 'g' ){
             if( $guia = $this->modeloGuia->getGuia($id) ){
+                $idpresu = $guia['idpresupuesto'];
+                $data['nroGuia']      = $guia['gui_nro'];
+                $data['presupuesto'] = $this->modeloPresupuesto->getPresupuesto($idpresu);
                 
                 $data['title']    = "Editar guía | ".help_nombreWeb();
             }else{
                 return redirect()->to('/');
             }
-        }else if( $cri == 'p' ){
-            $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($id, [1]);
-            $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($id);
-            $data['title']        = "Nuevo guía | ".help_nombreWeb();
-
-            $data['transportitas'] = $this->modeloTransportista->getTransportistas(0,100);
+        }else if( $cri == 'p' ){           
+            if( $presu = $this->modeloPresupuesto->getPresupuesto($id,[1]) ){
+                $data['presupuesto']  = $presu;
+                $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($id);
+                $data['nroGuia']      = $this->modeloGuia->nroGuia()['nro'];
+                $data['title']        = "Nuevo guía | ".help_nombreWeb();  
+            }else{
+                return redirect()->to('/');
+            }
         } 
         
         $data['guiaLinkActive'] = 1;
 
+        $data['transportitas'] = $this->modeloTransportista->getTransportistas(0,100);
         $data['departamentos'] = $this->modeloUbigeo->listarDepartamentos();
 
         return view('sistema/guias/nuevaGuia', $data);
@@ -165,9 +172,86 @@ class Guia extends BaseController
                 exit();
             }
 
-            echo "<pre>";
+            /* echo "<pre>";
             print_r($_POST);
-            echo "</pre>";
+            echo "</pre>"; */
+
+            $transportista  = $this->request->getVar('transportista');
+            $fechatrasl     = $this->request->getVar('fechatrasl');
+            $motivo         = $this->request->getVar('motivo');
+            $desc_trasl     = $this->request->getVar('desc_trasl');
+            $departamentop  = $this->request->getVar('departamentop');
+            $provinciap     = $this->request->getVar('provinciap');
+            $distritop      = $this->request->getVar('distritop');
+            $direccionp     = $this->request->getVar('direccionp');
+            $departamentoll = $this->request->getVar('departamentoll');
+            $provinciall    = $this->request->getVar('provinciall');
+            $distritoll     = $this->request->getVar('distritoll');
+            $direccionll    = $this->request->getVar('direccionll');
+            $placa          = $this->request->getVar('placa');
+            $opt            = $this->request->getVar('opt');
+            $idpre          = $this->request->getVar('idpre');
+
+            $ubigeop  = $this->modeloUbigeo->getUbigeo($distritop,$provinciap,$departamentop)['idubigeo'];
+            $ubigeoll = $this->modeloUbigeo->getUbigeo($distritoll,$provinciall,$departamentoll)['idubigeo'];
+
+            //echo "$ubigeop - $ubigeoll";
+            if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){               
+
+                $piezas = json_decode($presu['pre_piezas'], true);
+                /* echo "<pre>";
+                print_r($piezas);
+                echo "</pre>"; */
+                $arr_existentes = [];//cuando hay mas de una pieza que se repite, y asi poder ir restando su stock para el sgte y tbn para modificar item en presupuesto
+                foreach( $piezas as $pi ){
+                    $pieza    = $this->modeloPieza->getPieza($pi['idpie']);
+                    $stockIni = $pieza['pie_cant'];
+                    $pie_desc = $pieza['pie_desc'];
+                    $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
+
+                    $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [4]);
+                    $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3]);
+                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
+                    $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
+
+                    $arr_e = array_filter($arr_existentes, fn($pie) => $pie['idpie'] == $pi['idpie']);
+                    $arr_e = array_values($arr_e);
+                    //print_r($arr_e);
+                    if( count($arr_e) > 0 ){
+                        $stockAct  = ($stockAct - $arr_e[0]['req']) <= 0 ? 0 : ($stockAct - $arr_e[0]['req']);
+                        $faltantes = $cantReq > $stockAct ? abs($stockAct - $cantReq): "";
+                    }
+
+                    array_push($arr_existentes, array(
+                        'idtor'  => $pi['idtor'],
+                        'idpie'  => $pi['idpie'],
+                        'dtcan'  => $pi['dtcan'],
+                        'piepre' => $pi['piepre'],
+                        'dpcant' => $pi['dpcant'],
+                        'req'    => $cantReq,
+                        'falt'   => $faltantes
+                    ));
+                }
+
+                $nroGuia = $this->modeloGuia->nroGuia()['nro'];
+
+                if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2) ){
+                    if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Guía Generada",
+                                text: "",
+                                icon: "success",
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                            });
+                            setTimeout(function(){location.href="guias"},1500)
+                        </script>';
+                    }
+                        
+                }
+
+            }
         }
     }
 

@@ -85,7 +85,7 @@ class Presupuesto extends BaseController
         }
 
         if( $id != '' ){
-            if( $presu = $this->modeloPresupuesto->getPresupuesto($id) ){
+            if( $presu = $this->modeloPresupuesto->getPresupuesto($id,[1]) ){
                 
                 $data['nroPre']   = $presu['pre_numero'];
                 $data['presu_bd'] = $presu;

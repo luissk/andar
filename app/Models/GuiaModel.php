@@ -5,25 +5,25 @@ use CodeIgniter\Model;
 
 class GuiaModel extends Model{
 
-    public function nroPresupuesto(){
-        $query = "select 
-        concat( 
-            LPAD(
-                case when convert(substring(max(pre_numero),1,4),DECIMAL) is NULL then 0 else convert(substring(max(pre_numero),1,4),DECIMAL) end + 1
-                , 4, '0'
-            ), '-',YEAR(now())
-        ) as nro
-        from presupuesto 
-        where substring(pre_numero,6,4) = YEAR(now())";
+    public function nroGuia(){
+        $query = "select lpad(count(idguia) + 1, 8,'0') as nro FROM guia";
         $st = $this->db->query($query);
 
         return $st->getRowArray();
     }
 
     public function getGuias($desde, $hasta, $cri = ''){
-        $sql = $cri != '' ? " and (gui.gui_nro LIKE '%" . $this->db->escapeLikeString($cri) . "%' or gui.gui_vehiculo LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
+        $sql = $cri != '' ? " and (gui.gui_nro LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
-        $query = "select * from guia gui
+        $query = "select gui.idguia,gui.gui_nro,gui.gui_fecha,gui.gui_fechatraslado,gui.gui_motivo,gui.gui_motivodesc,gui.gui_ptopartida,gui.gui_direccionp,
+        gui.gui_ptollegada,gui.gui_direccionll,gui.gui_placa,gui.idpresupuesto,gui.idtransportista,gui.gui_completa,gui.gui_status,
+        pre.idcliente,pre.pre_piezas,pre.pre_verpiezas,pre.pre_status,
+        tran.tra_nombres,tran.tra_apellidos,tran.tra_dni,tran.tra_telef,
+        cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact
+        from guia gui
+        inner join presupuesto pre on gui.idpresupuesto=pre.idpresupuesto
+        inner join transportista tran on gui.idtransportista=tran.idtransportista
+        inner join cliente cli on pre.idcliente=cli.idcliente
         where gui.idguia is not null $sql order by gui.gui_fecha desc
         limit ?,?";
 
@@ -33,14 +33,43 @@ class GuiaModel extends Model{
     }
 
     public function getGuiasCount($cri = ''){
-        $sql = $cri != '' ? " and (gui.gui_nro LIKE '%" . $this->db->escapeLikeString($cri) . "%' or gui.gui_vehiculo LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
+        $sql = $cri != '' ? " and (gui.gui_nro LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
-        $query = "select count(gui.idguia) as total from guia gui
+        $query = "select count(gui.idguia) as total 
+        from guia gui
+        inner join presupuesto pre on gui.idpresupuesto=pre.idpresupuesto
+        inner join transportista tran on gui.idtransportista=tran.idtransportista
+        inner join cliente cli on pre.idcliente=cli.idcliente
         where gui.idguia is not null $sql";
 
         $st = $this->db->query($query);
 
         return $st->getRowArray();
+    }
+
+    public function getGuia($idguia){
+        $query = "select gui.idguia,gui.gui_nro,gui.gui_fecha,gui.gui_fechatraslado,gui.gui_motivo,gui.gui_motivodesc,gui.gui_ptopartida,gui.gui_direccionp,
+        gui.gui_ptollegada,gui.gui_direccionll,gui.gui_placa,gui.idpresupuesto,gui.idtransportista,gui.gui_completa,gui.gui_status,
+        pre.idcliente,pre.pre_piezas,pre.pre_verpiezas,pre.pre_status,
+        tran.tra_nombres,tran.tra_apellidos,tran.tra_dni,tran.tra_telef,
+        cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact
+        from guia gui
+        inner join presupuesto pre on gui.idpresupuesto=pre.idpresupuesto
+        inner join transportista tran on gui.idtransportista=tran.idtransportista
+        inner join cliente cli on pre.idcliente=cli.idcliente
+        where gui.idguia=?";
+
+        $st = $this->db->query($query, [$idguia]);
+
+        return $st->getRowArray();
+    }
+
+    public function generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,$idusuario2,$opt,$estado){
+        $query = "insert into guia(gui_nro,gui_fecha,gui_fechatraslado,gui_motivo,gui_motivodesc,gui_ptopartida,gui_direccionp,gui_ptollegada,gui_direccionll,gui_placa,idpresupuesto,idtransportista,idusuario2,gui_completa,gui_status) values(?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+        $st = $this->db->query($query, [$nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,$idusuario2,$opt,$estado]);
+
+        return $st;
     }
 
     /* select dp.idpresupuesto,dp.dp_cant,dp.idtorre,tor.tor_desc,pie.idpieza,pie.pie_codigo,pie.pie_desc,pie.pie_cant stock_ini,

@@ -1,15 +1,18 @@
 <?php
 if($guias){
-    //print_r($guias);
+    /* echo "<pre>";
+    print_r($guias);
+    echo "</pre>"; */
 ?>
 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th style="width: 15px">#</th>
-            <th>Fecha</th>
-            <th>Nro</th>
+            <th style="width: 15px">#</th>            
+            <th>Nro Guía</th>
+            <th>Fecha Traslado</th>            
             <th>Cliente</th>
+            <th>Dni o Ruc</th>
             <th style="width: 120px">Opciones</th>
         </tr>
     </thead>
@@ -18,31 +21,24 @@ if($guias){
         $RegistrosAMostrar = 10;//paginacion
         
         $cont = ( $page - 1 ) * $RegistrosAMostrar;
-        foreach($presupuestos as $p){
+        foreach($guias as $g){
             $cont++;
-            $id              = $p['idpresupuesto'];
-            $pre_fechareg    = date("d/m/Y h:i a", strtotime($p['pre_fechareg']));
-            $pre_numero      = $p['pre_numero'];
-            $cli_nombrerazon = $p['cli_nombrerazon'];
-
-            /* $modeloTorre = model('TorreModel');
-            $detalle = $modeloTorre->getDetalleTorre($id);
-            $arr_dt = json_encode($detalle);
-
-            $arr = json_encode(
-                [
-                    $desc,$plano
-                ]
-            ); */
+            $id                = $g['idguia'];
+            $gui_fecha         = date("d/m/Y h: i a", strtotime($g['gui_fecha']));
+            $gui_fechatraslado = date("d/m/Y", strtotime($g['gui_fechatraslado']));
+            $gui_nro           = $g['gui_nro'];
+            $cli_dniruc        = $g['cli_dniruc'];
+            $cli_nombrerazon   = $g['cli_nombrerazon'];
 
             echo "<tr>";
 
             echo "<td>$cont</td>";
-            echo "<td>$pre_fechareg</td>";
-            echo "<td>$pre_numero</td>";
+            echo "<td>$gui_nro</td>";
+            echo "<td>$gui_fecha</td>";
             echo "<td>$cli_nombrerazon</td>";
+            echo "<td>$cli_dniruc</td>";
             echo '<td class="d-flex justify-content-center">';
-            echo '<a href="editar-presupuesto-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
+            echo '<a href="editar-guia-g-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
             echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';

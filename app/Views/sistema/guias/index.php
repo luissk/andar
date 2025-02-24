@@ -28,7 +28,7 @@
                         <div class="row">
                             <div class="col-sm-5">
                                 <div class="search-container">
-                                    <input type="search" class="form-control search-input" placeholder="Buscar por nro ..." id="txtBuscar">
+                                    <input type="search" class="form-control search-input" placeholder="Buscar por nro o cliente ..." id="txtBuscar">
                                     <i class="fas fa-search search-icon"></i>
                                 </div>
                             </div>

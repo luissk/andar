@@ -38,7 +38,7 @@ class PresupuestoModel extends Model{
     }
 
     public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu,$verP){
-        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=? where idpresupuesto = ?";
+        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=? where idpresupuesto = ? and pre_status=1";
 
         $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$idpresu]);
 
@@ -91,7 +91,9 @@ class PresupuestoModel extends Model{
 
         $st = $this->db->query($query, [$idpresu, $status]);
 
-        return $st->getRowArray();
+        if( $st->getNumRows() > 0 )
+            return $st->getRowArray();
+        return FALSE;
     }
 
     public function getDetallePresupuesto($idpresu){
@@ -189,6 +191,14 @@ class PresupuestoModel extends Model{
         }
 
         return $suma;
+    }
+
+    public function modificaPresuPiezasEstatus($piezas, $estado, $idpresu){
+        $query = "update presupuesto set pre_piezas=?,pre_status=? where idpresupuesto = ?";
+
+        $st = $this->db->query($query, [$piezas, $estado, $idpresu]);
+
+        return $st;
     }
 
 }

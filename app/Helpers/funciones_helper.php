@@ -92,4 +92,21 @@ if(!function_exists('help_calcularPresu')){
         return $res;
     }
 }
+
+if(!function_exists('help_statusPresu')){
+    function help_statusPresu($estado){
+        $msj = "";
+        if( $estado == 1 )
+            $msj = "Activo";
+        else if( $estado == 2 )
+            $msj = "Con Guía";
+        else if( $estado == 3 )
+            $msj = "Entregado";
+        else if( $estado == 4 )
+            $msj = "Devuelto";
+
+        return $msj;
+    }
+}
+
 ?>

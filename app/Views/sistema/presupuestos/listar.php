@@ -10,6 +10,7 @@ if($presupuestos){
             <th>Fecha</th>
             <th>Nro</th>
             <th>Cliente</th>
+            <th>Estado</th>
             <th style="width: 120px">Opciones</th>
         </tr>
     </thead>
@@ -21,9 +22,12 @@ if($presupuestos){
         foreach($presupuestos as $p){
             $cont++;
             $id              = $p['idpresupuesto'];
-            $pre_fechareg    = date("d/m/Y h:i a", strtotime($p['pre_fechareg']));
+            $pre_fechareg    = date("d/m/Y h: i a", strtotime($p['pre_fechareg']));
             $pre_numero      = $p['pre_numero'];
             $cli_nombrerazon = $p['cli_nombrerazon'];
+            $pre_status      = $p['pre_status'];
+
+            if( $pre_status == 1 )
 
             /* $modeloTorre = model('TorreModel');
             $detalle = $modeloTorre->getDetalleTorre($id);
@@ -41,8 +45,10 @@ if($presupuestos){
             echo "<td>$pre_fechareg</td>";
             echo "<td>$pre_numero</td>";
             echo "<td>$cli_nombrerazon</td>";
+            echo "<td>".help_statusPresu($pre_status)."</td>";
             echo '<td class="d-flex justify-content-center">';
-            echo '<a href="editar-presupuesto-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
+            if( $pre_status == 1 )
+                echo '<a href="editar-presupuesto-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
             echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
