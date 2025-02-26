@@ -64,3 +64,4 @@ $routes->get('editar-guia-(:any)-(:num)', 'Guia::nuevaGuia/$1/$2');
 $routes->post('listar-provincias', 'Guia::listarProvincias');
 $routes->post('listar-distritos', 'Guia::listarDistritos');
 $routes->post('generar-guia', 'Guia::generarGuia');
+$routes->post('eliminar-guia', 'Guia::eliminarGuia');

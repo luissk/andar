@@ -47,19 +47,23 @@ class GuiaModel extends Model{
         return $st->getRowArray();
     }
 
-    public function getGuia($idguia){
+    public function getGuia($idguia, $estado = [1,2,3,4]){
         $query = "select gui.idguia,gui.gui_nro,gui.gui_fecha,gui.gui_fechatraslado,gui.gui_motivo,gui.gui_motivodesc,gui.gui_ptopartida,gui.gui_direccionp,
         gui.gui_ptollegada,gui.gui_direccionll,gui.gui_placa,gui.idpresupuesto,gui.idtransportista,gui.gui_completa,gui.gui_status,
         pre.idcliente,pre.pre_piezas,pre.pre_verpiezas,pre.pre_status,
         tran.tra_nombres,tran.tra_apellidos,tran.tra_dni,tran.tra_telef,
-        cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact
+        cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
+        ubip.iddepa iddepap,ubip.idprov idprovp,ubip.iddist iddistp,ubip.depa depap,ubip.prov provp, ubip.dist distp,
+        ubill.iddepa iddepall,ubill.idprov idprovll,ubill.iddist iddistll,ubill.depa depall,ubill.prov provll, ubill.dist distll
         from guia gui
         inner join presupuesto pre on gui.idpresupuesto=pre.idpresupuesto
         inner join transportista tran on gui.idtransportista=tran.idtransportista
         inner join cliente cli on pre.idcliente=cli.idcliente
-        where gui.idguia=?";
+        inner join ubigeo ubip on gui.gui_ptopartida=ubip.idubigeo
+        inner join ubigeo ubill on gui.gui_ptollegada=ubill.idubigeo
+        where gui.idguia=? and gui.gui_status in ?";
 
-        $st = $this->db->query($query, [$idguia]);
+        $st = $this->db->query($query, [$idguia, $estado]);
 
         return $st->getRowArray();
     }
@@ -68,6 +72,22 @@ class GuiaModel extends Model{
         $query = "insert into guia(gui_nro,gui_fecha,gui_fechatraslado,gui_motivo,gui_motivodesc,gui_ptopartida,gui_direccionp,gui_ptollegada,gui_direccionll,gui_placa,idpresupuesto,idtransportista,idusuario2,gui_completa,gui_status) values(?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         $st = $this->db->query($query, [$nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,$idusuario2,$opt,$estado]);
+
+        return $st;
+    }
+
+    public function modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado){
+        $query = "update guia set gui_fechatraslado=?,gui_motivo=?,gui_motivodesc=?,gui_ptopartida=?,gui_direccionp=?,gui_ptollegada=?,gui_direccionll=?,gui_placa=?,idtransportista=?,gui_completa=?,gui_status=? where idguia = ?";
+
+        $st = $this->db->query($query, [$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$idguia]);
+
+        return $st;
+    }
+
+    public function eliminarGuia($idguia){
+        $query = "delete from guia where idguia = ?";
+
+        $st = $this->db->query($query, [$idguia]);
 
         return $st;
     }

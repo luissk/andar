@@ -76,9 +76,11 @@ class Guia extends BaseController
             if( $guia = $this->modeloGuia->getGuia($id) ){
                 $idpresu = $guia['idpresupuesto'];
                 $data['nroGuia']      = $guia['gui_nro'];
-                $data['presupuesto'] = $this->modeloPresupuesto->getPresupuesto($idpresu);
+                $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($idpresu);
+                $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
                 
-                $data['title']    = "Editar guía | ".help_nombreWeb();
+                $data['title']   = "Editar guía | ".help_nombreWeb();
+                $data['guia_bd'] = $guia;
             }else{
                 return redirect()->to('/');
             }
@@ -123,7 +125,8 @@ class Guia extends BaseController
                 exit();
             }
 
-            $iddepa = $this->request->getVar('iddepa');
+            $iddepa    = $this->request->getVar('iddepa');
+            $idprov_bd = $this->request->getVar('idprov_bd');
 
             $provincias = $this->modeloUbigeo->listarProvincias($iddepa);
             if( $provincias ){
@@ -131,8 +134,10 @@ class Guia extends BaseController
                 foreach( $provincias as $prov ){
                     $idprov    = $prov['idprov'];
                     $provincia = $prov['provincias'];
+
+                    $select_prov = $idprov_bd != '' && $idprov == $idprov_bd ? 'selected' : ''; 
     
-                    echo "<option value=$idprov>$provincia</option>";
+                    echo "<option value=$idprov $select_prov>$provincia</option>";
                 }
             }else{
                 echo "<option value=''>Seleccione</option>";
@@ -149,6 +154,7 @@ class Guia extends BaseController
 
             $iddepa = $this->request->getVar('iddepa');
             $idprov = $this->request->getVar('idprov');
+            $iddist_bd = $this->request->getVar('iddist_bd');
 
             $distritos = $this->modeloUbigeo->listarDistritos($idprov,$iddepa);
             if( $distritos ){
@@ -156,8 +162,10 @@ class Guia extends BaseController
                 foreach( $distritos as $prov ){
                     $iddist   = $prov['iddist'];
                     $distrito = $prov['dist'];
+
+                    $select_dist = $iddist_bd != '' && $iddist == $iddist_bd ? 'selected' : ''; 
     
-                    echo "<option value=$iddist>$distrito</option>";
+                    echo "<option value=$iddist $select_dist>$distrito</option>";
                 }
             }else{
                 echo "<option value=''>Seleccione</option>";
@@ -174,7 +182,8 @@ class Guia extends BaseController
 
             /* echo "<pre>";
             print_r($_POST);
-            echo "</pre>"; */
+            echo "</pre>";
+            exit(); */
 
             $transportista  = $this->request->getVar('transportista');
             $fechatrasl     = $this->request->getVar('fechatrasl');
@@ -191,55 +200,109 @@ class Guia extends BaseController
             $placa          = $this->request->getVar('placa');
             $opt            = $this->request->getVar('opt');
             $idpre          = $this->request->getVar('idpre');
+            $idguia         = $this->request->getVar('idguia');
 
             $ubigeop  = $this->modeloUbigeo->getUbigeo($distritop,$provinciap,$departamentop)['idubigeo'];
             $ubigeoll = $this->modeloUbigeo->getUbigeo($distritoll,$provinciall,$departamentoll)['idubigeo'];
 
-            //echo "$ubigeop - $ubigeoll";
-            if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){               
+            if( $idguia != '' && $guia = $this->modeloGuia->getGuia($idguia) ){
+                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2) ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Guía Modificada",
+                            text: "",
+                            icon: "success",
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                        });
+                        setTimeout(function(){location.href="guias"},1500)
+                    </script>';
+                }                        
+            }else{
+                //echo "$ubigeop - $ubigeoll";
+                if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){               
 
-                $piezas = json_decode($presu['pre_piezas'], true);
-                /* echo "<pre>";
-                print_r($piezas);
-                echo "</pre>"; */
-                $arr_existentes = [];//cuando hay mas de una pieza que se repite, y asi poder ir restando su stock para el sgte y tbn para modificar item en presupuesto
-                foreach( $piezas as $pi ){
-                    $pieza    = $this->modeloPieza->getPieza($pi['idpie']);
-                    $stockIni = $pieza['pie_cant'];
-                    $pie_desc = $pieza['pie_desc'];
-                    $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
+                    $piezas = json_decode($presu['pre_piezas'], true);
+                    /* echo "<pre>";
+                    print_r($piezas);
+                    echo "</pre>"; */
+                    $arr_existentes = [];//cuando hay mas de una pieza que se repite, y asi poder ir restando su stock para el sgte y tbn para modificar item en presupuesto
+                    foreach( $piezas as $pi ){
+                        $pieza    = $this->modeloPieza->getPieza($pi['idpie']);
+                        $stockIni = $pieza['pie_cant'];
+                        $pie_desc = $pieza['pie_desc'];
+                        $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
 
-                    $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [4]);
-                    $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3]);
-                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
-                    $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
+                        $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [4],1);
+                        $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3,4]);
+                        $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
+                        $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
 
-                    $arr_e = array_filter($arr_existentes, fn($pie) => $pie['idpie'] == $pi['idpie']);
-                    $arr_e = array_values($arr_e);
-                    //print_r($arr_e);
-                    if( count($arr_e) > 0 ){
-                        $stockAct  = ($stockAct - $arr_e[0]['req']) <= 0 ? 0 : ($stockAct - $arr_e[0]['req']);
-                        $faltantes = $cantReq > $stockAct ? abs($stockAct - $cantReq): "";
+                        $arr_e = array_filter($arr_existentes, fn($pie) => $pie['idpie'] == $pi['idpie']);
+                        $arr_e = array_values($arr_e);
+                        //print_r($arr_e);
+                        if( count($arr_e) > 0 ){
+                            $stockAct  = ($stockAct - $arr_e[0]['req']) <= 0 ? 0 : ($stockAct - $arr_e[0]['req']);
+                            $faltantes = $cantReq > $stockAct ? abs($stockAct - $cantReq): "";
+                        }
+
+                        array_push($arr_existentes, array(
+                            'idtor'  => $pi['idtor'],
+                            'idpie'  => $pi['idpie'],
+                            'dtcan'  => $pi['dtcan'],
+                            'piepre' => $pi['piepre'],
+                            'dpcant' => $pi['dpcant'],
+                            'req'    => $cantReq,
+                            'falt'   => $faltantes
+                        ));
                     }
 
-                    array_push($arr_existentes, array(
-                        'idtor'  => $pi['idtor'],
-                        'idpie'  => $pi['idpie'],
-                        'dtcan'  => $pi['dtcan'],
-                        'piepre' => $pi['piepre'],
-                        'dpcant' => $pi['dpcant'],
-                        'req'    => $cantReq,
-                        'falt'   => $faltantes
-                    ));
+                    $nroGuia = $this->modeloGuia->nroGuia()['nro'];
+
+                    if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2) ){
+                        if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){
+                            echo '<script>
+                                Swal.fire({
+                                    title: "Guía Generada",
+                                    text: "",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false,
+                                });
+                                setTimeout(function(){location.href="guias"},1500)
+                            </script>';
+                        }
+                            
+                    }
+
                 }
+            }
 
-                $nroGuia = $this->modeloGuia->nroGuia()['nro'];
+            
+        }
+    }
 
-                if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2) ){
-                    if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){
+    public function eliminarGuia(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idguia = $this->request->getVar('id');
+
+            if( $guia = $this->modeloGuia->getGuia($idguia, [1,2]) ){
+                $idpresu = $guia['idpresupuesto'];
+                $piezas  = json_decode($guia['pre_piezas'],true);
+
+                $piezas_upd = [];
+                foreach( $piezas as $pi ){
+                    unset($pi['req'],$pi['falt']);
+                    $piezas_upd[] = $pi;
+                }
+                
+                if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($piezas_upd), 1, $idpresu) ){
+                    if( $this->modeloGuia->eliminarGuia($idguia) ){
                         echo '<script>
                             Swal.fire({
-                                title: "Guía Generada",
+                                title: "Guía Eliminada",
                                 text: "",
                                 icon: "success",
                                 showConfirmButton: false,
@@ -248,9 +311,7 @@ class Guia extends BaseController
                             setTimeout(function(){location.href="guias"},1500)
                         </script>';
                     }
-                        
                 }
-
             }
         }
     }

@@ -45,10 +45,12 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function getPresupuestos($desde = '', $hasta = '', $cri = '', $status = [1,2,3,4]){//1->activo, 2->con guía, 3->entregado,4->devuelto
+    public function getPresupuestos($desde = '', $hasta = '', $cri = '', $status = [1,2,3,4], $devuelto = ''){//1->activo, 2->con guía, 3->entregado,4->devuelto
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,
+        if( $devuelto != '' ) $cri .= " and pre.pre_devuelto = $devuelto ";
+
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,pre.pre_devuelto,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
         from presupuesto pre 
@@ -81,7 +83,7 @@ class PresupuestoModel extends Model{
     }
 
     public function getPresupuesto($idpresu, $status = [1,2,3,4]){
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,pre.pre_devuelto,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
         from presupuesto pre 
@@ -175,9 +177,9 @@ class PresupuestoModel extends Model{
         return $st->getResultArray();
     }
 
-    public function getStockPieza($idpieza, $status = [1,2,3,4]){
+    public function getStockPieza($idpieza, $status = [1,2,3,4], $devuelto = ''){
         //extraer de los presupuesto las piezas
-        $presus = $this->getPresupuestos('','','',$status);
+        $presus = $this->getPresupuestos('','','',$status, $devuelto);
         $suma = 0;
         foreach( $presus as $pre ){
             $piezas  = json_decode($pre['pre_piezas'], true);
