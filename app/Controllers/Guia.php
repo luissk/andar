@@ -246,14 +246,17 @@ class Guia extends BaseController
                             $faltantes = $cantReq > $stockAct ? abs($stockAct - $cantReq): "";
                         }
 
+                        $stock_que_sale = $cantReq <= $stockAct ? $cantReq : $stockAct;
+
                         array_push($arr_existentes, array(
-                            'idtor'  => $pi['idtor'],
-                            'idpie'  => $pi['idpie'],
-                            'dtcan'  => $pi['dtcan'],
-                            'piepre' => $pi['piepre'],
-                            'dpcant' => $pi['dpcant'],
-                            'req'    => $cantReq,
-                            'falt'   => $faltantes
+                            'idtor'   => $pi['idtor'],
+                            'idpie'   => $pi['idpie'],
+                            'dtcan'   => $pi['dtcan'],
+                            'piepre'  => $pi['piepre'],
+                            'dpcant'  => $pi['dpcant'],
+                            'req'     => $cantReq,
+                            'falt'    => $faltantes,
+                            'st_sale' => $stock_que_sale,
                         ));
                     }
 
@@ -294,7 +297,7 @@ class Guia extends BaseController
 
                 $piezas_upd = [];
                 foreach( $piezas as $pi ){
-                    unset($pi['req'],$pi['falt']);
+                    unset($pi['req'],$pi['falt'],$pi['st_sale']);
                     $piezas_upd[] = $pi;
                 }
                 
@@ -315,5 +318,42 @@ class Guia extends BaseController
             }
         }
     }
+
+    public function pdfGuia($id){
+        $options = new \Dompdf\Options();
+        $options->setIsRemoteEnabled(true);
+        $dompdf = new \Dompdf\Dompdf($options);
+
+        $data['params'] = $this->modeloParametros->getParametros();
+
+        $data['guia'] = $this->modeloGuia->getGuia($id);
+
+        $dompdf->loadHtml(view('sistema/guias/pdf', $data));
+
+        $dompdf->setPaper('A4', 'portrait');
+
+        $dompdf->render();
+
+        $dompdf->stream("guia.pdf", array("Attachment" => false));
+    }
+
+    public function cambiarEstado(){
+        if( $this->request->isAJAX() ){
+            $idguia   = $this->request->getVar('id');
+            $opt      = $this->request->getVar('opt');
+            $fechaent = $this->request->getVar('fechaent');
+            
+            if( $guia = $this->modeloGuia->getGuia($idguia, [2]) ){
+                if( $opt && $opt != '' ){//PARA PROCESAR LA FECHA DE ENTREGA
+                    print_r($_POST);
+                }else{
+                    //PARA MOSTRAR EL FORMULARIO FECHA DE ENTREGA
+                    $data['guia'] = $guia;
+                    return view('sistema/guias/cambiarestado', $data);
+                }                
+            }
+        }
+    }
+
 
 }

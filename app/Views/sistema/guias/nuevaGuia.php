@@ -78,14 +78,14 @@ if( isset($guia_bd) && $guia_bd ){
                                 Ruc o Dni: <b><?=$presupuesto['cli_dniruc']?></b>
                             </div>
                             <div class="">
-                                Fecha: <b><?=date("d/m/Y h:i a", strtotime($presupuesto['pre_fechareg']))?></b>
-                            </div>
-                            <div class="">
-                                Guía: <b><?=$nroGuia?></b>
-                            </div>
+                                Fecha Presu: <b><?=date("d/m/Y h:i a", strtotime($presupuesto['pre_fechareg']))?></b>
+                            </div>                            
                         </div>
 
                         <div class="row pt-3">
+                            <div class="col-sm-12 mb-3">
+                                Guía: <b><?=$nroGuia?></b>
+                            </div>
                             <div class="col-sm-4 mb-3">
                                 <label for="dias" class="form-label">Transportista</label>
                                 <select class="form-select" name="transportista" id="transportista">
@@ -225,6 +225,7 @@ if( isset($guia_bd) && $guia_bd ){
                                     echo "<th colspan='2'>$nomtorre</th>";
                                     echo "<td class='text-center'>Requerido</td>";
                                     echo "<td class='text-center'>Faltantes</td>";
+                                    echo "<td class='text-center'>Stock que sale</td>";
                                     echo "</tr>";
                                     $cont = 0;
                                     foreach( $pre_piezas_bd as $pi ){                                                        
@@ -266,11 +267,16 @@ if( isset($guia_bd) && $guia_bd ){
                                                 $resaltar = $faltantes != '' ? 'bg-danger-subtle' : '';
                                             }
 
+                                            $stock_que_sale = $cantReq <= $stockAct ? $cantReq : $stockAct;
+
+                                            $stock_que_sale = array_key_exists('st_sale', $pi) ? $pi['st_sale'] : $stock_que_sale;
+
                                             echo "<tr class='$resaltar'>";
                                             echo "<td>$cont</td>";
                                             echo "<td>$piedesc</td>";
                                             echo "<td class='text-center'>$cantReq</td>";
                                             echo "<td class='text-center'>$faltantes</td>";
+                                            echo "<td class='text-center'>$stock_que_sale</td>";
                                             echo "</tr>";
                                         }
                                     }

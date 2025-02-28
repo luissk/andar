@@ -10,7 +10,8 @@ if($guias){
         <tr>
             <th style="width: 15px">#</th>            
             <th>Nro Guía</th>
-            <th>Guía Completa</th>
+            <th>Completo</th>
+            <th>Estado</th>
             <th>Fecha Traslado</th>                       
             <th>Cliente</th>
             <th>Dni o Ruc</th>
@@ -31,20 +32,23 @@ if($guias){
             $gui_completa      = $g['gui_completa'] == 1 ? 'Si': 'No';
             $cli_dniruc        = $g['cli_dniruc'];
             $cli_nombrerazon   = $g['cli_nombrerazon'];
+            $estadoguia        = help_statusPresu($g['gui_status']);
 
             echo "<tr>";
 
             echo "<td>$cont</td>";
             echo "<td>$gui_nro</td>";
             echo "<td>$gui_completa</td>";
+            echo "<td>$estadoguia</td>";
             echo "<td>$gui_fechatraslado</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo "<td>$cli_dniruc</td>";
             echo '<td class="d-flex justify-content-center">';
             echo '<a href="editar-guia-g-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
-           /*  echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
-            echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>'; */
+            //echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
+            echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
+            echo '<a href="javascript:;" class="link-dark ms-2 estado" title="Cambiar Estado" data-id='.$id.'><i class="fa-solid fa-list-check"></i></a>';
             echo '</td>';
 
             echo "</tr>";
@@ -113,14 +117,28 @@ if($guias){
     </div>
 </div>
 
-<div class="modal fade" id="modalPdfPresu" tabindex="-1" aria-labelledby="modalPdfPresuLabel" aria-hidden="true">
+<div class="modal fade" id="modalPdfGuia" tabindex="-1" aria-labelledby="modalPdfGuiaLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header py-2">
-                <h1 class="modal-title fs-5" id="tituloModal">Presupuesto PDF</h1>
+                <h1 class="modal-title fs-5" id="tituloModal">Guía PDF</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center" id="pdf_div">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEstado" tabindex="-1" aria-labelledby="modalEstadoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h1 class="modal-title fs-5" id="tituloModal">Cambiar a Entregado</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" id="estado_div">
 
             </div>
         </div>
@@ -149,7 +167,7 @@ $(".eliminar").on('click', function(e){
     });
 });
 
-$(".detalle").on('click', function(e){
+/* $(".detalle").on('click', function(e){
     let id = $(this).data('id');
     $("#modalDetallePresu").modal('show');
     $("#detalle_presu").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> CARGANDO...')
@@ -158,15 +176,15 @@ $(".detalle").on('click', function(e){
     }, function(data){
         $('#detalle_presu').html(data);
     });
-});
+}); */
 
 $('.pdf').click(function(e) {
     e.preventDefault();
     let id = $(this).data('id');
-    $("#modalPdfPresu").modal('show');
+    $("#modalPdfGuia").modal('show');
     
     var iframe = $('<iframe width="100%" height="100%">');
-    iframe.attr('src','pdf-presupuesto-'+id);
+    iframe.attr('src','pdf-guia-'+id);
     $('#pdf_div').html(iframe);
 });
 
@@ -188,6 +206,16 @@ $(".eliminar").on('click', function(e){
                 $('#msjLista').html(data);
             });
         }
+    });
+});
+
+$('.estado').click(function(e) {
+    e.preventDefault();
+    let id = $(this).data('id');
+    $("#modalEstado").modal('show');
+    $("#estado_div").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> PROCESANDO...`);
+    $.post('cambiar-estado', {id}, function(data){
+        $("#estado_div").html(data);
     });
 });
 </script>

@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 class GuiaModel extends Model{
 
     public function nroGuia(){
-        $query = "select lpad(count(idguia) + 1, 8,'0') as nro FROM guia";
+        $query = "select concat('EG01', '-', lpad(count(idguia) + 1, 8,'0')) as nro FROM guia";
         $st = $this->db->query($query);
 
         return $st->getRowArray();

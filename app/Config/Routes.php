@@ -65,3 +65,6 @@ $routes->post('listar-provincias', 'Guia::listarProvincias');
 $routes->post('listar-distritos', 'Guia::listarDistritos');
 $routes->post('generar-guia', 'Guia::generarGuia');
 $routes->post('eliminar-guia', 'Guia::eliminarGuia');
+$routes->get('pdf-guia-(:num)', 'Guia::pdfGuia/$1');
+
+$routes->post('cambiar-estado', 'Guia::cambiarEstado');

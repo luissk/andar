@@ -186,7 +186,8 @@ class PresupuestoModel extends Model{
 
             foreach( $piezas as $pi ){
                 if( $pi['idpie'] == $idpieza ){
-                    $suma += $pi['dtcan'] * $pi['dpcant'];
+                    //$suma += $pi['dtcan'] * $pi['dpcant'];
+                    $suma += $pi['st_sale'];
                 }
             }
 
