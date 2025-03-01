@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-02-2025 a las 01:23:32
+-- Tiempo de generación: 01-03-2025 a las 03:32:57
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -138,15 +138,29 @@ CREATE TABLE `guia` (
   `idguia` int(10) UNSIGNED NOT NULL,
   `gui_nro` varchar(20) NOT NULL,
   `gui_fecha` datetime NOT NULL,
-  `gui_fechatraslado` datetime NOT NULL,
-  `gui_motivotraslado` varchar(45) DEFAULT NULL,
-  `gui_ptopartida` varchar(45) DEFAULT NULL,
-  `gui_ptollegada` varchar(45) DEFAULT NULL,
-  `gui_vehiculo` varchar(45) DEFAULT NULL,
+  `gui_fechatraslado` date NOT NULL,
+  `gui_motivo` char(1) DEFAULT NULL,
+  `gui_motivodesc` varchar(100) NOT NULL,
+  `gui_ptopartida` mediumint(6) DEFAULT NULL,
+  `gui_direccionp` varchar(100) NOT NULL,
+  `gui_ptollegada` mediumint(6) DEFAULT NULL,
+  `gui_direccionll` varchar(100) NOT NULL,
+  `gui_placa` varchar(20) DEFAULT NULL,
   `idpresupuesto` int(10) UNSIGNED NOT NULL,
   `idtransportista` int(10) UNSIGNED NOT NULL,
-  `idusuario2` int(11) NOT NULL
+  `idusuario2` int(11) NOT NULL,
+  `gui_completa` tinyint(4) NOT NULL,
+  `gui_status` tinyint(4) NOT NULL,
+  `gui_fechaent` date DEFAULT NULL,
+  `gui_fechadev` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `guia`
+--
+
+INSERT INTO `guia` (`idguia`, `gui_nro`, `gui_fecha`, `gui_fechatraslado`, `gui_motivo`, `gui_motivodesc`, `gui_ptopartida`, `gui_direccionp`, `gui_ptollegada`, `gui_direccionll`, `gui_placa`, `idpresupuesto`, `idtransportista`, `idusuario2`, `gui_completa`, `gui_status`, `gui_fechaent`, `gui_fechadev`) VALUES
+(6, 'EG01-00000001', '2025-02-27 10:41:25', '2025-02-27', 'o', 'para que acabe su construcción rápido', 20505, 'Calle Los Angeles Negros nro 123 - cerca al Mall', 30305, 'Av. Las Estrellas del techo n° 5236, por el estadio', 'PLCA 01233', 1, 2, 1, 0, 2, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -330,18 +344,19 @@ CREATE TABLE `presupuesto` (
   `pre_periodonro` tinyint(4) NOT NULL,
   `pre_piezas` text NOT NULL,
   `pre_verpiezas` tinyint(4) NOT NULL,
-  `pre_status` tinyint(4) NOT NULL
+  `pre_status` tinyint(4) NOT NULL,
+  `pre_devuelto` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `presupuesto`
 --
 
-INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_verpiezas`, `pre_status`) VALUES
-(1, '0001-2025', '2025-02-11 19:20:51', NULL, 1, 3, 8, 12, 's', 7, '[{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"3\"}]', 0, 1),
-(2, '0002-2025', '2025-02-11 19:22:32', NULL, 1, 1, 12, 12, 'd', 4, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"3\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"3\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"3\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"1\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"1\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"1\"}]', 0, 1),
-(3, '0003-2025', '2025-02-11 19:23:00', NULL, 1, 2, 8, 12, 'm', 5, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"4\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"4\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"4\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\"}]', 1, 1),
-(4, '0004-2025', '2025-02-12 10:42:22', NULL, 1, 2, 12, 12, 's', 11, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"3\"}]', 1, 1);
+INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_verpiezas`, `pre_status`, `pre_devuelto`) VALUES
+(1, '0001-2025', '2025-02-11 19:20:51', NULL, 1, 3, 8, 12, 's', 7, '[{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\",\"req\":10,\"falt\":\"\",\"st_sale\":10},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\",\"req\":8,\"falt\":\"\",\"st_sale\":8},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\",\"req\":6,\"falt\":\"\",\"st_sale\":6},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\",\"req\":12,\"falt\":\"\",\"st_sale\":12},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\",\"req\":16,\"falt\":\"\",\"st_sale\":16},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"3\",\"req\":21,\"falt\":18,\"st_sale\":3},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"3\",\"req\":15,\"falt\":11,\"st_sale\":4},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"3\",\"req\":12,\"falt\":1,\"st_sale\":11}]', 0, 2, 0),
+(2, '0002-2025', '2025-02-11 19:22:32', NULL, 1, 1, 12, 12, 'd', 4, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"3\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"3\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"3\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"1\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"1\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"1\"}]', 0, 1, 0),
+(3, '0003-2025', '2025-02-11 19:23:00', NULL, 1, 2, 8, 12, 'm', 5, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"4\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"4\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"4\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\"}]', 1, 1, 0),
+(4, '0004-2025', '2025-02-12 10:42:22', NULL, 1, 2, 12, 12, 's', 11, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"3\"}]', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -2672,7 +2687,7 @@ ALTER TABLE `factura`
 -- AUTO_INCREMENT de la tabla `guia`
 --
 ALTER TABLE `guia`
-  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `parametros`
