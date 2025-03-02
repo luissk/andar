@@ -6,11 +6,13 @@ class Pieza extends BaseController
 {
     protected $modeloUsuario;
     protected $modeloPieza;
+    protected $modeloPresupuesto;
     protected $helpers = ['funciones'];
 
     public function __construct(){
-        $this->modeloUsuario = model('UsuarioModel');
-        $this->modeloPieza   = model('PiezaModel');
+        $this->modeloUsuario     = model('UsuarioModel');
+        $this->modeloPieza       = model('PiezaModel');
+        $this->modeloPresupuesto = model('PresupuestoModel');
         $this->session;
     }
 

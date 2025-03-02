@@ -343,9 +343,38 @@ class Guia extends BaseController
             $opt      = $this->request->getVar('opt');
             $fechaent = $this->request->getVar('fechaent');
             
-            if( $guia = $this->modeloGuia->getGuia($idguia, [2]) ){
+            if( $guia = $this->modeloGuia->getGuia($idguia, [2,3]) ){
                 if( $opt && $opt != '' ){//PARA PROCESAR LA FECHA DE ENTREGA
-                    print_r($_POST);
+                    if( $opt == 'registrar' ){
+                        echo "registrar";
+                        if( $this->modeloGuia->registrarFechaEntregado($fechaent, 3,$idguia) ){
+                            $this->modeloPresupuesto->modificaStatusPre($guia['idpresupuesto'], 3);
+                            echo '<script>
+                                Swal.fire({
+                                    title: "Registrado",
+                                    text: "",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false,
+                                });
+                                setTimeout(function(){location.href="guias"},1500)
+                            </script>';
+                        }
+                    }else if( $opt == 'modificar' ){
+                        if( $this->modeloGuia->registrarFechaEntregado($fechaent, 3,$idguia) ){
+                            $this->modeloPresupuesto->modificaStatusPre($guia['idpresupuesto'], 3);
+                            echo '<script>
+                                Swal.fire({
+                                    title: "Registrado",
+                                    text: "",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false,
+                                });
+                                setTimeout(function(){location.href="guias"},1500)
+                            </script>';
+                        }
+                    }
                 }else{
                     //PARA MOSTRAR EL FORMULARIO FECHA DE ENTREGA
                     $data['guia'] = $guia;

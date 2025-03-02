@@ -12,7 +12,9 @@ if($guias){
             <th>Nro Guía</th>
             <th>Completo</th>
             <th>Estado</th>
-            <th>Fecha Traslado</th>                       
+            <th>F. Traslado</th>
+            <th>F. Entregado</th>
+            <th>F. Devolución</th>
             <th>Cliente</th>
             <th>Dni o Ruc</th>
             <th style="width: 120px">Opciones</th>
@@ -28,6 +30,8 @@ if($guias){
             $id                = $g['idguia'];
             $gui_fecha         = date("d/m/Y h      :  i a", strtotime($g['gui_fecha']));
             $gui_fechatraslado = date("d/m/Y", strtotime($g['gui_fechatraslado']));
+            $gui_fechaent      = $g['gui_fechaent'] != '' ? date("d/m/Y", strtotime($g['gui_fechaent'])) : '';
+            $gui_fechadev      = $g['gui_fechadev'] != '' ? date("d/m/Y", strtotime($g['gui_fechadev'])) : '';
             $gui_nro           = $g['gui_nro'];
             $gui_completa      = $g['gui_completa'] == 1 ? 'Si': 'No';
             $cli_dniruc        = $g['cli_dniruc'];
@@ -41,12 +45,15 @@ if($guias){
             echo "<td>$gui_completa</td>";
             echo "<td>$estadoguia</td>";
             echo "<td>$gui_fechatraslado</td>";
+            echo "<td>$gui_fechaent</td>";
+            echo "<td>$gui_fechadev</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo "<td>$cli_dniruc</td>";
             echo '<td class="d-flex justify-content-center">';
-            echo '<a href="editar-guia-g-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
-            echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
-            //echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
+            if( $g['gui_status'] == 2 ){
+                echo '<a href="editar-guia-g-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
+                echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
+            }
             echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
             echo '<a href="javascript:;" class="link-dark ms-2 estado" title="Cambiar Estado" data-id='.$id.'><i class="fa-solid fa-list-check"></i></a>';
             echo '</td>';

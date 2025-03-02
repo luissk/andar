@@ -308,6 +308,18 @@ class Presupuesto extends BaseController
 
             $idpresu = $this->request->getVar('id');
 
+            if( $presupuesto = $this->modeloPresupuesto->getPresupuesto($idpresu) ){
+                if( $presupuesto['pre_status'] != 1 ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "El presupuesto no puede ser eliminado",
+                            icon: "warning",
+                        });
+                    </script>';
+                    exit();
+                }
+            }
+
             $eliminar = FALSE;
             $mensaje = "";
 

@@ -204,4 +204,12 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
+    public function modificaStatusPre($idpresu, $estado){
+        $query = "update presupuesto set pre_status=? where idpresupuesto = ?";
+
+        $st = $this->db->query($query, [$estado, $idpresu]);
+
+        return $st;
+    }
+
 }

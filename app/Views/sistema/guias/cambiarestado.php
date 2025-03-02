@@ -1,14 +1,24 @@
 <?php
 $idguia = $guia['idguia'];
+
+$gui_fechaent = $guia['gui_fechaent'];
+
+$fecha = date('Y-m-d');
+$opt = "registrar";
+$btn = "REGISTRAR FECHA";
+if( $gui_fechaent != '' ){
+    $fecha = $gui_fechaent;
+    $btn = "MODIFICAR FECHA";
+}
 ?>
 
 <div class="row text-start">
     <div class="col-sm-6 pb-2">
         <label for="fechaent">Fecha de Entregado</label>
-        <input type="date" class="form-control" name="fechaent" id="fechaent" value="<?=date('Y-m-d')?>">
+        <input type="date" class="form-control" name="fechaent" id="fechaent" value="<?=$fecha?>">
     </div>
     <div class="col-sm-6 pb-2 d-flex align-items-end">
-        <button class="btn btn-danger" id="btnRegFecha" data-id=<?=$idguia?> >REGISTRAR FECHA</button>
+        <button class="btn btn-danger" id="btnRegFecha" data-id=<?=$idguia?> ><?=$btn?></button>
     </div>
 </div>
 <div id="msjcambiar"></div>

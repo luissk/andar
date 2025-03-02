@@ -12,11 +12,14 @@ if($piezas){
             <th>Peso</th>
             <th>Precio</th>
             <th>Cantidad</th>
+            <th>Stock Act.</th>
             <th style="width: 100px">Opciones</th>
         </tr>
     </thead>
     <tbody>
         <?php
+        $presuModel = model('PresupuestoModel');
+
         $RegistrosAMostrar = 10;//paginacion
         
         $cont = ( $page - 1 ) * $RegistrosAMostrar;
@@ -28,6 +31,10 @@ if($piezas){
             $peso     = $p['pie_peso'];
             $precio   = $p['pie_precio'];
             $cantidad = $p['pie_cant'];
+
+            $nroEntregados = $presuModel->getStockPieza($id, $estadoPresu = [4], 1);
+            $nroSalidas    = $presuModel->getStockPieza($id, $estadoPresu = [2,3,4]);
+            $stockAct      = ($cantidad + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($cantidad + $nroEntregados - $nroSalidas);
 
             $arr = json_encode(
                 [
@@ -43,6 +50,7 @@ if($piezas){
             echo "<td>$peso</td>";
             echo "<td>$precio</td>";
             echo "<td>$cantidad</td>";
+            echo "<td>$stockAct</td>";
             echo '<td class="d-flex justify-content-center">';
             echo '<a href="javascript:;" class="link-success editar" title="Modificar" data-id='.$id.' data-arr=\''.$arr.'\'><i class="fa-solid fa-pen-to-square"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
