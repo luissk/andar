@@ -68,3 +68,5 @@ $routes->post('eliminar-guia', 'Guia::eliminarGuia');
 $routes->get('pdf-guia-(:num)', 'Guia::pdfGuia/$1');
 
 $routes->post('cambiar-estado', 'Guia::cambiarEstado');
+
+$routes->get('devoluciones', 'Guia::devoluciones');

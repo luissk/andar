@@ -222,10 +222,11 @@ if( isset($guia_bd) && $guia_bd ){
                                     $idtorre  = $tor[0];
                                     $nomtorre = $tor[1];
                                     echo "<tr>";
-                                    echo "<th colspan='2'>$nomtorre</th>";
+                                    echo "<th colspan='2'>$nomtorre</th>";                                    
                                     echo "<td class='text-center'>Requerido</td>";
+                                    echo "<td class='text-center'>Stock Act</td>";                                    
+                                    echo "<td class='text-center'>Stock sale</td>";
                                     echo "<td class='text-center'>Faltantes</td>";
-                                    echo "<td class='text-center'>Stock que sale</td>";
                                     echo "</tr>";
                                     $cont = 0;
                                     foreach( $pre_piezas_bd as $pi ){                                                        
@@ -273,10 +274,11 @@ if( isset($guia_bd) && $guia_bd ){
 
                                             echo "<tr class='$resaltar'>";
                                             echo "<td>$cont</td>";
-                                            echo "<td>$piedesc</td>";
+                                            echo "<td>$piedesc</td>";                                            
                                             echo "<td class='text-center'>$cantReq</td>";
-                                            echo "<td class='text-center'>$faltantes</td>";
+                                            echo "<td class='text-center'>$stockAct</td>";                                           
                                             echo "<td class='text-center'>$stock_que_sale</td>";
+                                            echo "<td class='text-center'>$faltantes</td>";
                                             echo "</tr>";
                                         }
                                     }

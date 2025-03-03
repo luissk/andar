@@ -384,5 +384,16 @@ class Guia extends BaseController
         }
     }
 
+    public function devoluciones(){
+        if( !session('idusuario') ){
+            return redirect()->to('/');
+        }
+        
+        $data['title']           = "Devoluciones del Sistema | ".help_nombreWeb();
+        $data['devolLinkActive'] = 1;
+
+        return view('sistema/devolucion/index', $data);
+    }
+
 
 }
