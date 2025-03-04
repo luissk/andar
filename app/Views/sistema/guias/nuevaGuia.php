@@ -294,14 +294,7 @@ if( isset($guia_bd) && $guia_bd ){
                                 <input type="hidden" id="idpre" value="<?=$presupuesto['idpresupuesto']?>">
 
                                 <input type="hidden" id="idguia_bd" value="<?=$idguia_bd?>">
-                                <button class="btn btn-warning btnGuia" data-opt="1"><?=strtoupper($titulo)?> GUIA COMPLETA</button>
-                                <?php 
-                                if( $guiacompleta === FALSE ){
-                                ?>
-                                    &nbsp;&nbsp;<button class="btn btn-danger btnGuia" data-opt="0"><?=strtoupper($titulo)?> GUIA INCOMPLETA</button>
-                                <?php
-                                }
-                                ?>
+                                <button class="btn btn-warning btnGuia" data-opt="<?=$guiacompleta ? 1 : 0?>"><?=strtoupper($titulo)?> GUIA</button>
                             </div>
                             <div id="msj"></div>
                         </div>
