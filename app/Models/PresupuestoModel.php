@@ -45,12 +45,10 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function getPresupuestos($desde = '', $hasta = '', $cri = '', $status = [1,2,3,4], $devuelto = ''){//1->activo, 2->con guía, 3->entregado,4->devuelto
+    public function getPresupuestos($desde = '', $hasta = '', $cri = '', $status = [1,2,3]){//1->activo, 2->con guía, 3->devuelto
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
-        if( $devuelto != '' ) $cri .= " and pre.pre_devuelto = $devuelto ";
-
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,pre.pre_devuelto,
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
         from presupuesto pre 
@@ -68,7 +66,7 @@ class PresupuestoModel extends Model{
         return $st->getResultArray();
     }
 
-    public function getPresupuestosCount($cri = '', $status = [1,2,3,4]){
+    public function getPresupuestosCount($cri = '', $status = [1,2,3]){
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select count(pre.idpresupuesto) as total
@@ -82,8 +80,8 @@ class PresupuestoModel extends Model{
         return $st->getRowArray();
     }
 
-    public function getPresupuesto($idpresu, $status = [1,2,3,4]){
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,pre.pre_devuelto,
+    public function getPresupuesto($idpresu, $status = [1,2,3]){
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
         from presupuesto pre 
@@ -177,9 +175,9 @@ class PresupuestoModel extends Model{
         return $st->getResultArray();
     }
 
-    public function getStockPieza($idpieza, $status = [1,2,3,4], $devuelto = ''){
+    public function getStockPieza($idpieza, $status = [1,2,3], $tipo = 'e'){//$tipo e:entrada, s: salida
         //extraer de los presupuesto las piezas
-        $presus = $this->getPresupuestos('','','',$status, $devuelto);
+        $presus = $this->getPresupuestos('','','',$status);
         $suma = 0;
         foreach( $presus as $pre ){
             $piezas  = json_decode($pre['pre_piezas'], true);
@@ -187,7 +185,10 @@ class PresupuestoModel extends Model{
             foreach( $piezas as $pi ){
                 if( $pi['idpie'] == $idpieza ){
                     //$suma += $pi['dtcan'] * $pi['dpcant'];
-                    $suma += $pi['st_sale'];
+                    if( $tipo == 'e' )
+                        $suma += $pi['ingresa'];
+                    else if( $tipo == 's' )
+                        $suma += $pi['st_sale'];
                 }
             }
 

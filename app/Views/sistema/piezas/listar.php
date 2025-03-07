@@ -32,8 +32,8 @@ if($piezas){
             $precio   = $p['pie_precio'];
             $cantidad = $p['pie_cant'];
 
-            $nroEntregados = $presuModel->getStockPieza($id, $estadoPresu = [4], 1);
-            $nroSalidas    = $presuModel->getStockPieza($id, $estadoPresu = [2,3,4]);
+            $nroEntregados = $presuModel->getStockPieza($id, $estadoPresu = [3], 'e');
+            $nroSalidas    = $presuModel->getStockPieza($id, $estadoPresu = [2,3], 's');
             $stockAct      = ($cantidad + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($cantidad + $nroEntregados - $nroSalidas);
 
             $arr = json_encode(

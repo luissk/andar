@@ -10,11 +10,12 @@ if($guias){
         <tr>
             <th style="width: 15px">#</th>            
             <th>Nro Guía</th>
-            <th>Completo</th>
+            <!-- <th>Completo</th> -->
             <th>Estado</th>
             <th>F. Traslado</th>
-            <th>F. Entregado</th>
+            <!-- <th>F. Entregado</th> -->
             <th>F. Devolución</th>
+            <th>Devol. completo</th>
             <th>Cliente</th>
             <th>Dni o Ruc</th>
             <th style="width: 120px">Opciones</th>
@@ -30,8 +31,9 @@ if($guias){
             $id                = $g['idguia'];
             $gui_fecha         = date("d/m/Y h      :  i a", strtotime($g['gui_fecha']));
             $gui_fechatraslado = date("d/m/Y", strtotime($g['gui_fechatraslado']));
-            $gui_fechaent      = $g['gui_fechaent'] != '' ? date("d/m/Y", strtotime($g['gui_fechaent'])) : '';
+            //$gui_fechaent      = $g['gui_fechaent'] != '' ? date("d/m/Y", strtotime($g['gui_fechaent'])) : '';
             $gui_fechadev      = $g['gui_fechadev'] != '' ? date("d/m/Y", strtotime($g['gui_fechadev'])) : '';
+            $gui_estdev        = $g['gui_devcompleta'] == 1 ? 'Si': 'No';
             $gui_nro           = $g['gui_nro'];
             $gui_completa      = $g['gui_completa'] == 1 ? 'Si': 'No';
             $cli_dniruc        = $g['cli_dniruc'];
@@ -42,11 +44,12 @@ if($guias){
 
             echo "<td>$cont</td>";
             echo "<td>$gui_nro</td>";
-            echo "<td>$gui_completa</td>";
+            //echo "<td>$gui_completa</td>";
             echo "<td>$estadoguia</td>";
             echo "<td>$gui_fechatraslado</td>";
-            echo "<td>$gui_fechaent</td>";
+            //echo "<td>$gui_fechaent</td>";
             echo "<td>$gui_fechadev</td>";
+            echo "<td>$gui_estdev</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo "<td>$cli_dniruc</td>";
             echo '<td class="d-flex justify-content-center">';
@@ -54,8 +57,11 @@ if($guias){
                 echo '<a href="editar-guia-g-'.$id.'" class="link-success" title="Modificar"><i class="fa-solid fa-pen-to-square"></i></a>';
                 echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             }
-            echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
-            echo '<a href="javascript:;" class="link-dark ms-2 estado" title="Cambiar Estado" data-id='.$id.'><i class="fa-solid fa-list-check"></i></a>';
+            echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Guía Cliente" data-id='.$id.' data-opt=1><i class="fa-regular fa-file-pdf"></i></a>';
+            if( $g['gui_completa'] != 1 ){
+                echo '<a href="javascript:;" class="link-dark ms-2 pdf text-danger" title="Guía almacén" data-id='.$id.' data-opt=0><i class="fa-regular fa-file-pdf"></i></a>';    
+            }
+            //echo '<a href="javascript:;" class="link-dark ms-2 estado" title="Cambiar Estado" data-id='.$id.'><i class="fa-solid fa-list-check"></i></a>';
             echo '</td>';
 
             echo "</tr>";
@@ -138,7 +144,7 @@ if($guias){
     </div>
 </div>
 
-<div class="modal fade" id="modalEstado" tabindex="-1" aria-labelledby="modalEstadoLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="modalEstado" tabindex="-1" aria-labelledby="modalEstadoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header py-2">
@@ -150,7 +156,7 @@ if($guias){
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
 $(".eliminar").on('click', function(e){
@@ -187,11 +193,12 @@ $(".eliminar").on('click', function(e){
 
 $('.pdf').click(function(e) {
     e.preventDefault();
-    let id = $(this).data('id');
+    let id = $(this).data('id'),
+        opt = $(this).data('opt');
     $("#modalPdfGuia").modal('show');
     
     var iframe = $('<iframe width="100%" height="100%">');
-    iframe.attr('src','pdf-guia-'+id);
+    iframe.attr('src','pdf-guia-'+id+'-'+opt);
     $('#pdf_div').html(iframe);
 });
 
@@ -216,7 +223,7 @@ $(".eliminar").on('click', function(e){
     });
 });
 
-$('.estado').click(function(e) {
+/* $('.estado').click(function(e) {
     e.preventDefault();
     let id = $(this).data('id');
     $("#modalEstado").modal('show');
@@ -224,5 +231,5 @@ $('.estado').click(function(e) {
     $.post('cambiar-estado', {id}, function(data){
         $("#estado_div").html(data);
     });
-});
+}); */
 </script>

@@ -101,8 +101,6 @@ if(!function_exists('help_statusPresu')){
         else if( $estado == 2 )
             $msj = "Con Guía";
         else if( $estado == 3 )
-            $msj = "Entregado";
-        else if( $estado == 4 )
             $msj = "Devuelto";
 
         return $msj;

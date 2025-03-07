@@ -65,8 +65,11 @@ $routes->post('listar-provincias', 'Guia::listarProvincias');
 $routes->post('listar-distritos', 'Guia::listarDistritos');
 $routes->post('generar-guia', 'Guia::generarGuia');
 $routes->post('eliminar-guia', 'Guia::eliminarGuia');
-$routes->get('pdf-guia-(:num)', 'Guia::pdfGuia/$1');
+$routes->get('pdf-guia-(:num)-(:num)', 'Guia::pdfGuia/$1/$2');
 
-$routes->post('cambiar-estado', 'Guia::cambiarEstado');
+//$routes->post('cambiar-estado', 'Guia::cambiarEstado');
 
 $routes->get('devoluciones', 'Guia::devoluciones');
+$routes->post('listar-guias-devo', 'Guia::listarGuiasDevo');
+$routes->get('devolver-(:num)', 'Guia::Devolver/$1');
+$routes->post('generar-devolucion', 'Guia::generarDevolucion');

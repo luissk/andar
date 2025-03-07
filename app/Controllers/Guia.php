@@ -233,8 +233,8 @@ class Guia extends BaseController
                         $pie_desc = $pieza['pie_desc'];
                         $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
 
-                        $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [4],1);
-                        $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3,4]);
+                        $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [3],'e');
+                        $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3], 's');
                         $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
                         $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
 
@@ -297,7 +297,7 @@ class Guia extends BaseController
 
                 $piezas_upd = [];
                 foreach( $piezas as $pi ){
-                    unset($pi['req'],$pi['falt'],$pi['st_sale']);
+                    unset($pi['req'],$pi['falt'],$pi['st_sale'],$pi['ingresa']);
                     $piezas_upd[] = $pi;
                 }
                 
@@ -319,7 +319,7 @@ class Guia extends BaseController
         }
     }
 
-    public function pdfGuia($id){
+    public function pdfGuia($id,$opt){
         $options = new \Dompdf\Options();
         $options->setIsRemoteEnabled(true);
         $dompdf = new \Dompdf\Dompdf($options);
@@ -327,6 +327,7 @@ class Guia extends BaseController
         $data['params'] = $this->modeloParametros->getParametros();
 
         $data['guia'] = $this->modeloGuia->getGuia($id);
+        $data['opt'] = $opt;
 
         $dompdf->loadHtml(view('sistema/guias/pdf', $data));
 
@@ -337,7 +338,7 @@ class Guia extends BaseController
         $dompdf->stream("guia.pdf", array("Attachment" => false));
     }
 
-    public function cambiarEstado(){
+    /* public function cambiarEstado(){
         if( $this->request->isAJAX() ){
             $idguia   = $this->request->getVar('id');
             $opt      = $this->request->getVar('opt');
@@ -382,7 +383,7 @@ class Guia extends BaseController
                 }                
             }
         }
-    }
+    } */
 
     public function devoluciones(){
         if( !session('idusuario') ){
@@ -393,6 +394,123 @@ class Guia extends BaseController
         $data['devolLinkActive'] = 1;
 
         return view('sistema/devolucion/index', $data);
+    }
+
+    public function listarGuiasDevo(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            
+            $page = $this->request->getVar('page');
+            $cri  = trim($this->request->getVar('cri'));
+
+            $desde        = $page * 10 - 10;
+            $hasta        = 10;
+            $data['page'] = $page;
+
+            if( $cri == '' ) exit();
+
+            $cri = strlen($cri) > 2 ? $cri : '';
+            $data['cri'] = $cri;
+
+            $data['guias']   = $this->modeloGuia->getGuias($desde, $hasta, $cri);
+            $data['totalRegistros'] = $this->modeloGuia->getGuiasCount($cri)['total'];
+
+            return view('sistema/devolucion/listar', $data);
+        }
+    }
+
+    public function Devolver($id){
+        if( !session('idusuario') ){
+            return redirect()->to('/');
+        }
+        
+        $data['title']           = "Devoluciones del Sistema | ".help_nombreWeb();
+        $data['devolLinkActive'] = 1;
+
+        if( $guia = $this->modeloGuia->getGuia($id,[2,3]) ){
+            $idpresu              = $guia['idpresupuesto'];
+            $data['nroGuia']      = $guia['gui_nro'];
+            $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($idpresu);
+            $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
+            $data['guia_bd']      = $guia;
+        }else{
+            return redirect()->to('/');
+        }
+
+        return view('sistema/devolucion/devolver', $data);
+    }
+
+    public function generarDevolucion(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+
+            $idguia = $this->request->getVar('idguia');
+            $fechadevo = $this->request->getVar('fechadevo');
+            $items = $this->request->getVar('items');
+
+            if( $guia = $this->modeloGuia->getGuia($idguia,[2]) ){
+                $piezas = json_decode($guia['pre_piezas'], true);
+
+                $arr_restantes = []; //para guardar el idpieza y cant sobrante, si en caso haya mas items iguales
+                $arr_items     = []; //guardar con los ingresos
+                foreach( $piezas as $k => $pi ){
+                    echo "<pre>";
+                    $arr = array_values(array_filter($items, fn($v) => $v['idpieza'] == $pi['idpie']));
+                    $cant_t   = $arr[0]['cant'];//cantidad total que ingresa
+                    $st_salio = $pi['st_sale'];//stock que salió
+
+                    $arr_r = array_values(array_filter($arr_restantes, fn($v) => $v['idpieza'] == $pi['idpie']));
+                    if( count($arr_r) > 0 && $arr_r[0]['idpieza'] == $pi['idpie'] ){
+                        $pi['ingresa']= $arr_r[0]['restante'];                  
+                    }else{
+                        if( $cant_t <= $st_salio ){
+                            $pi['ingresa'] = $cant_t;
+                            array_push($arr_restantes, ['idpieza' => $pi['idpie'], 'restante' => 0]);//ingresamos ese restante al array
+                        }else if( $cant_t > $st_salio ){//quedará un restante, para las demás piezas iguales
+                            $restante = $cant_t  - $st_salio;
+                            array_push($arr_restantes, ['idpieza' => $pi['idpie'], 'restante' => $restante]);//ingresamos ese restante al array
+                            $pi['ingresa'] = $st_salio;
+                            //echo "===";
+                        }  
+                    }
+                    array_push($arr_items, $pi);
+                    /* print_r($pi);
+                    print_r($arr);
+                    print_r($arr_r); */
+                    echo "</pre>";
+                }
+
+                $completo = 1;
+                foreach( $items as $i ){
+                    if( $i['cant'] < $i['salio'] ) $completo = 0;
+                }                
+                /* echo "<pre>";
+                echo $completo;
+                print_r($items);
+                print_r($arr_items);
+                echo "</pre>"; */
+                if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, $fechadevo, $completo, 3) ){
+                    if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_items), 3, $guia['idpresupuesto']) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Registrado",
+                                text: "",
+                                icon: "success",
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                            });
+                            setTimeout(function(){location.href="guias"},1500)
+                        </script>';
+                    }
+                }
+
+            }           
+
+        }
     }
 
 

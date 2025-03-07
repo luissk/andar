@@ -130,7 +130,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
     <footer>
         <table width="100%">
             <tr>
-                <!-- <td align="left"><code>Copyright &copy; <?php echo date("d/m/Y");?></code></td> -->
+                <td align="left"><?=$opt == 1 ? 'Guía cliente' : 'Guía almacén'?></td>
                 <td align="right">página <span class="pagenum"></span></td>
             </tr>
         </table>
@@ -166,18 +166,39 @@ if( $motivo == 'o' ) $motivo = "Otros";
         $presuModel = model('PresupuestoModel');
         $torreModel = model('TorreModel');
         $piezaModel = model('PiezaModel');
-        
-        $arr_tor = [];//para separar las torres, sin que se repitan
-        foreach( $pre_piezas as $pie_bd ){
-            $idtor = $pie_bd['idtor'];
-            $torre_bd = $torreModel->getTorre($idtor);
-            array_push($arr_tor, array($torre_bd['idtorre'],$torre_bd['tor_desc']));
-        }
-        $arr_tor = array_unique($arr_tor, SORT_REGULAR);
 
         /* echo "<pre>";
         print_r($pre_piezas);
         echo "</pre>"; */
+        $arr_aux = array_map(function($v){
+            if( array_key_exists('falt', $v) && array_key_exists('st_sale', $v) ){//editar
+                return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
+            }else{
+                return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant']];
+            }
+            
+        }, $pre_piezas);
+
+        $newarr = [];
+        foreach( $arr_aux as $ax ){
+            if( in_array($ax['idpie'], array_column($newarr, 'idpie')) ){
+                $aa = array_filter($newarr, fn($v) => $v['idpie'] == $ax['idpie']);
+                $aa = array_keys($aa)[0];
+                $newarr[$aa]['req'] = $newarr[$aa]['req'] + $ax['req'];
+
+                if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){//editar
+                    $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
+                    $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
+                    $newarr[$aa]['falt'] = $e_falt + $ax['falt'];
+                    $newarr[$aa]['st_sale'] = $e_stsale + $ax['st_sale'];
+                    //echo $aa;
+                    //print_r($ax);
+                }
+
+                continue;
+            }
+            $newarr[] = $ax;
+        }
         ?>
         <div>
             <table cellspacing="0" cellpadding="0" width="100%" class="tablapdf">
@@ -194,7 +215,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                 <?php
                 $cont = 0;
                 $suma_peso = 0;
-                foreach( $pre_piezas as $pi ){                                                        
+                foreach( $newarr as $pi ){                                                        
                     $cont++;
                     $idpieza  = $pi['idpie'];
                     $pieza_bd = $piezaModel->getPieza($idpieza);
@@ -203,7 +224,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     $piedesc   = $pieza_bd['pie_desc'];
                     $stockIni  = $pieza_bd['pie_cant'];
                     $piepeso   = $pieza_bd['pie_peso'];
-                    $cantReq   = $pi['req'];
+                    $cantReq   = $opt == 1 ? $pi['req'] : $pi['st_sale'];
 
                     $suma_peso += $piepeso * $pi['req'];
 
