@@ -21,6 +21,8 @@ $direcll_bd    = $guia_bd['gui_direccionll'];
 $placa_bd      = $guia_bd['gui_placa'];
 $fechadev_bd      = $guia_bd['gui_fechadev'];
 
+$status = $guia_bd['gui_status'];
+
 $pre_piezas_bd = json_decode($guia_bd['pre_piezas'], true);
 
 $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
@@ -75,12 +77,11 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                 
                                 echo "<pre>";                                
                                 $arr_aux = array_map(function($v){
-                                    if( array_key_exists('falt', $v) && array_key_exists('st_sale', $v) ){//editar
-                                        return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
-                                    }else{
-                                        return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant']];
+                                    if( array_key_exists('ingresa', $v) ){//editar
+                                        return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale'], 'ingresa' => $v['ingresa']];
                                     }
-                                    
+                                    return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
+                                                                       
                                 }, $pre_piezas_bd);
 
                                 $newarr = [];
@@ -90,7 +91,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                         $aa = array_keys($aa)[0];
                                         $newarr[$aa]['req'] = $newarr[$aa]['req'] + $ax['req'];
 
-                                        if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){//editar
+                                        if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){
                                             $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
                                             $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
                                             $newarr[$aa]['falt'] = $e_falt + $ax['falt'];
@@ -99,11 +100,15 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                             //print_r($ax);
                                         }
 
+                                        if( array_key_exists('ingresa', $ax) ){//editar
+                                            $newarr[$aa]['ingresa'] = $newarr[$aa]['ingresa'] + $ax['ingresa'];
+                                        }
+
                                         continue;
                                     }
                                     $newarr[] = $ax;
                                 }
-                                print_r($pre_piezas_bd);
+                                //print_r($newarr);
                                 echo "</pre>";
 
                                 echo "<tr>";
@@ -123,20 +128,23 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                     $stockIni      = $pieza_bd['pie_cant'];
                                     $cantReq       = $pi['req'];
                 
-                                    $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 1);
-                                    $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3]);
+                                    $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
+                                    $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3], 's');
                                     $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
                                     $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
-                                   
-
 
                                     $stock_que_sale = $pi['st_sale'];
+                                    $stock_input_default = $pi['st_sale'];
+
+                                    if( array_key_exists('ingresa', $pi) ){//editar
+                                        $stock_input_default = $pi['ingresa'];
+                                    }
 
                                     echo "<tr>";
                                     echo "<td>$cont</td>";
                                     echo "<td>$piedesc</td>";                                                                                 
                                     echo "<td class='text-center'>$stock_que_sale</td>";
-                                    echo "<td class='text-center'><input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale id='cant-$idpieza' value=$stock_que_sale /></td>";
+                                    echo "<td class='text-center'><input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale id='cant-$idpieza' value=$stock_input_default /></td>";
                                     echo "</tr>";
                                     
                                 }

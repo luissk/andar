@@ -452,7 +452,7 @@ class Guia extends BaseController
             $fechadevo = $this->request->getVar('fechadevo');
             $items = $this->request->getVar('items');
 
-            if( $guia = $this->modeloGuia->getGuia($idguia,[2]) ){
+            if( $guia = $this->modeloGuia->getGuia($idguia,[2,3]) ){
                 $piezas = json_decode($guia['pre_piezas'], true);
 
                 $arr_restantes = []; //para guardar el idpieza y cant sobrante, si en caso haya mas items iguales

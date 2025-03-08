@@ -20,7 +20,7 @@ if($piezas){
         <?php
         $presuModel = model('PresupuestoModel');
 
-        $RegistrosAMostrar = 10;//paginacion
+        $RegistrosAMostrar = 50;//paginacion
         
         $cont = ( $page - 1 ) * $RegistrosAMostrar;
         foreach($piezas as $p){
@@ -71,30 +71,35 @@ if($piezas){
     if( $res > 0 ) $PagUlt = floor($PagUlt) + 1;
     ?>
 
-    <div class="pt-3 <?=$totalRegistros <= 10 ? 'd-none' : ''?>">
-        <ul class="pagination pagination-sm m-0 float-end">
-            <li class="page-item <?=$PagAct > ($PaginasIntervalo + 1) ? '' : 'd-none'?>">
-                <a class="page-link" href="javascript:;" onclick="listarPiezas(1,'<?=$cri?>')">«</a>
-            </li>
-            <?php
-            for ( $i = ($PagAct - $PaginasIntervalo) ; $i <= ($PagAct - 1) ; $i ++) {
-                if($i >= 1) {
-                    echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+    <div class="d-flex align-items-center justify-content-between mt-2">
+        <div class="">
+            <p class="fw-bolder">Total de Piezas: <?=$totalRegistros;?></p>
+        </div>
+        <div class="<?=$totalRegistros <= 50 ? 'd-none' : ''?>">
+            <ul class="pagination pagination-sm m-0 float-end">
+                <li class="page-item <?=$PagAct > ($PaginasIntervalo + 1) ? '' : 'd-none'?>">
+                    <a class="page-link" href="javascript:;" onclick="listarPiezas(1,'<?=$cri?>')">«</a>
+                </li>
+                <?php
+                for ( $i = ($PagAct - $PaginasIntervalo) ; $i <= ($PagAct - 1) ; $i ++) {
+                    if($i >= 1) {
+                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+                    }
                 }
-            }
-            ?>
-            <li class="page-item active"><a class="page-link pe-none"><?=$PagAct?></a></li>
-            <?php
-            for ( $i = ($PagAct + 1) ; $i <= ($PagAct + $PaginasIntervalo) ; $i ++) {
-                if( $i <= $PagUlt) {
-                    echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+                ?>
+                <li class="page-item active"><a class="page-link pe-none"><?=$PagAct?></a></li>
+                <?php
+                for ( $i = ($PagAct + 1) ; $i <= ($PagAct + $PaginasIntervalo) ; $i ++) {
+                    if( $i <= $PagUlt) {
+                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+                    }
                 }
-            }
-            ?>
-            <li class="page-item <?=$PagAct < ($PagUlt - $PaginasIntervalo) ? '' : 'd-none'?>">
-                <a class="page-link" href="#" onclick="listarPiezas(<?=$PagUlt?>,'<?=$cri?>')">»</a>
-            </li>
-        </ul>
+                ?>
+                <li class="page-item <?=$PagAct < ($PagUlt - $PaginasIntervalo) ? '' : 'd-none'?>">
+                    <a class="page-link" href="#" onclick="listarPiezas(<?=$PagUlt?>,'<?=$cri?>')">»</a>
+                </li>
+            </ul>
+        </div>
     </div>
 
 <?php
