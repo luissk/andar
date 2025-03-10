@@ -271,9 +271,10 @@ if( isset($guia_bd) && $guia_bd ){
                                     $stockIni      = $pieza_bd['pie_cant'];
                                     $cantReq       = $pi['req'];
                 
-                                    $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
+                                    /* $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
                                     $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3], 's');
-                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
+                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
+                                    $stockAct      = $pieza_bd['stockActual'];
                                     $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
                                     
                                     /* $arr_e = array_filter($arr_existentes, fn($pie) => $pie[0] == $idpieza);

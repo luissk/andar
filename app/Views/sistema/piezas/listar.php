@@ -1,6 +1,11 @@
 <?php
 if($piezas){
     //print_r($piezas);
+    echo "$campo - $order";
+    $class_order_desc = $campo == 'pie_desc' && $order    == 'ASC' ? 'up': 'down';
+    $class_order_prec = $campo == 'pie_precio' && $order  == 'DESC' ? 'down': 'up';
+    $class_order_cant = $campo == 'pie_cant' && $order    == 'DESC' ? 'down': 'up';
+    $class_order_stoc = $campo == 'stockActual' && $order == 'DESC' ? 'down': 'up';
 ?>
 
 <table class="table table-bordered">
@@ -8,17 +13,17 @@ if($piezas){
         <tr>
             <th style="width: 15px">#</th>
             <th>Código</th>
-            <th>Descripción de la pieza</th>
+            <th>Descripción de la pieza <a href="javascript:void(0);" class="btn-link link-dark ordenar" data-opt="pie_desc"><i class="fa-solid fa-caret-<?=$class_order_desc?>"></a></i></th>
             <th>Peso</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Stock Act.</th>
+            <th>Precio <a href="javascript:void(0);" class="btn-link link-dark ordenar" data-opt="pie_precio"><i class="fa-solid fa-caret-<?=$class_order_prec?>"></a></th>
+            <th>Cantidad <a href="javascript:void(0);" class="btn-link link-dark ordenar" data-opt="pie_cant"><i class="fa-solid fa-caret-<?=$class_order_cant?>"></a></th>
+            <th>Stock Act. <a href="javascript:void(0);" class="btn-link link-dark ordenar" data-opt="stockActual"><i class="fa-solid fa-caret-<?=$class_order_stoc?>"></a></th>
             <th style="width: 100px">Opciones</th>
         </tr>
     </thead>
     <tbody>
         <?php
-        $presuModel = model('PresupuestoModel');
+        //$presuModel = model('PresupuestoModel');
 
         $RegistrosAMostrar = 50;//paginacion
         
@@ -32,9 +37,10 @@ if($piezas){
             $precio   = $p['pie_precio'];
             $cantidad = $p['pie_cant'];
 
-            $nroEntregados = $presuModel->getStockPieza($id, $estadoPresu = [3], 'e');
+            /* $nroEntregados = $presuModel->getStockPieza($id, $estadoPresu = [3], 'e');
             $nroSalidas    = $presuModel->getStockPieza($id, $estadoPresu = [2,3], 's');
-            $stockAct      = ($cantidad + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($cantidad + $nroEntregados - $nroSalidas);
+            $stockAct      = ($cantidad + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($cantidad + $nroEntregados - $nroSalidas); */
+            $stockAct = $p['stockActual'];
 
             $arr = json_encode(
                 [
@@ -78,12 +84,12 @@ if($piezas){
         <div class="<?=$totalRegistros <= 50 ? 'd-none' : ''?>">
             <ul class="pagination pagination-sm m-0 float-end">
                 <li class="page-item <?=$PagAct > ($PaginasIntervalo + 1) ? '' : 'd-none'?>">
-                    <a class="page-link" href="javascript:;" onclick="listarPiezas(1,'<?=$cri?>')">«</a>
+                    <a class="page-link" href="javascript:;" onclick="listarPiezas(1,'<?=$cri?>','<?=$campo?>','<?=$order?>')">«</a>
                 </li>
                 <?php
                 for ( $i = ($PagAct - $PaginasIntervalo) ; $i <= ($PagAct - 1) ; $i ++) {
                     if($i >= 1) {
-                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\",\"$campo\",\"$order\")'>$i</a></li>";
                     }
                 }
                 ?>
@@ -91,12 +97,12 @@ if($piezas){
                 <?php
                 for ( $i = ($PagAct + 1) ; $i <= ($PagAct + $PaginasIntervalo) ; $i ++) {
                     if( $i <= $PagUlt) {
-                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\")'>$i</a></li>";
+                        echo "<li class='page-item'><a class='page-link' href='javascript:;' onclick='listarPiezas($i,\"$cri\",\"$campo\",\"$order\")'>$i</a></li>";
                     }
                 }
                 ?>
                 <li class="page-item <?=$PagAct < ($PagUlt - $PaginasIntervalo) ? '' : 'd-none'?>">
-                    <a class="page-link" href="#" onclick="listarPiezas(<?=$PagUlt?>,'<?=$cri?>')">»</a>
+                    <a class="page-link" href="#" onclick="listarPiezas(<?=$PagUlt?>,'<?=$cri?>','<?=$campo?>','<?=$order?>')">»</a>
                 </li>
             </ul>
         </div>
@@ -149,5 +155,22 @@ $(".eliminar").on('click', function(e){
             });
         }
     });
+});
+
+$(".ordenar").on('click', function(e){
+    let opt = $(this).data('opt');
+    let order = '';
+    if( $(this).children().hasClass('fa-caret-down') ){
+        $(this).children().removeClass('fa-caret-down')
+        $(this).children().addClass('fa-caret-up');
+        order = 'ASC';
+    }else{
+        $(this).children().removeClass('fa-caret-up')
+        $(this).children().addClass('fa-caret-down');
+        order = 'DESC';
+    }
+    listarPiezas(1, '<?=$cri?>', opt, order);
+
+    console.log(opt, order)
 });
 </script>

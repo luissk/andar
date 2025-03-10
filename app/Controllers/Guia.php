@@ -233,9 +233,10 @@ class Guia extends BaseController
                         $pie_desc = $pieza['pie_desc'];
                         $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
 
-                        $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [3],'e');
+                        /* $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [3],'e');
                         $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3], 's');
-                        $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
+                        $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
+                        $stockAct = $pieza['stockActual'];
                         $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
 
                         $arr_e = array_filter($arr_existentes, fn($pie) => $pie['idpie'] == $pi['idpie']);

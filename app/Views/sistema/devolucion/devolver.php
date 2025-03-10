@@ -128,9 +128,10 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                     $stockIni      = $pieza_bd['pie_cant'];
                                     $cantReq       = $pi['req'];
                 
-                                    $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
+                                    /* $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
                                     $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3], 's');
-                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas);
+                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
+                                    $stockAct      = $pieza_bd['stockActual'];
                                     $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
 
                                     $stock_que_sale = $pi['st_sale'];

@@ -93,16 +93,16 @@
 <?php echo $this->section('scripts');?>
 
 <script>
-function listarPiezas(page, cri = ''){
+function listarPiezas(page, cri = '', campo = 'pie_desc', order = 'ASC'){
     $("#divListar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> CARGANDO DATOS');
     $.post('listar-piezas', {
-        page,cri
+        page,cri,campo,order
     }, function(data){
         $("#divListar").html(data);
     })
 }
 
-listarPiezas(1);
+listarPiezas(1, cri = '', campo = 'pie_desc', order = 'ASC');
 
 function limpiarCampos(){
     $("#frmPieza")[0].reset();

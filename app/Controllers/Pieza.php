@@ -34,17 +34,22 @@ class Pieza extends BaseController
                 exit();
             }
             
-            $page = $this->request->getVar('page');
-            $cri  = trim($this->request->getVar('cri'));
+            $page  = $this->request->getVar('page');
+            $cri   = trim($this->request->getVar('cri'));
+            $campo = trim($this->request->getVar('campo'));
+            $order = trim($this->request->getVar('order'));
+            //print_r($_POST);
 
             $desde        = $page * 50 - 50;
             $hasta        = 50;
             $data['page'] = $page;
 
             $cri = strlen($cri) > 2 ? $cri : '';
-            $data['cri'] = $cri;
+            $data['cri']   = $cri;
+            $data['campo'] = $campo;
+            $data['order'] = $order;
 
-            $data['piezas']         = $this->modeloPieza->getPiezas($desde, $hasta, $cri);
+            $data['piezas']         = $this->modeloPieza->getPiezas($desde, $hasta, $cri, $campo, $order);
             $data['totalRegistros'] = $this->modeloPieza->getPiezasCount($cri)['total'];
 
             return view('sistema/piezas/listar', $data);
