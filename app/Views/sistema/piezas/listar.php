@@ -1,12 +1,17 @@
 <?php
 if($piezas){
     //print_r($piezas);
-    echo "$campo - $order";
+    //echo "$campo - $order";
     $class_order_desc = $campo == 'pie_desc' && $order    == 'ASC' ? 'up': 'down';
     $class_order_prec = $campo == 'pie_precio' && $order  == 'DESC' ? 'down': 'up';
     $class_order_cant = $campo == 'pie_cant' && $order    == 'DESC' ? 'down': 'up';
     $class_order_stoc = $campo == 'stockActual' && $order == 'DESC' ? 'down': 'up';
 ?>
+<div class="row">
+    <div class="col-sm-12">
+        <a href="piezas-a-excel" title="Reporte a Excel" class="text-success fs-4" target="_blank"><i class="fa-solid fa-file-excel"></i></a>
+    </div>
+</div>
 
 <table class="table table-bordered">
     <thead>

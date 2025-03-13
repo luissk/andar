@@ -36,6 +36,7 @@ $routes->get('piezas', 'Pieza::index');
 $routes->post('listar-piezas', 'Pieza::listarPiezas');
 $routes->post('registro-pieza', 'Pieza::registrarPieza');
 $routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
+$routes->get('piezas-a-excel', 'Pieza::reporteExcel');
 
 $routes->get('torres', 'Torre::index');
 $routes->get('piezas-select-ajax', 'Torre::listarPiezasAjaxSelect2');

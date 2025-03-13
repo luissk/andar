@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 class Pieza extends BaseController
 {
     protected $modeloUsuario;
@@ -238,6 +241,66 @@ class Pieza extends BaseController
                 </script>';
             }
         }
+    }
+
+
+    public function reporteExcel(){
+        if(!session('idusuario')){
+            return redirect()->to('/');
+        }
+        $piezas = $this->modeloPieza->getPiezas(0, 200);        
+
+        $spreadsheet = new Spreadsheet();
+        $sheet       = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'NRO');
+        $sheet->setCellValue('B1', 'CODIGO');
+        $sheet->setCellValue('C1', 'PIEZA');
+        $sheet->setCellValue('D1', 'PESO');
+        $sheet->setCellValue('E1', 'PRECIO');
+        $sheet->setCellValue('F1', 'STOCK INI');
+        $sheet->setCellValue('G1', 'STOCK ACT');
+        
+        $cont = 0;
+        $rows = 2;
+        foreach($piezas as $p){
+            $cont++;
+            $idpieza  = $p['idpieza'];
+            $codigo   = $p['pie_codigo'];
+            $desc     = $p['pie_desc'];
+            $fecha    = $p['pie_fechareg'];
+            $peso     = $p['pie_peso'];
+            $precio   = $p['pie_precio'];
+            $stockIni = $p['pie_cant'];
+            $stockAct = $p['stockActual'];
+
+            $sheet->setCellValue('A'.$rows, $cont);
+            $sheet->setCellValue('B'.$rows, $codigo);
+            //$sheet->getCell('B'.$rows, $codigo)->getStyle()->getNumberFormat()->setFormatCode('#');
+            $sheet->setCellValue('C'.$rows, $desc);
+            $sheet->setCellValue('D'.$rows, $peso);
+            $sheet->setCellValue('E'.$rows, $precio);
+            $sheet->setCellValue('F'.$rows, $stockIni);
+            $sheet->setCellValue('G'.$rows, $stockAct);
+            $rows++;
+        }
+        foreach (range('A','G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        /* 
+        $file_name = 'public/reporte-piezas.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($file_name);
+        $ruta = base_url().'/'.$file_name;                
+        echo "<script>window.open('".$ruta."','_blank' )</script>"; */
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="piezas.xls"');
+        header('Cache-Control: max-age=0');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xls');
+        $writer->save('php://output');
+        
     }
 
 
