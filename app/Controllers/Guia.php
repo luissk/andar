@@ -430,7 +430,7 @@ class Guia extends BaseController
         $data['title']           = "Devoluciones del Sistema | ".help_nombreWeb();
         $data['devolLinkActive'] = 1;
 
-        if( $guia = $this->modeloGuia->getGuia($id,[2,3]) ){
+        if( $guia = $this->modeloGuia->getGuia($id,[2,3]) ){            
             $idpresu              = $guia['idpresupuesto'];
             $data['nroGuia']      = $guia['gui_nro'];
             $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($idpresu);
@@ -494,7 +494,25 @@ class Guia extends BaseController
                 print_r($items);
                 print_r($arr_items);
                 echo "</pre>"; */
-                if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, $fechadevo, $completo, 3) ){
+
+                //para track guia
+                $fecha_track = date('d/m/Y h:i a');
+
+                if( $guia['guia_track'] != '' ){
+                    $arr_track = json_decode($guia['guia_track'], true);
+                }
+                $arr_track[] = array(
+                    'fecha' => $fecha_track,
+                    'items' => $items
+                );
+                echo "<pre>";
+                print_r($arr_track);
+                echo $guia['guia_track'];
+                echo "</pre>";
+                exit(); 
+                //fin track guia
+
+                if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, $fechadevo, $completo, json_encode($arr_track), 3) ){
                     if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_items), 3, $guia['idpresupuesto']) ){
                         echo '<script>
                             Swal.fire({

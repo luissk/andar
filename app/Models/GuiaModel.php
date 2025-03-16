@@ -17,7 +17,7 @@ class GuiaModel extends Model{
 
         $query = "select gui.idguia,gui.gui_nro,gui.gui_fecha,gui.gui_fechatraslado,gui.gui_motivo,gui.gui_motivodesc,gui.gui_ptopartida,gui.gui_direccionp,
         gui.gui_ptollegada,gui.gui_direccionll,gui.gui_placa,gui.idpresupuesto,gui.idtransportista,gui.gui_completa,gui.gui_status,gui.gui_fechaent,gui.gui_fechadev,
-        gui.gui_devcompleta,
+        gui.gui_devcompleta,gui.guia_track,
         pre.idcliente,pre.pre_piezas,pre.pre_verpiezas,pre.pre_status,
         tran.tra_nombres,tran.tra_apellidos,tran.tra_dni,tran.tra_telef,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact
@@ -51,7 +51,7 @@ class GuiaModel extends Model{
     public function getGuia($idguia, $estado = [2,3]){
         $query = "select gui.idguia,gui.gui_nro,gui.gui_fecha,gui.gui_fechatraslado,gui.gui_motivo,gui.gui_motivodesc,gui.gui_ptopartida,gui.gui_direccionp,
         gui.gui_ptollegada,gui.gui_direccionll,gui.gui_placa,gui.idpresupuesto,gui.idtransportista,gui.gui_completa,gui.gui_status,gui.gui_fechaent,gui.gui_fechadev,
-        gui.gui_devcompleta,
+        gui.gui_devcompleta,gui.guia_track,
         pre.idcliente,pre.pre_piezas,pre.pre_verpiezas,pre.pre_status,
         tran.tra_nombres,tran.tra_apellidos,tran.tra_dni,tran.tra_telef,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
@@ -94,10 +94,10 @@ class GuiaModel extends Model{
         return $st;
     }
 
-    public function modificarFechaDevolucionGuia($idguia, $fecha, $completo, $estado){
-        $query = "update guia set gui_fechadev=?,gui_devcompleta=?,gui_status=? where idguia = ?";
+    public function modificarFechaDevolucionGuia($idguia, $fecha, $completo, $track, $estado){
+        $query = "update guia set gui_fechadev=?,gui_devcompleta=?,guia_track=?,gui_status=? where idguia = ?";
 
-        $st = $this->db->query($query, [$fecha, $completo, $estado, $idguia]);
+        $st = $this->db->query($query, [$fecha, $completo, $track, $estado, $idguia]);
 
         return $st;
     }

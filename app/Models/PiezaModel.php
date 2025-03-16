@@ -13,12 +13,12 @@ class PiezaModel extends Model{
 
     public function getPieza($idpieza){
         $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0) as salidas,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) as entradas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
         (
             pie_cant + 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) - 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0)
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) - 
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0)
         ) as stockActual
         from pieza where idpieza = ?";
 
@@ -31,12 +31,12 @@ class PiezaModel extends Model{
         $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0) as salidas,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) as entradas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
         (
             pie_cant + 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) - 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0)
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) - 
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0)
         ) as stockActual
         from pieza 
         where idpieza is not null $sql order by pie_desc asc";
@@ -50,12 +50,12 @@ class PiezaModel extends Model{
         $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0) as salidas,
-        ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) as entradas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
+        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
         (
             pie_cant + 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'ingresa') from presupuesto where pre_status in(3) ), 0) - 
-            ifnull(( select calcularStock(pre_piezas, idpieza, 'st_sale') from presupuesto where pre_status in(2,3) ), 0)
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) - 
+            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0)
         ) as stockActual
         from pieza 
         where idpieza is not null $sql order by $campo $order

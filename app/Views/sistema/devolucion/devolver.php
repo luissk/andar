@@ -69,7 +69,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                 <p class="mt-4 fw-bolder border-bottom border-black">PIEZAS</p>
                             </div>
                             <div class="col-sm-12 table-responsive">                           
-                                <table class="table">
+                                <table class="table" id="tbl_piezas">
                                 <?php
                                 $presuModel = model('PresupuestoModel');
                                 $torreModel = model('TorreModel');
@@ -85,6 +85,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                 }, $pre_piezas_bd);
 
                                 $newarr = [];
+                                //$ya_ingreso_algo = FALSE;//para saber si el array tiene ingresos. Sirve para editar
                                 foreach( $arr_aux as $ax ){
                                     if( in_array($ax['idpie'], array_column($newarr, 'idpie')) ){
                                         $aa = array_filter($newarr, fn($v) => $v['idpie'] == $ax['idpie']);
@@ -102,6 +103,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
 
                                         if( array_key_exists('ingresa', $ax) ){//editar
                                             $newarr[$aa]['ingresa'] = $newarr[$aa]['ingresa'] + $ax['ingresa'];
+                                            //$ya_ingreso_algo = TRUE;
                                         }
 
                                         continue;
@@ -113,6 +115,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
 
                                 echo "<tr>";
                                 echo "<th>N°</th>";
+                                echo "<th>Código</th>";
                                 echo "<th>Piezas</th>";                                    
                                 echo "<td class='text-center'>Cant. Salió</td>";
                                 echo "<td class='text-center'>Cant. Ingresa</td>";
@@ -128,24 +131,39 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                     $stockIni      = $pieza_bd['pie_cant'];
                                     $cantReq       = $pi['req'];
                 
-                                    /* $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
-                                    $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3], 's');
-                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
                                     $stockAct      = $pieza_bd['stockActual'];
                                     $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
 
                                     $stock_que_sale = $pi['st_sale'];
                                     $stock_input_default = $pi['st_sale'];
 
+                                    $readonly = $stock_que_sale == 0 ? 'readonly' : '';//cuando lo que salio es cero, el input debe estar READONLY
+                                    $checkbox = FALSE;//para visualizar el checkbox
+                                    $pintar_fila = '';//para resaltar la fila que aun tiene pendiente de stock
+
                                     if( array_key_exists('ingresa', $pi) ){//editar
                                         $stock_input_default = $pi['ingresa'];
-                                    }
 
-                                    echo "<tr>";
+                                        if( $stock_que_sale > 0 && $stock_input_default == $stock_que_sale ){//si lo que salio y lo que ingresa es igual, readonly a la caja y un checkbox
+                                            $readonly = 'readonly';
+                                            $checkbox = TRUE;
+                                        }
+
+                                        if( $stock_que_sale > 0 && $stock_input_default < $stock_que_sale ){//pinta lo que falta
+                                            $pintar_fila = 'class="bg-danger-subtle"';
+                                        }
+                                    }                                    
+
+                                    echo "<tr $pintar_fila>";
                                     echo "<td>$cont</td>";
+                                    echo "<td>$piecodigo</td>";
                                     echo "<td>$piedesc</td>";                                                                                 
                                     echo "<td class='text-center'>$stock_que_sale</td>";
-                                    echo "<td class='text-center'><input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale id='cant-$idpieza' value=$stock_input_default /></td>";
+                                    echo "<td class='text-center'>";
+                                    echo "<input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale id='cant-$idpieza' value=$stock_input_default $readonly />";
+                                    if( $checkbox )
+                                        echo "&nbsp;<input type='checkbox' id='chk-$idpieza' onclick='habilitarCaja($idpieza, this)' />";
+                                    echo "</td>";
                                     echo "</tr>";
                                     
                                 }
@@ -214,8 +232,8 @@ $(function(){
                 cant = Number(v.value),
                 salio = Number(v.getAttribute('data-sale'));
 
-            if( cant == '' ){
-                men = 'Ingrese las cantidades que ingresan';
+            if( cant == '' && salio > 0 ){
+                men = 'Coloque las cantidades que ingresan';
                 Swal.fire({title: men, icon: "error"});
                 return;
             }
@@ -250,6 +268,16 @@ $(function(){
     });
 
 });
+
+function habilitarCaja(idpieza, event){
+    console.dir(event.checked)
+    console.log(idpieza);
+    if( event.checked ){
+        $("#cant-" + idpieza).removeAttr('readonly');
+    }else{
+        $("#cant-" + idpieza).attr('readonly', true);
+    }
+}
 </script>
 
 <?php echo $this->endSection();?>

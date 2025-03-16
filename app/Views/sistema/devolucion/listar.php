@@ -40,6 +40,8 @@ if($guias){
             $cli_nombrerazon   = $g['cli_nombrerazon'];
             $estadoguia        = help_statusPresu($g['gui_status']);
 
+            $stilodev = $g['gui_devcompleta'] == 1 ? '' : 'fw-bolder text-danger';
+
             echo "<tr>";
 
             echo "<td>$cont</td>";
@@ -49,7 +51,7 @@ if($guias){
             echo "<td>$gui_fechatraslado</td>";
             //echo "<td>$gui_fechaent</td>";
             echo "<td>$gui_fechadev</td>";
-            echo "<td>$gui_estdev</td>";
+            echo "<td class='$stilodev'>$gui_estdev</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo "<td>$cli_dniruc</td>";
             echo '<td class="d-flex justify-content-center">';
