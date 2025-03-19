@@ -85,7 +85,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                 }, $pre_piezas_bd);
 
                                 $newarr = [];
-                                //$ya_ingreso_algo = FALSE;//para saber si el array tiene ingresos. Sirve para editar
+                                $ya_ingreso = FALSE;//para saber si el array tiene ingresos. Sirve para editar
                                 foreach( $arr_aux as $ax ){
                                     if( in_array($ax['idpie'], array_column($newarr, 'idpie')) ){
                                         $aa = array_filter($newarr, fn($v) => $v['idpie'] == $ax['idpie']);
@@ -103,7 +103,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
 
                                         if( array_key_exists('ingresa', $ax) ){//editar
                                             $newarr[$aa]['ingresa'] = $newarr[$aa]['ingresa'] + $ax['ingresa'];
-                                            //$ya_ingreso_algo = TRUE;
+                                            $ya_ingreso = TRUE;
                                         }
 
                                         continue;
@@ -118,7 +118,10 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                 echo "<th>Código</th>";
                                 echo "<th>Piezas</th>";                                    
                                 echo "<td class='text-center'>Cant. Salió</td>";
-                                echo "<td class='text-center'>Cant. Ingresa</td>";
+                                if( $ya_ingreso )
+                                    echo "<td class='text-center'>Cant. Pend.</td>";
+                                else
+                                    echo "<td class='text-center'>Cant. Ingresa</td>";
                                 echo "</tr>";
                                 $cont = 0;
                                 foreach( $newarr as $pi ){                                                        
@@ -140,27 +143,30 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                     $readonly = $stock_que_sale == 0 ? 'readonly' : '';//cuando lo que salio es cero, el input debe estar READONLY
                                     $checkbox = FALSE;//para visualizar el checkbox
                                     $pintar_fila = '';//para resaltar la fila que aun tiene pendiente de stock
+                                    $stock_ya_ingresado = 0; //para saber cuanto ya ingresó anteriormente
 
                                     if( array_key_exists('ingresa', $pi) ){//editar
-                                        $stock_input_default = $pi['ingresa'];
+                                        $stock_ya_ingresado = $pi['ingresa'];                                        
 
-                                        if( $stock_que_sale > 0 && $stock_input_default == $stock_que_sale ){//si lo que salio y lo que ingresa es igual, readonly a la caja y un checkbox
-                                            $readonly = 'readonly';
-                                            $checkbox = TRUE;
-                                        }
-
-                                        if( $stock_que_sale > 0 && $stock_input_default < $stock_que_sale ){//pinta lo que falta
+                                        if( $stock_que_sale > 0 && $stock_ya_ingresado < $stock_que_sale ){//pinta lo que falta
                                             $pintar_fila = 'class="bg-danger-subtle"';
                                         }
+
+                                        if( $stock_que_sale > 0 && $stock_ya_ingresado == $stock_que_sale ){//si lo que salio y lo que ingresa es igual, readonly a la caja y un checkbox
+                                            $readonly = 'readonly';
+                                            $checkbox = TRUE;                                            
+                                        }
+
+                                        $stock_input_default = $stock_que_sale - $stock_ya_ingresado;
                                     }                                    
 
                                     echo "<tr $pintar_fila>";
                                     echo "<td>$cont</td>";
                                     echo "<td>$piecodigo</td>";
                                     echo "<td>$piedesc</td>";                                                                                 
-                                    echo "<td class='text-center'>$stock_que_sale</td>";
+                                    echo "<td class='text-center'>$stock_que_sale - $stock_ya_ingresado</td>";
                                     echo "<td class='text-center'>";
-                                    echo "<input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale id='cant-$idpieza' value=$stock_input_default $readonly />";
+                                    echo "<input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale data-yaingresado=$stock_ya_ingresado id='cant-$idpieza' value=$stock_input_default $readonly />";
                                     if( $checkbox )
                                         echo "&nbsp;<input type='checkbox' id='chk-$idpieza' onclick='habilitarCaja($idpieza, this)' />";
                                     echo "</td>";
@@ -230,22 +236,31 @@ $(function(){
         $('[id^="cant-"').each(function(i, v){
             let idpieza = v.id.split("-")[1],
                 cant = Number(v.value),
-                salio = Number(v.getAttribute('data-sale'));
+                salio = Number(v.getAttribute('data-sale'))
+                yaingresado = Number(v.getAttribute('data-yaingresado'));
 
-            if( cant == '' && salio > 0 ){
+            let resetear = 0;
+            if ( $("#chk-"+idpieza).length && $("#chk-"+idpieza).is(":checked") ) {//si existe el checkobox y esta checkeado
+                resetear    = 1;
+                yaingresado = 0;
+            }
+
+            if( (cant + yaingresado) == '' && salio > 0 ){
                 men = 'Coloque las cantidades que ingresan';
                 Swal.fire({title: men, icon: "error"});
                 return;
             }
 
-            if( cant > salio ){
+            if( (cant + yaingresado) > salio ){
                 men = 'La cantidad que ingresa no puede ser mayor a lo que salió';
                 Swal.fire({title: men, icon: "error"});
                 return;
             }
 
-            items.push({idpieza,cant,salio});
-        });
+            let nuevoingreso = cant;
+
+            items.push({idpieza,cant:(cant + yaingresado),salio,nuevoingreso,yaingresado,resetear});
+        });//HACER LOGICA CHECK BOX RESETEARRR
         
 
         if( men != '' ){
@@ -270,12 +285,13 @@ $(function(){
 });
 
 function habilitarCaja(idpieza, event){
-    console.dir(event.checked)
-    console.log(idpieza);
+    //console.dir(event.checked)
+    //console.log(idpieza);
     if( event.checked ){
         $("#cant-" + idpieza).removeAttr('readonly');
     }else{
         $("#cant-" + idpieza).attr('readonly', true);
+        $("#cant-" + idpieza).val(0);
     }
 }
 </script>

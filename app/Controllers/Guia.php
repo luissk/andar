@@ -491,7 +491,7 @@ class Guia extends BaseController
                 }                
                 /* echo "<pre>";
                 echo $completo;
-                print_r($items);
+                //print_r($items);
                 print_r($arr_items);
                 echo "</pre>"; */
 
@@ -505,11 +505,11 @@ class Guia extends BaseController
                     'fecha' => $fecha_track,
                     'items' => $items
                 );
-                echo "<pre>";
+                /* echo "<pre>";
                 print_r($arr_track);
                 echo $guia['guia_track'];
                 echo "</pre>";
-                exit(); 
+                exit(); */ 
                 //fin track guia
 
                 if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, $fechadevo, $completo, json_encode($arr_track), 3) ){
