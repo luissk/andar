@@ -19,7 +19,8 @@ $iddistll_bd   = $guia_bd['iddistll'];
 $direcp_bd     = $guia_bd['gui_direccionp'];
 $direcll_bd    = $guia_bd['gui_direccionll'];
 $placa_bd      = $guia_bd['gui_placa'];
-$fechadev_bd      = $guia_bd['gui_fechadev'];
+$fechadev_bd   = $guia_bd['gui_fechadev'];
+$track_bd      = $guia_bd['guia_track'];
 
 $status = $guia_bd['gui_status'];
 
@@ -59,9 +60,29 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
 
                         <div class="row pt-3">
                             <div class="col-sm-3 mb-3">
-                                <label for="fechadevo" class="form-label">Fecha Devoclución</label>
+                                <label for="fechadevo" class="form-label">Fecha Devolución</label>
                                 <input type="date" class="form-control" name="fechadevo" id="fechadevo" value="<?=$fecha_dev?>">
                             </div>
+
+                            <?php
+                            if( $track_bd != '' ){
+                                $ingresos = json_decode($track_bd, true);
+                            ?>
+                            <div class="col-sm-3 mb-3">
+                                <span>Ya ingresados</span>
+                                <ul class="list-group">
+                                    <?php
+                                    foreach( $ingresos as $in ){
+                                        $fecha = $in['fecha'];
+                                        $fecha_url = date('d-m-Y h:i:s a', strtotime(str_replace("/","-",$fecha)));
+                                        echo "<li class='list-group-item'><a href='javascript:void(0);' class='btn-link' onclick='verEnPdf($idguia_bd,\"$fecha_url\")'>$fecha_url</a></li>";
+                                    }
+                                    ?>
+                                </ul>
+                            </div>
+                            <?php
+                            }
+                            ?>
                         </div>
 
                         <div class="row">
@@ -164,7 +185,7 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                                     echo "<td>$cont</td>";
                                     echo "<td>$piecodigo</td>";
                                     echo "<td>$piedesc</td>";                                                                                 
-                                    echo "<td class='text-center'>$stock_que_sale - $stock_ya_ingresado</td>";
+                                    echo "<td class='text-center'>$stock_que_sale</td>";
                                     echo "<td class='text-center'>";
                                     echo "<input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale data-yaingresado=$stock_ya_ingresado id='cant-$idpieza' value=$stock_input_default $readonly />";
                                     if( $checkbox )
@@ -201,6 +222,21 @@ $fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
                     </div>
                 </div>
             </div>            
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalPdfGuia" tabindex="-1" aria-labelledby="modalPdfGuiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h1 class="modal-title fs-5" id="tituloModal">Ingreso PDF</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" id="pdf_div">
+
+            </div>
         </div>
     </div>
 </div>
@@ -293,6 +329,14 @@ function habilitarCaja(idpieza, event){
         $("#cant-" + idpieza).attr('readonly', true);
         $("#cant-" + idpieza).val(0);
     }
+}
+
+function verEnPdf(id, fecha){
+    $("#modalPdfGuia").modal('show');
+    
+    var iframe = $('<iframe width="100%" height="100%">');
+    iframe.attr('src','pdf-guia-ingreso/'+id+'/'+fecha);
+    $('#pdf_div').html(iframe);
 }
 </script>
 

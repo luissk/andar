@@ -496,7 +496,7 @@ class Guia extends BaseController
                 echo "</pre>"; */
 
                 //para track guia
-                $fecha_track = date('d/m/Y h:i a');
+                $fecha_track = date('d/m/Y h:i:s a');
 
                 if( $guia['guia_track'] != '' ){
                     $arr_track = json_decode($guia['guia_track'], true);
@@ -522,7 +522,7 @@ class Guia extends BaseController
                                 showConfirmButton: false,
                                 allowOutsideClick: false,
                             });
-                            setTimeout(function(){location.href="guias"},1500)
+                            setTimeout(function(){location.href="devoluciones"},1500)
                         </script>';
                     }
                 }
@@ -530,6 +530,29 @@ class Guia extends BaseController
             }           
 
         }
+    }
+
+    public function pdfGuiaIngreso($id,$fecha){
+        $options = new \Dompdf\Options();
+        $options->setIsRemoteEnabled(true);
+        $dompdf = new \Dompdf\Dompdf($options);
+
+        //echo "$id - $fecha";
+        if( $guia = $this->modeloGuia->getGuia($id,[3]) ){
+            $data['params'] = $this->modeloParametros->getParametros();
+
+            $data['guia']  = $guia;
+            $data['fecha'] = $fecha;
+            $dompdf->loadHtml(view('sistema/devolucion/pdf', $data));
+
+            $dompdf->setPaper('A4', 'portrait');
+
+            $dompdf->render();
+
+            $dompdf->stream("ingreso-$fecha.pdf", array("Attachment" => false));
+        }
+
+        
     }
 
 
