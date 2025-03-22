@@ -201,12 +201,26 @@ class Guia extends BaseController
             $opt            = $this->request->getVar('opt');
             $idpre          = $this->request->getVar('idpre');
             $idguia         = $this->request->getVar('idguia');
+            $nroGuia        = trim($this->request->getVar('nroguia'));
 
             $ubigeop  = $this->modeloUbigeo->getUbigeo($distritop,$provinciap,$departamentop)['idubigeo'];
             $ubigeoll = $this->modeloUbigeo->getUbigeo($distritoll,$provinciall,$departamentoll)['idubigeo'];
 
             if( $idguia != '' && $guia = $this->modeloGuia->getGuia($idguia) ){
-                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2) ){
+                $nroGuia_bd = $guia['gui_nro'];
+                if( $nroGuia != $nroGuia_bd ){
+                    if( $this->modeloGuia->getGuia_x_nroGuia($nroGuia) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Ya existe el número de Guía",
+                                icon: "error"
+                            });
+                        </script>';
+                        exit();
+                    }
+                }
+
+                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia) ){
                     echo '<script>
                         Swal.fire({
                             title: "Guía Modificada",
@@ -220,7 +234,17 @@ class Guia extends BaseController
                 }                        
             }else{
                 //echo "$ubigeop - $ubigeoll";
-                if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){               
+                if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){        
+                    
+                    if( $this->modeloGuia->getGuia_x_nroGuia($nroGuia) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Ya existe el número de Guía",
+                                icon: "error"
+                            });
+                        </script>';
+                        exit();
+                    }
 
                     $piezas = json_decode($presu['pre_piezas'], true);
                     /* echo "<pre>";
@@ -261,7 +285,7 @@ class Guia extends BaseController
                         ));
                     }
 
-                    $nroGuia = $this->modeloGuia->nroGuia()['nro'];
+                    //$nroGuia = $this->modeloGuia->nroGuia()['nro'];
 
                     if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2) ){
                         if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){

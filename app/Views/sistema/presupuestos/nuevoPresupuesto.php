@@ -102,7 +102,7 @@ if( isset($presu_bd) && $presu_bd ){
                         <div class="row">
                             <div class="col-sm-2 mb-3">
                                 <label for="nropre" class="form-label">N° Presupuesto</label>
-                                <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre?>" maxlength="10" disabled>
+                                <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre?>" maxlength="10">
                                 <div id="msj-nropre" class="form-text text-danger"></div>
                             </div>                            
                             <div class="col-sm-2 mb-3">
@@ -430,6 +430,7 @@ $(function(){
         let id = $("#torre").val(),
             text = $("#torre option:selected").text(),
             cant = $("#cantidad").val(),
+            nropre = $("#nropre").val().trim(),
             total = $("#torre option:selected").data('total'),
             piezas = $("#torre option:selected").data('pie');
         
@@ -440,6 +441,7 @@ $(function(){
         else if( $("#cliente").val() == '' ) men = 'Seleccione un cliente';
         else if( id == '' || id == undefined ) men = 'Seleccione una torre';
         else if( cant == '' || cant == undefined ) men = 'Ingrese una cantidad';
+        else if( nropre == '' ) men = 'Ingrese el nro de Presupuesto';
 
         if( men != '' ){
             Swal.fire({title: men, icon: "error"});

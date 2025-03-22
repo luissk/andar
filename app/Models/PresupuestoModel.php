@@ -20,6 +20,14 @@ class PresupuestoModel extends Model{
         return $st->getRowArray();
     }
 
+    public function getPresu_x_nroPresu($nroPre){
+        $query = "select idpresupuesto from presupuesto where pre_numero = ? ";
+
+        $st = $this->db->query($query, [$nroPre]);
+
+        return $st->getRowArray();
+    }
+
     public function insertarPresupuesto($nroPre,$idusuario2,$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP){
         $query = "insert into presupuesto(pre_numero,pre_fechareg,idusuario2,idcliente,pre_porcenprecio,pre_porcsem,pre_periodo,pre_periodonro,pre_piezas,pre_verpiezas,pre_status) 
         values(?,now(),?,?,?,?,?,?,?,?,1)";
@@ -37,10 +45,10 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu,$verP){
-        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=? where idpresupuesto = ? and pre_status=1";
+    public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu,$verP,$nroPre){
+        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=?,pre_numero=? where idpresupuesto = ? and pre_status=1";
 
-        $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$idpresu]);
+        $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$nroPre,$idpresu]);
 
         return $st;
     }

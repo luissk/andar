@@ -6,8 +6,24 @@ use CodeIgniter\Model;
 class GuiaModel extends Model{
 
     public function nroGuia(){
-        $query = "select concat('EG01', '-', lpad(count(idguia) + 1, 8,'0')) as nro FROM guia";
+        $query = "select 
+        concat(
+            'EG01-',
+            LPAD(
+                case when convert(substring(max(gui_nro),6,8),DECIMAL) is NULL then 0 else convert(substring(max(gui_nro),6,8),DECIMAL) end + 1
+                , 8, '0'
+            )
+        ) as nro
+        from guia";
         $st = $this->db->query($query);
+
+        return $st->getRowArray();
+    }
+
+    public function getGuia_x_nroGuia($nroGuia){
+        $query = "select idguia from guia where gui_nro=?";
+
+        $st = $this->db->query($query, [$nroGuia]);
 
         return $st->getRowArray();
     }
@@ -78,10 +94,10 @@ class GuiaModel extends Model{
         return $st;
     }
 
-    public function modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado){
-        $query = "update guia set gui_fechatraslado=?,gui_motivo=?,gui_motivodesc=?,gui_ptopartida=?,gui_direccionp=?,gui_ptollegada=?,gui_direccionll=?,gui_placa=?,idtransportista=?,gui_completa=?,gui_status=? where idguia = ?";
+    public function modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$nroGuia){
+        $query = "update guia set gui_fechatraslado=?,gui_motivo=?,gui_motivodesc=?,gui_ptopartida=?,gui_direccionp=?,gui_ptollegada=?,gui_direccionll=?,gui_placa=?,idtransportista=?,gui_completa=?,gui_status=?,gui_nro=? where idguia = ?";
 
-        $st = $this->db->query($query, [$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$idguia]);
+        $st = $this->db->query($query, [$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$nroGuia,$idguia]);
 
         return $st;
     }

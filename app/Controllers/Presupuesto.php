@@ -181,7 +181,7 @@ class Presupuesto extends BaseController
                 echo "ITEMS VACIO";exit();
             }
 
-            $nroPre  = $this->modeloPresupuesto->nroPresupuesto()['nro'];
+            //$nroPre  = $this->modeloPresupuesto->nroPresupuesto()['nro'];
             $porcsem = $this->modeloParametros->getParametros()['par_porcensem'];
 
             $porcpre    = $this->request->getVar('porcpre');
@@ -190,6 +190,7 @@ class Presupuesto extends BaseController
             $cliente    = $this->request->getVar('cliente');
             $verP       = $this->request->getVar('verP') ? 1: 0;
             $idpre_e    = $this->request->getVar('idpre');
+            $nroPre     = trim($this->request->getVar('nropre'));
 
             //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
@@ -217,7 +218,20 @@ class Presupuesto extends BaseController
             if( $presu_bd = $this->modeloPresupuesto->getPresupuesto($idpre_e) ){
                 //EDITAR
                 //exit();
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP) ){
+                $nroPre_bd = $presu_bd['pre_numero'];
+                if( $nroPre != $nroPre_bd ){
+                    if( $this->modeloPresupuesto->getPresu_x_nroPresu($nroPre) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Ya existe el número de Presupuesto",
+                                icon: "error"
+                            });
+                        </script>';
+                        exit();
+                    }
+                }
+
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
                         $res = FALSE;
                         foreach( $items as $i ){
@@ -242,7 +256,17 @@ class Presupuesto extends BaseController
                         }
                     }
                 }
-            }else{                
+            }else{
+                
+                if( $this->modeloPresupuesto->getPresu_x_nroPresu($nroPre) ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "Ya existe el número de Presupuesto",
+                            icon: "error"
+                        });
+                    </script>';
+                    exit();
+                }
 
                 if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP) ){
                     $res = FALSE;

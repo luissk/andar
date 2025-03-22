@@ -83,9 +83,6 @@ if( isset($guia_bd) && $guia_bd ){
                         </div>
 
                         <div class="row pt-3">
-                            <div class="col-sm-12 mb-3">
-                                Guía: <b><?=$nroGuia?></b>
-                            </div>
                             <div class="col-sm-4 mb-3">
                                 <label for="dias" class="form-label">Transportista</label>
                                 <select class="form-select" name="transportista" id="transportista">
@@ -188,6 +185,10 @@ if( isset($guia_bd) && $guia_bd ){
                             <div class="col-sm-3 mb-3">
                                 <label for="placa" class="form-label">Placa del vehículo</label>
                                 <input type="text" class="form-control" name="placa" id="placa" maxlength="20" value="<?=$placa_bd?>">
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="nroguia" class="form-label">Nro de Guía</label>
+                                <input type="text" class="form-control" name="nroguia" id="nroguia" maxlength="20" value="<?=$nroGuia?>">
                             </div>
                         </div>
 
@@ -426,7 +427,8 @@ $(function(){
         placa = $("#placa").val().trim(),
         idpre = $("#idpre").val(),
         idguia = $("#idguia_bd").val(),
-        opt = $(this).data('opt');
+        opt = $(this).data('opt'),
+        nroguia = $("#nroguia").val().trim();
 
         let men = '';
         if( transportista == '' ) men = 'Seleccione un transportista';
@@ -442,6 +444,7 @@ $(function(){
         else if( distritoll == '' ) men = 'Seleccione un distrito de llegada';
         else if( direccionll == '' ) men = 'Seleccione una dirección de llegada';
         else if( placa == '' ) men = 'Ingrese la placa del vehículo';
+        else if( nroguia == '' ) men = 'Ingrese el Nro de Guía';
 
         if( men != '' ){
             Swal.fire({title: men, icon: "error"});
@@ -452,7 +455,7 @@ $(function(){
 
         $.post('generar-guia',{
             transportista,fechatrasl,motivo,desc_trasl,departamentop,provinciap,distritop,direccionp,
-            departamentoll,provinciall,distritoll,direccionll,placa,opt,idpre,idguia
+            departamentoll,provinciall,distritoll,direccionll,placa,opt,idpre,idguia,nroguia
         }, function(data){
             $(".btnGuia").removeAttr('disabled');
             _this.text(textBtn);
