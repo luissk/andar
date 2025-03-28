@@ -199,7 +199,7 @@ class Cliente extends BaseController
 
             $tablas = ['presupuesto'];
             foreach( $tablas as $t ){
-                $total = $this->modeloUsuario->verificarCliTieneRegEnTablas($idcliente,$t)['total'];
+                $total = $this->modeloCliente->verificarCliTieneRegEnTablas($idcliente,$t)['total'];
                 if( $total > 0 ){
                     $mensaje .= "<div class='text-start'>El cliente tiene $total registros en la tabla '$t'.</div>";
                     $eliminar = TRUE;
@@ -225,7 +225,7 @@ class Cliente extends BaseController
                         icon: "success",
                         showConfirmButton: true,
                     });
-                    listarUsuarios(1);
+                    listarClientes(1);
                 </script>';
             }
         }
