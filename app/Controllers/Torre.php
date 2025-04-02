@@ -110,10 +110,11 @@ class Torre extends BaseController
             $rules = [
                 'desc' => [
                     'label' => 'Descripción', 
-                    'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\-\",\/ 0-9]+$/]|max_length[200]',
+                    //'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\-\",\/ 0-9]+$/]|max_length[200]',
+                    'rules' => 'required|max_length[200]',
                     'errors' => [
                         'required'    => '* La {field} es requerida.',
-                        'regex_match' => '* La {field} no es válida.',
+                        //'regex_match' => '* La {field} no es válida.',
                         'max_length'  => '* La {field} debe contener máximo 200 caracteres.'
                     ]
                 ],
@@ -127,9 +128,9 @@ class Torre extends BaseController
                 ], */
                 'plano' => [
                     'label' => 'Plano', 
-                    'rules' => 'uploaded[plano]|max_size[plano,2048]|mime_in[plano,application/pdf]',
+                    'rules' => 'max_size[plano,2048]|mime_in[plano,application/pdf]',
                     'errors' => [
-                        'uploaded' => '* El {field} es requerido.',
+                        //'uploaded' => '* El {field} es requerido.',
                         'max_size' => '* El {field} no deber ser mayor a 2 MB.',
                         'mime_in'  => '* El extensión es inválida.',
                     ]
@@ -199,11 +200,12 @@ class Torre extends BaseController
             }else{//INSERTAR
                 //plano
                 $carpeta = 'public/uploads/planos/';
-                $nombre_plano = 'plano_'.help_stringRandom(10,2).".pdf";
+                $nombre_plano = $plano->getError() === 0 ? 'plano_'.help_stringRandom(10,2).".pdf" : '';
                 
                 //INSERTAR TORRE
                 if( $idtorre_i = $this->modeloTorre->insertarTorre($desc, $nombre_plano, session('idusuario')) ){
-                    $plano->move($carpeta, $nombre_plano);//plano a carpeta
+                    if( $plano->getError() === 0 )
+                        $plano->move($carpeta, $nombre_plano);//plano a carpeta
 
                     //INSERTAR DETALLE
                     $res = FALSE;

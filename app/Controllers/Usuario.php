@@ -37,7 +37,7 @@ class Usuario extends BaseController
 
         $data['misdatos'] = $this->modeloUsuario->getUsuario(session('idusuario'));
 
-        return view('sistema/usuarios/misDatos', $data);
+        return view('sistema/usuarios/misdatos', $data);
     }
 
     public function cambiarPassword(){

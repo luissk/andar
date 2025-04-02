@@ -263,7 +263,7 @@ function dibujaFilas(){
             <tr style='color:#666; font-size:15px; display:${isChecked}' id='piezas${i.id}' class='piezasOcultas'>
                 <td>${cont}.${cont2}</td>
                 <td>${j[0]}</td>                
-                <td>${j[2]}</td>
+                <td>${j[2] * i.cant}</td>
                 <td>${j[4].toFixed(2)}</td>
                 <td>${(i.cant * j[4]).toFixed(2)}</td>
                 <td></td>

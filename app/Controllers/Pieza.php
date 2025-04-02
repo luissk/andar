@@ -87,10 +87,11 @@ class Pieza extends BaseController
             $rules = [
                 'desc' => [
                     'label' => 'Descripción', 
-                    'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\-\",\/ 0-9]+$/]|max_length[200]',
+                    //'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ.\-\",\/ 0-9]+$/]|max_length[200]',
+                    'rules' => 'required|max_length[200]',
                     'errors' => [
                         'required'    => '* La {field} es requerida.',
-                        'regex_match' => '* La {field} no es válida.',
+                        //'regex_match' => '* La {field} no es válida.',
                         'max_length'  => '* La {field} debe contener máximo 200 caracteres.'
                     ]
                 ],

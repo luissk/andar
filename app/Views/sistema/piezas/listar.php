@@ -50,7 +50,8 @@ if($piezas){
             $arr = json_encode(
                 [
                     $codigo,$desc,$peso,$precio,$cantidad
-                ]
+                ],
+                JSON_HEX_APOS
             );
 
             echo "<tr>";

@@ -100,7 +100,7 @@ echo "</pre>"; */
                                         echo "<tr style='color:#666'>";
                                         echo "<td>$c.$c2</td>";
                                         echo "<td>".$pieza_bd['pie_desc']."</td>";
-                                        echo "<td>".$pi['dtcan']."</td>";
+                                        echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";
                                         echo "<td class='text-end'>".number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem),2,".","")."</td>";
                                         echo "<td class='text-end'>".number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $d['dp_cant'],2,".","")."</td>";
                                         echo "</tr>";
