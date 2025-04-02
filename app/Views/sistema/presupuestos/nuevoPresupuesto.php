@@ -26,6 +26,7 @@ if( isset($presu_bd) && $presu_bd ){
     $porcsem    = $presu_bd['pre_porcsem'];
     $idcliente  = $presu_bd['idcliente'];
     $verP       = $presu_bd['pre_verpiezas'];
+    $tcambio    = $presu_bd['pre_tcambio'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -76,6 +77,7 @@ if( isset($presu_bd) && $presu_bd ){
     $porcsem    = "";
     $idcliente  = "";
     $verP       = "";
+    $tcambio    = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -105,10 +107,15 @@ if( isset($presu_bd) && $presu_bd ){
                                 <input type="text" class="form-control" id="nropre" name="nropre" value="<?=$nroPre?>" maxlength="10">
                                 <div id="msj-nropre" class="form-text text-danger"></div>
                             </div>                            
-                            <div class="col-sm-2 mb-3">
-                                <label for="porcpre" class="form-label">% Precio</label>
+                            <div class="col-sm-1 mb-3">
+                                <label for="porcpre" class="form-label">% Pre.</label>
                                 <input type="text" class="form-control" id="porcpre" name="porcpre" value="<?=$porcprecio?>" maxlength="2">
                                 <div id="msj-porcpre" class="form-text text-danger"></div>
+                            </div>
+                            <div class="col-sm-1 mb-3">
+                                <label for="tcambio" class="form-label">T. Ca.</label>
+                                <input type="text" class="form-control" id="tcambio" name="tcambio" value="<?=$tcambio?>" maxlength="4">
+                                <div id="msj-tcambio" class="form-text text-danger"></div>
                             </div> 
                             <div class="col-sm-2 mb-3">
                                 <label for="dias" class="form-label">Periodo</label>
@@ -297,6 +304,7 @@ function calcular(){//calcularEnPrecioPiezas();
     let nroperiodo = $("#nroperiodo").val();
     let porcsem    = $("#porcsem").val();
     let porcpre    = $("#porcpre").val();
+    let tcambio    = $("#tcambio").val();
     //let suma       = 0;
     
     let p_pre = (1 + porcpre/100),
@@ -305,29 +313,29 @@ function calcular(){//calcularEnPrecioPiezas();
     let monto, tmonto; //para los items
 
     for( let i of items ){
-        let pre_cant = i.total * i.cant;
+        let pre_cant = i.total * i.cant;  
 
         if( periodo == 'd' && nroperiodo <= 6 ){
             //suma += pre_cant / 4 * p_pre * p_sem;
-            monto  = (pre_cant / 4 * p_pre * p_sem) / i.cant;//para items
-            tmonto = pre_cant / 4 * p_pre * p_sem;//para items
+            monto  = (pre_cant / 4 * p_pre * p_sem * tcambio) / i.cant;//para items
+            tmonto = pre_cant / 4 * p_pre * p_sem * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * p_pre * p_sem });
+            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * p_pre * p_sem * tcambio });
         }else if( periodo == 's' ){
             if( nroperiodo < 4 ){
                 //suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
-                monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem) / i.cant;//para items
-                tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem;//para items
+                monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio) / i.cant;//para items
+                tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * nroperiodo * p_pre * p_sem });
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * nroperiodo * p_pre * p_sem * tcambio });
             }
             if( nroperiodo % 4 == 0 ){//es mes
                 let nromes = nroperiodo / 4;
                 //suma += pre_cant * nromes * p_pre;
-                monto  = (pre_cant * nromes * p_pre) / i.cant;//para items
-                tmonto = pre_cant * nromes * p_pre;//para items
+                monto  = (pre_cant * nromes * p_pre * tcambio) / i.cant;//para items
+                tmonto = pre_cant * nromes * p_pre * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nromes * p_pre });
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nromes * p_pre * tcambio });
             }
             if( nroperiodo > 4 && nroperiodo % 4 != 0 ){
                 let res = nroperiodo / 4;
@@ -336,17 +344,17 @@ function calcular(){//calcularEnPrecioPiezas();
                 let sem = 4 * dec;
 
                 //suma += (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);
-                monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem)) / i.cant;//para items
-                tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem);//para items
+                monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio)) / i.cant;//para items
+                tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio);//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem) });
+                calcularEnPrecioPiezas( (a, pr) => { a[4] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem * tcambio) });
             }
         }else if( periodo == 'm' ){
             //suma += pre_cant * nroperiodo * p_pre;
-            monto  = (pre_cant * nroperiodo * p_pre) / i.cant;//para items
-            tmonto = pre_cant * nroperiodo * p_pre;//para items
+            monto  = (pre_cant * nroperiodo * p_pre * tcambio) / i.cant;//para items
+            tmonto = pre_cant * nroperiodo * p_pre * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nroperiodo * p_pre });
+            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nroperiodo * p_pre * tcambio });
         }
 
         let indice = items.findIndex(x => x.id == i.id);
@@ -409,7 +417,7 @@ $(function(){
         }
     });
 
-    $("#porcpre").on('input', function(e){
+    $("#porcpre, #tcambio").on('input', function(e){
         if( items.length > 0 ){
             calcular();
             dibujaFilas();
@@ -436,6 +444,7 @@ $(function(){
         
         let men = '';
         if( $("#porcpre").val().trim() == '' ) men = 'Ingrese un porcentaje de precio';
+        else if( $("#tcambio").val() == '' ) men = 'Ingrese el tip ode cambio';
         else if( $("#periodo").val() == '' ) men = 'Seleccione el periodo';
         else if( $("#nroperiodo").val() == '' ) men = 'Seleccione el Numero de periodo';
         else if( $("#cliente").val() == '' ) men = 'Seleccione un cliente';

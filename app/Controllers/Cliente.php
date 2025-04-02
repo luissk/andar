@@ -75,9 +75,9 @@ class Cliente extends BaseController
             $rules = [
                 'dniruc' => [
                     'label' => 'DNI o RUC', 
-                    'rules' => 'required|regex_match[/^[0-9]+$/]|min_length[8]|max_length[11]',
+                    'rules' => 'permit_empty|regex_match[/^[0-9]+$/]|min_length[8]|max_length[11]',
                     'errors' => [
-                        'required'    => '* El {field} es requerido.',
+                        //'required'    => '* El {field} es requerido.',
                         'min_length'  => '* Como mínimo 8 caracteres para el {field}.',
                         'max_length'  => '* Como máximo 11 caracteres para el {field}.',
                         'regex_match' => '* El {field} sólo contiene números.'
@@ -94,27 +94,27 @@ class Cliente extends BaseController
                 ],
                 'nombrec' => [
                     'label' => 'Nombre de contacto', 
-                    'rules' => 'required|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ. 0-9]+$/]|max_length[100]',
+                    'rules' => 'permit_empty|regex_match[/^[a-zA-ZñÑáéíóúÁÉÍÓÚ. 0-9]+$/]|max_length[100]',
                     'errors' => [
-                        'required'    => '* El {field} es requerido.',
+                        //'required'    => '* El {field} es requerido.',
                         'regex_match' => '* El {field} no es válido.',
                         'max_length'  => '* El {field} debe contener máximo 100 caracteres.'
                     ]
                 ],
                 'correoc' => [
                     'label' => 'Correo de contacto',
-                    'rules' => 'required|valid_email|max_length[100]',
+                    'rules' => 'permit_empty|valid_email|max_length[100]',
                     'errors' => [
-                        'required'    => '* El {field} es requerido.',
+                        //'required'    => '* El {field} es requerido.',
                         'valid_email' => '* El {field} no es válido.',
                         'max_length'  => '* Como máximo 100 caracteres para el {field}.',
                     ]
                 ],
                 'telefc' => [
                     'label' => 'Teléfono de contacto', 
-                    'rules' => 'required|regex_match[/^[0-9]+$/]|min_length[9]|max_length[12]',
+                    'rules' => 'permit_empty|regex_match[/^[0-9]+$/]|min_length[9]|max_length[12]',
                     'errors' => [
-                        'required'    => '* El {field} es requerido.',
+                        //'required'    => '* El {field} es requerido.',
                         'min_length'  => '* Como mínimo 9 caracteres para el {field}.',
                         'max_length'  => '* Como máximo 12 caracteres para el {field}.',
                         'regex_match' => '* El {field} sólo contiene números.'
@@ -132,16 +132,18 @@ class Cliente extends BaseController
 
             if( $cliente_bd ){
                 //MODIFICAR
-                $dniruc_bd = $cliente_bd['cli_dniruc'];
-                if( $dniruc != $dniruc_bd ){
-                    if( $this->modeloCliente->getClientePorDniRuc($dniruc) ){
-                        echo '<script>
-                            Swal.fire({
-                                title: "El Dni o Ruc ya existe",
-                                icon: "error"
-                            });
-                        </script>';
-                        exit();
+                if( $dniruc != '' ){
+                    $dniruc_bd = $cliente_bd['cli_dniruc'];
+                    if( $dniruc != $dniruc_bd ){
+                        if( $this->modeloCliente->getClientePorDniRuc($dniruc) ){
+                            echo '<script>
+                                Swal.fire({
+                                    title: "El Dni o Ruc ya existe",
+                                    icon: "error"
+                                });
+                            </script>';
+                            exit();
+                        }
                     }
                 }
                 if( $this->modeloCliente->modificarCliente($dniruc,$nombrer,$nombrec,$correoc,$telefc,$idcliente) ){
@@ -160,14 +162,16 @@ class Cliente extends BaseController
 
             }else{
                 //INSERTAR
-                if( $this->modeloCliente->getClientePorDniRuc($dniruc) ){
-                    echo '<script>
-                        Swal.fire({
-                            title: "El Dni o Ruc ya existe",
-                            icon: "error"
-                        });
-                    </script>';
-                    exit();
+                if( $dniruc != '' ){
+                    if( $this->modeloCliente->getClientePorDniRuc($dniruc) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "El Dni o Ruc ya existe",
+                                icon: "error"
+                            });
+                        </script>';
+                        exit();
+                    }
                 }
 
                 if( $this->modeloCliente->insertarCliente($dniruc,$nombrer,$nombrec,$correoc,$telefc,session('idusuario')) ){

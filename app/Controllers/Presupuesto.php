@@ -185,6 +185,7 @@ class Presupuesto extends BaseController
             $porcsem = $this->modeloParametros->getParametros()['par_porcensem'];
 
             $porcpre    = $this->request->getVar('porcpre');
+            $tcambio    = $this->request->getVar('tcambio');
             $periodo    = $this->request->getVar('periodo');
             $nroperiodo = $this->request->getVar('nroperiodo');
             $cliente    = $this->request->getVar('cliente');
@@ -231,7 +232,7 @@ class Presupuesto extends BaseController
                     }
                 }
 
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre) ){
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
                         $res = FALSE;
                         foreach( $items as $i ){
@@ -268,7 +269,7 @@ class Presupuesto extends BaseController
                     exit();
                 }
 
-                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP) ){
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio) ){
                     $res = FALSE;
                     foreach( $items as $i ){
                         $idtorre = $i['id'];
