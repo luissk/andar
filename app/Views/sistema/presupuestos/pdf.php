@@ -223,13 +223,15 @@ if( $periodo == 'm' ) $peri = 'Mes';
                             $pieza_bd = $piezaModel->getPieza($pi['idpie']);//solo para sacar los nombres de las piezas, porque los precios de las piezas se obtienen del presupuesto guardado, ya que con esos precios se grabaron
                             $preciop = $pi['piepre'] * $pi['dtcan'];
 
+                            $tott = help_calcularPresu($preciop,$periodo,$nperiodo,$porcprecio,$porcsem) * $d['dp_cant'] * $presu['pre_tcambio'];
+
                             echo "<tr class='piezas'>";
                             echo "<td>$c.$c2</td>";
                             echo "<td>".$pieza_bd['pie_desc']."</td>";
                             echo "<td></td>";
-                            echo "<td>".$pi['dtcan']."</td>";
-                            echo "<td class='price'>S/. ".number_format(help_calcularPresu($preciop,$periodo,$nperiodo,$porcprecio,$porcsem),2,".","")."</td>";
-                            echo "<td class='price'>S/. ".number_format(help_calcularPresu($preciop,$periodo,$nperiodo,$porcprecio,$porcsem) * $d['dp_cant'],2,".","")."</td>";
+                            echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";
+                            echo "<td class='price'>S/. ".number_format($tott/($pi['dtcan'] * $d['dp_cant']),2,".","")."</td>";
+                            echo "<td class='price'>S/. ".number_format($tott,2,".","")."</td>";
                             echo "</tr>";
                         }                                    
                     }

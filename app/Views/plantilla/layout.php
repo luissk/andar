@@ -185,7 +185,7 @@ if(!session('idusuario')){
                                 <li class="nav-item">
                                     <a href="<?=base_url('torres')?>" class="nav-link ps-4 <?php echo isset($torresLinkActive) ? 'active': ''?>">
                                         <i class="fa-solid fa-tower-observation"></i>
-                                        <p>Torres</p>
+                                        <p>Despiece</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">

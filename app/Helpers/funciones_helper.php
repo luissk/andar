@@ -64,8 +64,8 @@ if(!function_exists('help_sendMail')){
 if(!function_exists('help_calcularPresu')){
     function help_calcularPresu($precio,$periodo,$nroperiodo,$porcpre,$porcsem){
         $res = 0;
-        $p_pre = (1 + $porcpre/100);
-        $p_sem = (1 + $porcsem/100);
+        $p_pre = ($porcpre/100);
+        $p_sem = ($porcsem/100);
 
         if( $periodo == 'd' && $nroperiodo <= 6 ){
             $res = $precio / 4 * $p_pre * $p_sem;

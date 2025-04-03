@@ -97,12 +97,15 @@ echo "</pre>"; */
                                         $pieza_bd = $piezaModel->getPieza($pi['idpie']);//solo para sacar los nombres de las piezas, porque los precios de las piezas se obtienen del presupuesto guardado, ya que con esos precios se grabaron
                                         $preciop = $pi['piepre'] * $pi['dtcan'];
 
+                                        //$subt = number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $presupuesto['pre_tcambio'],2,".","");
+                                        $tott = help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $d['dp_cant'] * $presupuesto['pre_tcambio'];
+
                                         echo "<tr style='color:#666'>";
                                         echo "<td>$c.$c2.</td>";
                                         echo "<td>".$pieza_bd['pie_desc']."</td>";
-                                        echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";
-                                        echo "<td class='text-end'>".number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $presupuesto['pre_tcambio'],2,".","")."</td>";
-                                        echo "<td class='text-end'>".number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $d['dp_cant'] * $presupuesto['pre_tcambio'],2,".","")."</td>";
+                                        echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";                                        
+                                        echo "<td class='text-end'>".number_format($tott/($pi['dtcan'] * $d['dp_cant']),2,".","")."</td>";                                        
+                                        echo "<td class='text-end'>".number_format($tott,2,".","")."</td>";
                                         echo "</tr>";
                                     }                                    
                                 }

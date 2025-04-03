@@ -65,7 +65,7 @@ if( isset($presu_bd) && $presu_bd ){
         array_push($items, $item);
     }
 
-    $items = json_encode($items);
+    $items = json_encode($items, JSON_HEX_APOS);
     //print_r($items);
 
 }else{
@@ -109,7 +109,7 @@ if( isset($presu_bd) && $presu_bd ){
                             </div>                            
                             <div class="col-sm-1 mb-3">
                                 <label for="porcpre" class="form-label">% Pre.</label>
-                                <input type="text" class="form-control" id="porcpre" name="porcpre" value="<?=$porcprecio?>" maxlength="2">
+                                <input type="text" class="form-control" id="porcpre" name="porcpre" value="<?=$porcprecio?>" maxlength="5">
                                 <div id="msj-porcpre" class="form-text text-danger"></div>
                             </div>
                             <div class="col-sm-1 mb-3">
@@ -271,7 +271,7 @@ function dibujaFilas(){
                 <td>${cont}.${cont2}</td>
                 <td>${j[0]}</td>                
                 <td>${j[2] * i.cant}</td>
-                <td>${j[4].toFixed(2)}</td>
+                <td>${( (i.cant * j[4])/(j[2] * i.cant) ).toFixed(2)}</td>
                 <td>${(i.cant * j[4]).toFixed(2)}</td>
                 <td></td>
             </tr>
@@ -307,8 +307,8 @@ function calcular(){//calcularEnPrecioPiezas();
     let tcambio    = $("#tcambio").val();
     //let suma       = 0;
     
-    let p_pre = (1 + porcpre/100),
-        p_sem = (1 + porcsem/100);
+    let p_pre = (porcpre/100),
+        p_sem = (porcsem/100);
 
     let monto, tmonto; //para los items
 

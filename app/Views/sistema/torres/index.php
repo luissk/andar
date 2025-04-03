@@ -14,7 +14,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
-                <h4 class="mb-0">Módulo Torres</h4>
+                <h4 class="mb-0">Módulo Despiece</h4>
             </div>
         </div>
     </div>

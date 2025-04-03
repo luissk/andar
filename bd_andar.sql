@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-03-2025 a las 01:21:19
+-- Tiempo de generación: 04-04-2025 a las 01:30:16
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -63,9 +63,8 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`idcliente`, `cli_dniruc`, `cli_nombrerazon`, `cli_nombrecontact`, `cli_correocontact`, `cli_telefcontact`, `idusuario2`, `cli_fechareg`) VALUES
-(1, '20125632148', 'Adecco Consulting S.A.', 'Martin Carlos Oviedo Serna', 'martin_10_88@gmail.com', '951357852', 16, '2025-01-27 14:56:25'),
-(2, '10454872296', 'Luis Alberto Calderón Sánchez', 'Anita Carlota Santiesteban Miranda', 'asantiestebanmiranda@gmail.com', '975089485', 16, '2025-01-27 15:00:19'),
-(3, '20145632145', 'Servicios de Terceros S.A.C.', 'Jorge Zelada Campos', 'jorgito_123456@gmail.com', '985741262', 16, '2025-01-27 15:05:08');
+(1, '', 'Adecco Consulting S.A.', '', '', '', 16, '2025-01-27 14:56:25'),
+(2, '', 'Luis Alberto Calderón Sánchez', 'Anita Carlota Santiesteban Miranda', 'asantiestebanmiranda@gmail.com', '975089485', 16, '2025-01-27 15:00:19');
 
 -- --------------------------------------------------------
 
@@ -96,14 +95,8 @@ CREATE TABLE `detalle_presupuesto` (
 --
 
 INSERT INTO `detalle_presupuesto` (`idpresupuesto`, `idtorre`, `dp_cant`, `dp_precio`) VALUES
-(2, 2, 3, '736.74'),
-(2, 5, 2, '860.48'),
-(2, 6, 1, '316.07'),
-(3, 2, 4, '16914.96'),
-(3, 5, 2, '14816.95'),
-(4, 2, 2, '4981.77'),
-(4, 6, 3, '9617.69'),
-(6, 2, 1, '861.41');
+(12, 7, 1, '12.03'),
+(12, 8, 3, '57.29');
 
 -- --------------------------------------------------------
 
@@ -122,17 +115,10 @@ CREATE TABLE `detalle_torre` (
 --
 
 INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
-(2, 6, 5),
-(2, 66, 3),
-(2, 114, 2),
-(5, 10, 5),
-(5, 37, 4),
-(5, 84, 3),
-(5, 90, 6),
-(5, 111, 8),
-(6, 74, 7),
-(6, 88, 5),
-(6, 90, 4);
+(7, 11, 2),
+(7, 20, 1),
+(8, 38, 1),
+(8, 114, 2);
 
 -- --------------------------------------------------------
 
@@ -176,14 +162,6 @@ CREATE TABLE `guia` (
   `guia_track` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
---
--- Volcado de datos para la tabla `guia`
---
-
-INSERT INTO `guia` (`idguia`, `gui_nro`, `gui_fecha`, `gui_fechatraslado`, `gui_motivo`, `gui_motivodesc`, `gui_ptopartida`, `gui_direccionp`, `gui_ptollegada`, `gui_direccionll`, `gui_placa`, `idpresupuesto`, `idtransportista`, `idusuario2`, `gui_completa`, `gui_status`, `gui_fechaent`, `gui_fechadev`, `gui_devcompleta`, `guia_track`) VALUES
-(14, 'EG01-00000001', '2025-03-14 17:36:19', '2025-03-14', 'e', '', 20506, 'Calle Los Angeles Negros nro 123 - cerca al Mall', 140201, 'dir 2', 'PLCA 01233', 3, 1, 1, 0, 2, NULL, NULL, NULL, NULL),
-(22, 'EG01-00000002', '2025-03-18 19:17:14', '2025-03-18', 'i', '', 40306, 'dir 1', 140204, 'dir 2', 'PLCA 01233', 2, 1, 1, 0, 3, NULL, '2025-03-18', 1, '[{\"fecha\":\"18\\/03\\/2025 07:17 pm\",\"items\":[{\"idpieza\":\"6\",\"cant\":\"0\",\"salio\":\"0\",\"nuevoingreso\":\"0\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"66\",\"cant\":\"3\",\"salio\":\"9\",\"nuevoingreso\":\"3\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"114\",\"cant\":\"5\",\"salio\":\"6\",\"nuevoingreso\":\"5\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"10\",\"cant\":\"10\",\"salio\":\"10\",\"nuevoingreso\":\"10\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"37\",\"cant\":\"8\",\"salio\":\"8\",\"nuevoingreso\":\"8\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"84\",\"cant\":\"6\",\"salio\":\"6\",\"nuevoingreso\":\"6\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"90\",\"cant\":\"11\",\"salio\":\"11\",\"nuevoingreso\":\"11\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"111\",\"cant\":\"0\",\"salio\":\"0\",\"nuevoingreso\":\"0\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"74\",\"cant\":\"3\",\"salio\":\"3\",\"nuevoingreso\":\"3\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"88\",\"cant\":\"4\",\"salio\":\"4\",\"nuevoingreso\":\"4\",\"yaingresado\":\"0\",\"resetear\":\"0\"}]},{\"fecha\":\"18\\/03\\/2025 07:18 pm\",\"items\":[{\"idpieza\":\"6\",\"cant\":\"0\",\"salio\":\"0\",\"nuevoingreso\":\"0\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"66\",\"cant\":\"9\",\"salio\":\"9\",\"nuevoingreso\":\"6\",\"yaingresado\":\"3\",\"resetear\":\"0\"},{\"idpieza\":\"114\",\"cant\":\"6\",\"salio\":\"6\",\"nuevoingreso\":\"1\",\"yaingresado\":\"5\",\"resetear\":\"0\"},{\"idpieza\":\"10\",\"cant\":\"10\",\"salio\":\"10\",\"nuevoingreso\":\"0\",\"yaingresado\":\"10\",\"resetear\":\"0\"},{\"idpieza\":\"37\",\"cant\":\"8\",\"salio\":\"8\",\"nuevoingreso\":\"0\",\"yaingresado\":\"8\",\"resetear\":\"0\"},{\"idpieza\":\"84\",\"cant\":\"6\",\"salio\":\"6\",\"nuevoingreso\":\"0\",\"yaingresado\":\"6\",\"resetear\":\"0\"},{\"idpieza\":\"90\",\"cant\":\"11\",\"salio\":\"11\",\"nuevoingreso\":\"0\",\"yaingresado\":\"11\",\"resetear\":\"0\"},{\"idpieza\":\"111\",\"cant\":\"0\",\"salio\":\"0\",\"nuevoingreso\":\"0\",\"yaingresado\":\"0\",\"resetear\":\"0\"},{\"idpieza\":\"74\",\"cant\":\"3\",\"salio\":\"3\",\"nuevoingreso\":\"0\",\"yaingresado\":\"3\",\"resetear\":\"0\"},{\"idpieza\":\"88\",\"cant\":\"4\",\"salio\":\"4\",\"nuevoingreso\":\"0\",\"yaingresado\":\"4\",\"resetear\":\"0\"}]}]');
-
 -- --------------------------------------------------------
 
 --
@@ -192,7 +170,7 @@ INSERT INTO `guia` (`idguia`, `gui_nro`, `gui_fecha`, `gui_fechatraslado`, `gui_
 
 CREATE TABLE `parametros` (
   `idparametros` int(10) UNSIGNED NOT NULL,
-  `par_porcensem` int(11) NOT NULL,
+  `par_porcensem` decimal(10,2) NOT NULL,
   `par_logo` varchar(100) DEFAULT NULL,
   `par_firma` varchar(100) DEFAULT NULL,
   `par_direcc` varchar(100) DEFAULT NULL,
@@ -205,7 +183,7 @@ CREATE TABLE `parametros` (
 --
 
 INSERT INTO `parametros` (`idparametros`, `par_porcensem`, `par_logo`, `par_firma`, `par_direcc`, `par_telef`, `par_correo`) VALUES
-(2, 12, 'logo.jpeg', 'firma.jpg', 'Av. Tomas Marsano N° 4674 Lima - Lima - Santiago de Surco', '996044983', 'ventas@andamiosandar.com');
+(2, '12.00', 'logo.jpeg', 'firma.jpg', 'Av. Tomas Marsano N° 4674 Lima - Lima - Santiago de Surco', '996044983', 'ventas@andamiosandar.com');
 
 -- --------------------------------------------------------
 
@@ -360,25 +338,23 @@ CREATE TABLE `presupuesto` (
   `pre_correocontact` varchar(100) DEFAULT NULL,
   `idusuario2` int(10) UNSIGNED NOT NULL,
   `idcliente` int(10) UNSIGNED NOT NULL,
-  `pre_porcenprecio` int(11) NOT NULL,
-  `pre_porcsem` int(11) NOT NULL,
+  `pre_porcenprecio` decimal(10,2) NOT NULL,
+  `pre_porcsem` decimal(10,2) NOT NULL,
   `pre_periodo` char(1) NOT NULL,
   `pre_periodonro` tinyint(4) NOT NULL,
   `pre_piezas` text NOT NULL,
   `pre_verpiezas` tinyint(4) NOT NULL,
   `pre_status` tinyint(4) NOT NULL,
-  `pre_devuelto` tinyint(4) NOT NULL
+  `pre_devuelto` tinyint(4) NOT NULL,
+  `pre_tcambio` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `presupuesto`
 --
 
-INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_verpiezas`, `pre_status`, `pre_devuelto`) VALUES
-(2, '0002-2025', '2025-02-11 19:22:32', NULL, 1, 1, 12, 12, 'd', 4, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"3\",\"req\":15,\"falt\":15,\"st_sale\":\"0\",\"ingresa\":\"0\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"3\",\"req\":9,\"falt\":\"\",\"st_sale\":9,\"ingresa\":\"9\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"3\",\"req\":6,\"falt\":\"\",\"st_sale\":6,\"ingresa\":\"6\"},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\",\"req\":10,\"falt\":\"\",\"st_sale\":10,\"ingresa\":\"10\"},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\",\"req\":8,\"falt\":\"\",\"st_sale\":8,\"ingresa\":\"8\"},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\",\"req\":6,\"falt\":\"\",\"st_sale\":6,\"ingresa\":\"6\"},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\",\"req\":12,\"falt\":1,\"st_sale\":\"11\",\"ingresa\":\"11\"},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\",\"req\":16,\"falt\":16,\"st_sale\":\"0\",\"ingresa\":\"0\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"1\",\"req\":7,\"falt\":4,\"st_sale\":\"3\",\"ingresa\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"1\",\"req\":5,\"falt\":1,\"st_sale\":\"4\",\"ingresa\":\"4\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"1\",\"req\":4,\"falt\":4,\"st_sale\":0,\"ingresa\":0}]', 1, 3, 0),
-(3, '0003-2025', '2025-02-11 19:23:00', NULL, 1, 2, 8, 12, 'm', 5, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"4\",\"req\":20,\"falt\":16,\"st_sale\":\"4\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"4\",\"req\":12,\"falt\":\"\",\"st_sale\":12},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"4\",\"req\":8,\"falt\":\"\",\"st_sale\":8},{\"idtor\":\"5\",\"idpie\":\"10\",\"dtcan\":\"5\",\"piepre\":\"4.34\",\"dpcant\":\"2\",\"req\":10,\"falt\":\"\",\"st_sale\":10},{\"idtor\":\"5\",\"idpie\":\"37\",\"dtcan\":\"4\",\"piepre\":\"68.88\",\"dpcant\":\"2\",\"req\":8,\"falt\":\"\",\"st_sale\":8},{\"idtor\":\"5\",\"idpie\":\"84\",\"dtcan\":\"3\",\"piepre\":\"71.64\",\"dpcant\":\"2\",\"req\":6,\"falt\":\"\",\"st_sale\":6},{\"idtor\":\"5\",\"idpie\":\"90\",\"dtcan\":\"6\",\"piepre\":\"53.78\",\"dpcant\":\"2\",\"req\":12,\"falt\":\"\",\"st_sale\":12},{\"idtor\":\"5\",\"idpie\":\"111\",\"dtcan\":\"8\",\"piepre\":\"67.14\",\"dpcant\":\"2\",\"req\":16,\"falt\":\"\",\"st_sale\":16}]', 1, 2, 0),
-(4, '0004-2025', '2025-02-12 10:42:22', NULL, 1, 2, 12, 12, 's', 11, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"2\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"2\"},{\"idtor\":\"6\",\"idpie\":\"74\",\"dtcan\":\"7\",\"piepre\":\"95.41\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"88\",\"dtcan\":\"5\",\"piepre\":\"24.98\",\"dpcant\":\"3\"},{\"idtor\":\"6\",\"idpie\":\"90\",\"dtcan\":\"4\",\"piepre\":\"53.78\",\"dpcant\":\"3\"}]', 1, 1, 0),
-(6, '0005-2025', '2025-03-03 15:34:21', NULL, 1, 2, 10, 12, 'm', 1, '[{\"idtor\":\"2\",\"idpie\":\"6\",\"dtcan\":\"5\",\"piepre\":\"101.31\",\"dpcant\":\"1\"},{\"idtor\":\"2\",\"idpie\":\"66\",\"dtcan\":\"3\",\"piepre\":\"81.19\",\"dpcant\":\"1\"},{\"idtor\":\"2\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"1\"}]', 1, 1, 0);
+INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_verpiezas`, `pre_status`, `pre_devuelto`, `pre_tcambio`) VALUES
+(12, '0001-2025', '2025-04-02 18:19:04', NULL, 1, 1, '4.50', '12.00', 'm', 1, '[{\"idtor\":\"7\",\"idpie\":\"11\",\"dtcan\":\"2\",\"piepre\":\"1.37\",\"dpcant\":\"1\"},{\"idtor\":\"7\",\"idpie\":\"20\",\"dtcan\":\"1\",\"piepre\":\"68.00\",\"dpcant\":\"1\"},{\"idtor\":\"8\",\"idpie\":\"38\",\"dtcan\":\"1\",\"piepre\":\"79.29\",\"dpcant\":\"3\"},{\"idtor\":\"8\",\"idpie\":\"114\",\"dtcan\":\"2\",\"piepre\":\"16.49\",\"dpcant\":\"3\"}]', 1, 1, 0, '3.78');
 
 -- --------------------------------------------------------
 
@@ -418,9 +394,8 @@ CREATE TABLE `torre` (
 --
 
 INSERT INTO `torre` (`idtorre`, `tor_desc`, `tor_plano`, `tor_fechareg`, `idusuario2`) VALUES
-(2, 'Andamios de crucetas o andamio tradicional', 'plano_fo9922vdvm.pdf', '2025-01-29 18:58:08', 1),
-(5, 'Andamios tipo caballete', 'plano_up1xum7ajq.pdf', '2025-01-30 12:00:33', 1),
-(6, 'Andamios eléctricos o con plataforma auto elevadora', 'plano_pyryo2w2uw.pdf', '2025-01-30 12:02:31', 1);
+(7, 'Torre 1', '', '2025-04-01 20:37:19', 1),
+(8, 'Torre 2', '', '2025-04-01 20:37:38', 1);
 
 -- --------------------------------------------------------
 
@@ -443,9 +418,7 @@ CREATE TABLE `transportista` (
 --
 
 INSERT INTO `transportista` (`idtransportista`, `tra_nombres`, `tra_apellidos`, `tra_dni`, `tra_telef`, `idusuario2`, `tra_fechareg`) VALUES
-(1, 'Jony', 'Corcuera Sanchez', '47856932', '975089485', 1, '2025-01-27 10:48:34'),
-(2, 'Daryl The Dog', 'Dixon Green', '12369854', '975089485', 1, '2025-01-27 10:48:43'),
-(3, 'Eugenio', 'Derbez Martinez', '85236987', '987452313', 1, '2025-01-27 10:51:06');
+(1, 'Jony', 'Corcuera Sanchez', '47856932', '975089485', 1, '2025-01-27 10:48:34');
 
 -- --------------------------------------------------------
 
@@ -2586,7 +2559,6 @@ INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `
 (5, '12345678', 'Arnulfo', 'Gallardo Ram', 'arnulfo', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
 (6, '14785236', 'Timoteo', 'Sans Rubio', 'timoteo', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
 (7, '15963254', 'Francisco', 'Rodriguez Chao', 'pancho', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
-(12, '12365498', 'Andres', 'Hurtado Rosquilla', 'chibolin', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 2, 1),
 (16, '12365478', 'Alland', 'Ortega Reyna', 'alan_or', '$2a$12$YmtIBS/VsxVywSQHV4A2.uBXqGmEtpaMTU34EzRFhVoRl2k2sBK5C', '2025-01-25 21:52:12', 1, 1);
 
 --
@@ -2697,7 +2669,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `idcliente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `idcliente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
@@ -2709,7 +2681,7 @@ ALTER TABLE `factura`
 -- AUTO_INCREMENT de la tabla `guia`
 --
 ALTER TABLE `guia`
-  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `parametros`
@@ -2727,7 +2699,7 @@ ALTER TABLE `pieza`
 -- AUTO_INCREMENT de la tabla `presupuesto`
 --
 ALTER TABLE `presupuesto`
-  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `tipousuario`
@@ -2739,7 +2711,7 @@ ALTER TABLE `tipousuario`
 -- AUTO_INCREMENT de la tabla `torre`
 --
 ALTER TABLE `torre`
-  MODIFY `idtorre` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `idtorre` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `transportista`
