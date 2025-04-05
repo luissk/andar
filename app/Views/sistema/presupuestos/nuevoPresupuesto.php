@@ -50,7 +50,7 @@ if( isset($presu_bd) && $presu_bd ){
         $dt_torre   = $torreModel->getDetalleTorre($d['idtorre']);
         $arrDT = [];
         foreach( $dt_torre as $dtt ){
-            array_push($arrDT,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total']]);
+            array_push($arrDT,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total'],$dtt['pie_peso']]);
         }
 
         $item = array(
@@ -163,9 +163,9 @@ if( isset($presu_bd) && $presu_bd ){
 
                                         $arr = [];
                                         foreach( $dt_torre as $dtt ){
-                                            array_push($arr,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total']]);
+                                            array_push($arr,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total'],$dtt['pie_peso']]);
                                         }
-                                        $arr = json_encode($arr);
+                                        $arr = json_encode($arr, JSON_HEX_APOS);
 
                                         echo "<option value='$idtor' data-total='$tor_total' data-pie='$arr'>$tor_desc</option>";
                                     }
@@ -199,8 +199,10 @@ if( isset($presu_bd) && $presu_bd ){
                                             <th style="width: 15px">#</th>
                                             <th>Torres</th>
                                             <th style="width: 80px;">Cantidad</th>
-                                            <th style="width: 90px;">Precio(S/.)</th>
-                                            <th style="width: 90px;">Total(S/.)</th>
+                                            <th style="width: 80px;">Peso U.</th>
+                                            <th style="width: 80px;">Peso T.</th>
+                                            <th style="width: 100px;">Precio U.</th>
+                                            <th style="width: 100px;">Total(S/.)</th>
                                             <th style="width: 80px;">Quitar</th>
                                         </tr>
                                     </thead>
@@ -208,6 +210,7 @@ if( isset($presu_bd) && $presu_bd ){
                                     </tbody>
                                 </table>
                             </div>
+                            <div id="pesoT" class="fw-bolder"></div>
                             <div class="col-sm-12 text-end">
                                 <div class="fw-bolder">SUB TOTAL: S/. <span id="subT">0.00</span></div>
                                 <div class="fw-bolder">IGV(18%): S/. <span id="igv">0.00</span></div>
@@ -246,17 +249,21 @@ let fila = document.querySelector('#tbl_deta');
 
 function dibujaFilas(){
     let filahtml = '';
-    
+    let sumapeso = 0;
     let cont = 0;
     for(let i of items){
         cont++;
+        let toPesoUnit = i.piezas.reduce((pv, cv, ci, arr) => pv + Number(cv[4]), 0);
+        let toPesoTotal = i.piezas.reduce((pv, cv, ci, arr) => pv + Number(cv[4]) * Number(cv[2]) * i.cant, 0);
         filahtml += `
-            <tr>
-            <td id="${i.id}" style='font-weight:600'>
+            <tr style='font-weight:600; color: #666'>
+            <td id="${i.id}">
                 ${cont}
             </td>
             <td>${i.text}</td>
             <td>${i.cant}</td>
+            <td>${toPesoUnit.toFixed(2)}</td>
+            <td>${toPesoTotal.toFixed(2)}</td>
             <td>${i.monto}</td>
             <td>${i.tmonto}</td>
             <td class='text-center'><a onclick="eliminarItem(${i.id})"><i class='fas fa-trash-alt'></i></a></td>
@@ -266,19 +273,24 @@ function dibujaFilas(){
         for(let j of i.piezas){
             cont2++;
             const isChecked = $("#verP").is(":checked") ? '' : 'none';
+            sumapeso += j[4] * (j[2] * i.cant);
             filahtml += `
             <tr style='color:#666; font-size:15px; display:${isChecked}' id='piezas${i.id}' class='piezasOcultas'>
                 <td>${cont}.${cont2}</td>
                 <td>${j[0]}</td>                
                 <td>${j[2] * i.cant}</td>
-                <td>${( (i.cant * j[4])/(j[2] * i.cant) ).toFixed(2)}</td>
-                <td>${(i.cant * j[4]).toFixed(2)}</td>
+                <td>${j[4]}</td>
+                <td>${(j[4] * (j[2] * i.cant)).toFixed(2)}</td>
+                <td>${( (i.cant * j[5])/(j[2] * i.cant) ).toFixed(2)}</td>
+                <td>${(i.cant * j[5]).toFixed(2)}</td>
                 <td></td>
             </tr>
             `;
         }
     }
-    fila.innerHTML = filahtml;    
+    fila.innerHTML = filahtml;
+    
+    $("#pesoT").html(`* Peso Total: ${(sumapeso / 1000).toFixed(2)} Tn`)
 }
 
 function eliminarItem(id){
@@ -291,7 +303,6 @@ function eliminarItem(id){
 
 function calcularEnPrecioPiezas(callback){
     for( let i of items ){
-        //console.log(i.text)
         for(let j of i.piezas){
             let totalPrecioPiezaTorre = j[3];//del detalle de torre(cant piezas para torre * precio de pieza)
             callback(j, totalPrecioPiezaTorre);
@@ -320,14 +331,14 @@ function calcular(){//calcularEnPrecioPiezas();
             monto  = (pre_cant / 4 * p_pre * p_sem * tcambio) / i.cant;//para items
             tmonto = pre_cant / 4 * p_pre * p_sem * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * p_pre * p_sem * tcambio });
+            calcularEnPrecioPiezas( (a, pr) => { a[5] = pr / 4 * p_pre * p_sem * tcambio });
         }else if( periodo == 's' ){
             if( nroperiodo < 4 ){
                 //suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
                 monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio) / i.cant;//para items
                 tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr / 4 * nroperiodo * p_pre * p_sem * tcambio });
+                calcularEnPrecioPiezas( (a, pr) => { a[5] = pr / 4 * nroperiodo * p_pre * p_sem * tcambio });
             }
             if( nroperiodo % 4 == 0 ){//es mes
                 let nromes = nroperiodo / 4;
@@ -335,7 +346,7 @@ function calcular(){//calcularEnPrecioPiezas();
                 monto  = (pre_cant * nromes * p_pre * tcambio) / i.cant;//para items
                 tmonto = pre_cant * nromes * p_pre * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nromes * p_pre * tcambio });
+                calcularEnPrecioPiezas( (a, pr) => { a[5] = pr * nromes * p_pre * tcambio });
             }
             if( nroperiodo > 4 && nroperiodo % 4 != 0 ){
                 let res = nroperiodo / 4;
@@ -347,14 +358,14 @@ function calcular(){//calcularEnPrecioPiezas();
                 monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio)) / i.cant;//para items
                 tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio);//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[4] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem * tcambio) });
+                calcularEnPrecioPiezas( (a, pr) => { a[5] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem * tcambio) });
             }
         }else if( periodo == 'm' ){
             //suma += pre_cant * nroperiodo * p_pre;
             monto  = (pre_cant * nroperiodo * p_pre * tcambio) / i.cant;//para items
             tmonto = pre_cant * nroperiodo * p_pre * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[4] = pr * nroperiodo * p_pre * tcambio });
+            calcularEnPrecioPiezas( (a, pr) => { a[5] = pr * nroperiodo * p_pre * tcambio });
         }
 
         let indice = items.findIndex(x => x.id == i.id);

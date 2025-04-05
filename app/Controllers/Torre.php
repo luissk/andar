@@ -164,6 +164,24 @@ class Torre extends BaseController
             }
 
             if( $torre_bd ){//MODIFICAR
+                //verificar si ya esta presupuesto, si esta no se puede eliminar ni agregar piezas
+                $t = 'detalle_presupuesto';
+                $total = $this->modeloTorre->verificarTorTieneRegEnTablas($id_torree,$t)['total'];
+                if( $total > 0 ){
+                    echo '<script>
+                        Swal.fire({
+                            title: "",
+                            text: "No puedes agregar ni quitar piezas de la torre, porque ya tiene presupuesto(s).",
+                            icon: "error",
+                            showConfirmButton: true,
+                        });
+                        listarTorres(1);
+                        limpiarCampos();
+                        $("#modalTorre").modal("hide");
+                    </script>';
+                    exit();
+                }
+
                 $detalle_bd = $this->modeloTorre->getDetalleTorre($id_torree);
                 $nombre_plano = $plano->getError() === 0 ? 'plano_'.help_stringRandom(10,2).".pdf" : $torre_bd['tor_plano'];
                 if( $plano->getError() === 0 ){

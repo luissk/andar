@@ -186,7 +186,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
             <thead style="background-color: lightgray;">
                 <tr>
                     <th width="40px">Item</th>
-                    <th width="300px">Description</th>
+                    <th width="300px" align="left">Description</th>
                     <th><?=$peri?></th>
                     <th>Cant.</th>
                     <th>Precio Unit.</th>
@@ -201,13 +201,28 @@ if( $periodo == 'm' ) $peri = 'Mes';
 
                 $c = 0;
                 $sum = 0;
+                $pesoTotalPiezas = 0;
                 foreach($detalle as $d){
                     $c++;
                     $sum += $d['dp_precio'];
+
+                    //para sacar los pesos totales
+                    $pesoUnTotal = 0;
+                    $pesoTT = 0;
+                    $piezasFilter = array_filter($piezas, fn($p) => $p['idtor'] == $d['idtorre']);
+                    foreach( $piezasFilter as $pi ){
+                        $pieza_bd = $piezaModel->getPieza($pi['idpie']);
+                        $pie_peso = $pieza_bd['pie_peso'];
+                        $pie_peso_t = $pie_peso * $pi['dtcan'] * $d['dp_cant'];
+                        $pesoUnTotal += $pie_peso;
+                        $pesoTT += $pie_peso_t;
+                    }
+                    $pesoTotalPiezas += $pesoTT;
+                    
                     echo "<tr>";
 
                     echo "<td>$c</td>";
-                    echo "<td>".$d['tor_desc']."</td>";
+                    echo "<td style='text-align:left'>".$d['tor_desc']."</td>";
                     echo "<td>$nperiodo</td>";
                     echo "<td>".$d['dp_cant']."</td>";
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'] / $d['dp_cant'],2,".",",")."</td>";
@@ -227,7 +242,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
 
                             echo "<tr class='piezas'>";
                             echo "<td>$c.$c2</td>";
-                            echo "<td>".$pieza_bd['pie_desc']."</td>";
+                            echo "<td style='text-align:left'>".$pieza_bd['pie_desc']."</td>";
                             echo "<td></td>";
                             echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";
                             echo "<td class='price'>S/. ".number_format($tott/($pi['dtcan'] * $d['dp_cant']),2,".","")."</td>";
@@ -240,9 +255,14 @@ if( $periodo == 'm' ) $peri = 'Mes';
             </tbody>
             <tfoot class="pie_price">
                 <tr>
+                    <th colspan="6" align="left">
+                        * Peso total: <?=number_format($pesoTotalPiezas / 1000,2,".","")?> Tn
+                    </th>
+                </tr>
+                <!-- <tr>
                     <th colspan="5" align="right"><br></th>
                     <th align="right"><br></th>
-                </tr>
+                </tr> -->
                 <tr>
                     <th colspan="5" align="right">SubTotal:</th>
                     <th align="right">S/. <?=number_format($sum,2,".",",")?></th>
