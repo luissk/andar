@@ -299,9 +299,9 @@ $(function(){
             $(this).val('');
             return false;
         }
-        if(sizefile >= 2097152){
+        if(sizefile >= 20971520){
             Swal.fire({
-                text: "El documento de debe ser mayor 2MB",
+                text: "El documento no de debe ser mayor 20 MB",
                 icon: "info"
             });
             $(this).val('');

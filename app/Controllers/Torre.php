@@ -128,10 +128,10 @@ class Torre extends BaseController
                 ], */
                 'plano' => [
                     'label' => 'Plano', 
-                    'rules' => 'max_size[plano,2048]|mime_in[plano,application/pdf]',
+                    'rules' => 'max_size[plano,20480]|mime_in[plano,application/pdf]',
                     'errors' => [
                         //'uploaded' => '* El {field} es requerido.',
-                        'max_size' => '* El {field} no deber ser mayor a 2 MB.',
+                        'max_size' => '* El {field} no deber ser mayor a 20 MB.',
                         'mime_in'  => '* El extensión es inválida.',
                     ]
                 ],

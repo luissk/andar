@@ -9,6 +9,7 @@ if($presupuestos){
             <th style="width: 15px">#</th>
             <th>Fecha</th>
             <th>Nro</th>
+            <th>Torre(s)</th>
             <th>Cliente</th>
             <th>Estado</th>
             <th style="width: 120px">Opciones</th>
@@ -27,23 +28,22 @@ if($presupuestos){
             $cli_nombrerazon = $p['cli_nombrerazon'];
             $pre_status      = $p['pre_status'];
 
-            if( $pre_status == 1 )
+            //if( $pre_status == 1 )
 
-            /* $modeloTorre = model('TorreModel');
-            $detalle = $modeloTorre->getDetalleTorre($id);
-            $arr_dt = json_encode($detalle);
-
-            $arr = json_encode(
-                [
-                    $desc,$plano
-                ]
-            ); */
+            $modeloPresu = model('PresupuestoModel');
+            $torres      = $modeloPresu->getDetallePresupuesto($id);
+            //print_r($torres);
 
             echo "<tr>";
 
             echo "<td>$cont</td>";
-            echo "<td>$pre_fechareg</td>";
+            echo "<td>$pre_fechareg</td>";           
             echo "<td>$pre_numero</td>";
+            echo "<td style='font-size:15px;'>";
+            foreach($torres as $tor){
+                echo "- ".$tor['tor_desc']."<br>";
+            }
+            echo "</td>";
             echo "<td>$cli_nombrerazon</td>";
             echo "<td>".help_statusPresu($pre_status)."</td>";
             echo '<td class="d-flex justify-content-center">';
@@ -108,7 +108,7 @@ if($presupuestos){
 <div id="msjLista"></div>
 
 <div class="modal fade" id="modalDetallePresu" tabindex="-1" aria-labelledby="modalDetallePresuLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <h1 class="modal-title fs-5" id="tituloModal">Detalle de Presupuesto</h1>
