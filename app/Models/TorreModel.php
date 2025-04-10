@@ -59,7 +59,7 @@ class TorreModel extends Model{
     }
 
     public function getDetalleTorre($idtorre){
-        $query = "select dt.idtorre,dt.idpieza,dt.dt_cantidad,pi.pie_desc,pi.pie_precio,(dt.dt_cantidad * pi.pie_precio) total,pi.pie_peso
+        $query = "select dt.idtorre,dt.idpieza,dt.dt_cantidad,pi.pie_codigo,pi.pie_desc,pi.pie_precio,(dt.dt_cantidad * pi.pie_precio) total,pi.pie_peso
         from detalle_torre dt
         inner join pieza pi on dt.idpieza=pi.idpieza
         where dt.idtorre=?";

@@ -49,6 +49,7 @@ echo "</pre>"; */
                         <thead>
                             <tr>
                                 <th style="width: 20px;">#</th>
+                                <th>Codigo</th>
                                 <th>Pieza</th>
                                 <th style="width: 90px;">Cantidad</th>
                                 <th>Precio</th>
@@ -62,20 +63,31 @@ echo "</pre>"; */
                                 $c++;
                                 $sum += ($d['dt_cantidad'] * $d['pie_precio']);
                                 echo '<tr>';
-
+                                
                                 echo '<td>'.$c.'</td>';
+                                echo '<td>'.$d['pie_codigo'].'</td>';
                                 echo '<td>'.$d['pie_desc'].'</td>';
                                 echo '<td>'.$d['dt_cantidad'].'</td>';
                                 echo '<td>S/. '.($d['dt_cantidad'] * $d['pie_precio']).'</td>';
 
                                 echo '</tr>';
                             }
+                            $igv   = $sum * 0.18;
+                            $total = $sum + $igv;
                             ?>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3" class="text-end">Total</th>
+                                <th colspan="4" class="text-end">Sub total</th>
                                 <th>S/. <?=$sum?></th>
+                            </tr>
+                            <tr>
+                                <th colspan="4" class="text-end">IGV</th>
+                                <th>S/. <?=number_format($igv,2,".","")?></th>
+                            </tr>
+                            <tr>
+                                <th colspan="4" class="text-end">Total</th>
+                                <th>S/. <?=number_format($total,2,".","")?></th>
                             </tr>
                         </tfoot>
                     </table>

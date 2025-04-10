@@ -95,7 +95,7 @@ if($torres){
 <div id="msjLista"></div>
 
 <div class="modal fade" id="modalDetalleTorre" tabindex="-1" aria-labelledby="modalDetalleTorreLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <h1 class="modal-title fs-5" id="tituloModal">Detalle de Torre</h1>
