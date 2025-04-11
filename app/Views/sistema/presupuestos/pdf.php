@@ -12,6 +12,10 @@ $porcprecio = $presu['pre_porcenprecio'];
 $porcsem    = $presu['pre_porcsem'];
 $piezas     = $presu['pre_piezas'];
 $verPiezas  = $presu['pre_verpiezas'];
+$pentrega   = $presu['pre_pentrega'];
+$fpago      = $presu['pre_fpago'];
+$voferta    = $presu['pre_voferta'];
+$lentrega   = $presu['pre_lentrega'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -127,7 +131,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
     </footer>
 
     <div>
-        <table cellspacing="0" style=" font-size: 13px" width="100%">
+        <table cellspacing="0" style=" font-size: 12px" width="100%">
             <tr>
                 <td width="50%">
                     <table>
@@ -179,10 +183,10 @@ if( $periodo == 'm' ) $peri = 'Mes';
 
     <br/>
 
-    <div style="font-size: 14px;">
+    <div style="font-size: 12px;">
         Estimado Cliente, le hacemos llegar el siguiente PRESUPUESTO.<br><br>
 
-        <table width="100%" style="font-size: 13px;" id="table_items" cellspacing="0">
+        <table width="100%" style="font-size: 12px;" id="table_items" cellspacing="0">
             <thead style="background-color: lightgray;">
                 <tr>
                     <th width="40px">Item</th>
@@ -277,6 +281,62 @@ if( $periodo == 'm' ) $peri = 'Mes';
                 </tr>
             </tfoot>
         </table>
+        <br>
+        <div style="font-size:11px;">
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <td>PLAZO DE ENTREGA&nbsp;</td>
+                    <td>:</td>
+                    <td>&nbsp;<?=$pentrega?></td>
+                </tr>
+                <tr>
+                    <td>FORMA DE PAGO&nbsp;</td>
+                    <td>:</td>
+                    <td>&nbsp;<?=$fpago?></td>
+                </tr>
+                <tr>
+                    <td>VALIDEZ DE LA OFERTA&nbsp;</td>
+                    <td>:</td>
+                    <td>&nbsp;<?=$voferta?></td>
+                </tr>
+                <tr>
+                    <td>LUGAR DE ENTREGA&nbsp;</td>
+                    <td>:</td>
+                    <td>&nbsp;<?=$lentrega?></td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div style="text-align:center;background-color:#ddd;padding:3px 0">
+            Cuenta Soles:
+        </div>
+        <div style="text-align:center; font-weight:bold">
+            BBVA 00110872020009900392<br>
+            CCI 01187200020009900392<br>
+            BCP 19116373803094
+        </div>
+        <br>
+        <div style="text-align:center;background-color:#ddd;padding:7px 0"></div>
+        <br>
+        <div style="font-size: 10px;">
+            * COTIZACIÓN SUJETA A VARIACIONES
+            <br><br>
+            <u>Condiciones de alquiler:</u><br>
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <td valign='top'>*</td>
+                    <td>El cliente acepta que recibió los andamios en buen estado y limpios.</td>
+                </tr>
+                <tr>
+                    <td valign='top'>*</td>
+                    <td>El cliente se responsabiliza por daños que puedan ocasionar al equipo en alquiler, comprometiéndose a pagar por a valorizaciones correspondientes.</td>
+                </tr>
+                <tr>
+                    <td valign='top'>*</td>
+                    <td>En caso de prolongar el alquiler el cliente se apersonará o llamará para renovar el contrato, caso contrario cumplida la fecha de vencimiento se pasará a recoger el equipo.</td>
+                </tr>
+            </table>
+        </div>
     </div>
 
 </body>

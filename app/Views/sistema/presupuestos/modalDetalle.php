@@ -27,6 +27,10 @@ echo "</pre>"; */
                     <li class='list-group-item'><b>Periodo: </b><?=$presupuesto['pre_periodonro']." ".$periodo?></li>
                     <li class='list-group-item'><b>% Precio:</b> <?=$presupuesto['pre_porcenprecio']?></li>
                     <li class='list-group-item'><b>% Semanal:</b> <?=$presupuesto['pre_porcsem']?></li>
+                    <li class='list-group-item'><b>Plazo de entrega:</b> <?=$presupuesto['pre_pentrega']?></li>
+                    <li class='list-group-item'><b>Forma de pago:</b> <?=$presupuesto['pre_fpago']?></li>
+                    <li class='list-group-item'><b>Validez de la oferta:</b> <?=$presupuesto['pre_voferta']?></li>
+                    <li class='list-group-item'><b>Lugar de entrega:</b> <?=$presupuesto['pre_lentrega']?></li>
                 </ul>
             </div>       
         </div>

@@ -193,6 +193,11 @@ class Presupuesto extends BaseController
             $idpre_e    = $this->request->getVar('idpre');
             $nroPre     = trim($this->request->getVar('nropre'));
 
+            $pentrega = trim($this->request->getVar('plazoentrega'));
+            $fpago    = trim($this->request->getVar('formapago'));
+            $voferta  = trim($this->request->getVar('validezoferta'));
+            $lentrega = trim($this->request->getVar('lugarentrega'));
+
             //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
             foreach( $items as $i ){
@@ -232,7 +237,7 @@ class Presupuesto extends BaseController
                     }
                 }
 
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio) ){
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
                         $res = FALSE;
                         foreach( $items as $i ){
@@ -269,7 +274,7 @@ class Presupuesto extends BaseController
                     exit();
                 }
 
-                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio) ){
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega) ){
                     $res = FALSE;
                     foreach( $items as $i ){
                         $idtorre = $i['id'];
@@ -324,7 +329,7 @@ class Presupuesto extends BaseController
 
         // Output the generated PDF to Browser
         $dompdf->stream("presupuesto.pdf", array("Attachment" => false));
-        //exit();
+        exit();
     }
 
     public function eliminarPresu(){
