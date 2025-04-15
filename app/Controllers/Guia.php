@@ -53,8 +53,8 @@ class Guia extends BaseController
             $page = $this->request->getVar('page');
             $cri  = trim($this->request->getVar('cri'));
 
-            $desde        = $page * 10 - 10;
-            $hasta        = 10;
+            $desde        = $page * 40 - 40;
+            $hasta        = 40;
             $data['page'] = $page;
 
             $cri = strlen($cri) > 2 ? $cri : '';
@@ -361,6 +361,7 @@ class Guia extends BaseController
         $dompdf->render();
 
         $dompdf->stream("guia.pdf", array("Attachment" => false));
+        exit();
     }
 
     /* public function cambiarEstado(){
@@ -483,15 +484,55 @@ class Guia extends BaseController
                 $arr_restantes = []; //para guardar el idpieza y cant sobrante, si en caso haya mas items iguales
                 $arr_items     = []; //guardar con los ingresos
                 foreach( $piezas as $k => $pi ){
-                    echo "<pre>";
-                    $arr = array_values(array_filter($items, fn($v) => $v['idpieza'] == $pi['idpie']));
+                    //echo "<pre>";
+                    foreach( $items as $i ){
+                        if( $pi['idpie'] == $i['idpieza'] ){
+                            $cant_total = $i['cant']; //total que ingresa
+                            $cant_salio = $pi['st_sale']; // cant que sale por pieza
+
+                            //echo "$pi[idpie] - $cant_total / $cant_salio<br>";
+
+                            if( count($arr_restantes) > 0 ){
+                                foreach( $arr_restantes as $arr_r ){
+                                    if( $pi['idpie'] == $arr_r['idpieza'] ){
+                                        $cant_total = $arr_r['restante'];
+                                        if( $cant_total > $cant_salio ){
+                                            $restante = $cant_total - $cant_salio;
+                                            $pi['ingresa'] = $cant_salio;
+                                            array_push($arr_restantes, [ 'idpieza' => $pi['idpie'], 'restante' => $restante ]);
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if( $cant_total > $cant_salio ){
+                                $restante = $cant_total - $cant_salio;
+                                $pi['ingresa'] = $cant_salio;
+                                array_push($arr_restantes, [ 'idpieza' => $pi['idpie'], 'restante' => $restante ]);
+                                continue;
+                            }
+
+                            if( $cant_total <= $cant_salio ){
+                                $pi['ingresa'] = $cant_total;
+                                array_push($arr_restantes, ['idpieza' => $pi['idpie'], 'restante' => 0]);
+                                continue;                                
+                            }
+                        }                        
+                    }
+                    //print_r($arr_restantes);
+                    array_push($arr_items, $pi);
+                    //echo "</pre>";
+
+
+                    /* $arr = array_values(array_filter($items, fn($v) => $v['idpieza'] == $pi['idpie']));
                     $cant_t   = $arr[0]['cant'];//cantidad total que ingresa
                     $st_salio = $pi['st_sale'];//stock que salió
 
                     $arr_r = array_values(array_filter($arr_restantes, fn($v) => $v['idpieza'] == $pi['idpie']));
                     if( count($arr_r) > 0 && $arr_r[0]['idpieza'] == $pi['idpie'] ){
                         $pi['ingresa']= $arr_r[0]['restante'];                  
-                    }else{
+                    //}else{
                         if( $cant_t <= $st_salio ){
                             $pi['ingresa'] = $cant_t;
                             array_push($arr_restantes, ['idpieza' => $pi['idpie'], 'restante' => 0]);//ingresamos ese restante al array
@@ -502,12 +543,17 @@ class Guia extends BaseController
                             //echo "===";
                         }  
                     }
-                    array_push($arr_items, $pi);
+                    array_push($arr_items, $pi);*/
                     /* print_r($pi);
                     print_r($arr);
                     print_r($arr_r); */
-                    echo "</pre>";
+                    //echo "</pre>";
                 }
+
+                /* echo "<pre>";
+                print_r($arr_items);
+                echo "</pre>"; 
+                exit(); */
 
                 $completo = 1;
                 foreach( $items as $i ){
@@ -574,6 +620,7 @@ class Guia extends BaseController
             $dompdf->render();
 
             $dompdf->stream("ingreso-$fecha.pdf", array("Attachment" => false));
+            exit();
         }
 
         

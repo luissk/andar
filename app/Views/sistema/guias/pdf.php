@@ -189,7 +189,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                 if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){//editar
                     $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
                     $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
-                    $newarr[$aa]['falt'] = $e_falt + $ax['falt'];
+                    $newarr[$aa]['falt'] = $e_falt + ($ax['falt'] == '' ? 0 : $ax['falt']);
                     $newarr[$aa]['st_sale'] = $e_stsale + $ax['st_sale'];
                     //echo $aa;
                     //print_r($ax);

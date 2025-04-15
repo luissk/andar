@@ -23,7 +23,7 @@ if($guias){
     </thead>
     <tbody>
         <?php
-        $RegistrosAMostrar = 10;//paginacion
+        $RegistrosAMostrar = 40;//paginacion
         
         $cont = ( $page - 1 ) * $RegistrosAMostrar;
         foreach($guias as $g){
@@ -79,7 +79,7 @@ if($guias){
     if( $res > 0 ) $PagUlt = floor($PagUlt) + 1;
     ?>
 
-    <div class="pt-3 <?=$totalRegistros <= 10 ? 'd-none' : ''?>">
+    <div class="pt-3 <?=$totalRegistros <= 40 ? 'd-none' : ''?>">
         <ul class="pagination pagination-sm m-0 float-end">
             <li class="page-item <?=$PagAct > ($PaginasIntervalo + 1) ? '' : 'd-none'?>">
                 <a class="page-link" href="javascript:;" onclick="listarGuias(1,'<?=$cri?>')">«</a>

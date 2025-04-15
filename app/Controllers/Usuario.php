@@ -99,8 +99,8 @@ class Usuario extends BaseController
             $page = $this->request->getVar('page');
             $cri  = trim($this->request->getVar('cri'));
 
-            $desde        = $page * 10 - 10;
-            $hasta        = 10;
+            $desde        = $page * 40 - 40;
+            $hasta        = 40;
             $data['page'] = $page;
 
             $cri = strlen($cri) > 2 ? $cri : '';

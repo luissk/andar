@@ -225,23 +225,26 @@ if( isset($presu_bd) && $presu_bd ){
                                 <div class="fw-bolder">TOTAL: S/. <span id="total">0.00</span></div>
                             </div>
                         </div>
+                        <p>
+                            <b>CONDICIONES COMERCIALES</b>
+                        </p>
                         <div class="row border my-2"">
-                            <div class="col-sm-3 mb-3">
+                            <div class="col-sm-6 mb-3">
                                 <label for="plazoentrega" class="form-label">Plazo de entrega</label>
                                 <input type="text" class="form-control" id="plazoentrega" name="plazoentrega" value="<?=$pentrega?>" maxlength="100">
                                 <div id="msj-plazoentrega" class="form-text text-danger"></div>
                             </div>
-                            <div class="col-sm-3 mb-3">
+                            <div class="col-sm-6 mb-3">
                                 <label for="formapago" class="form-label">Forma de Pago</label>
                                 <input type="text" class="form-control" id="formapago" name="formapago" value="<?=$fpago?>" maxlength="50">
                                 <div id="msj-formapago" class="form-text text-danger"></div>
                             </div>
-                            <div class="col-sm-3 mb-3">
+                            <div class="col-sm-6 mb-3">
                                 <label for="validezoferta" class="form-label">Validez de oferta</label>
                                 <input type="text" class="form-control" id="validezoferta" name="validezoferta" value="<?=$voferta?>" maxlength="50">
                                 <div id="msj-validezoferta" class="form-text text-danger"></div>
                             </div>
-                            <div class="col-sm-3 mb-3">
+                            <div class="col-sm-6 mb-3">
                                 <label for="lugarentrega" class="form-label">Lugar entrega</label>
                                 <input type="text" class="form-control" id="lugarentrega" name="lugarentrega" value="<?=$lentrega?>" maxlength="100">
                                 <div id="msj-lugarentrega" class="form-text text-danger"></div>

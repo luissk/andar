@@ -236,7 +236,7 @@ if( isset($guia_bd) && $guia_bd ){
                                         if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){//editar
                                             $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
                                             $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
-                                            $newarr[$aa]['falt'] = $e_falt + $ax['falt'];
+                                            $newarr[$aa]['falt'] = $e_falt + ($ax['falt'] == '' ? 0 : $ax['falt']);
                                             $newarr[$aa]['st_sale'] = $e_stsale + $ax['st_sale'];
                                             //echo $aa;
                                             //print_r($ax);
@@ -296,7 +296,7 @@ if( isset($guia_bd) && $guia_bd ){
                                     //editar, de frfente las cantidades
                                     if( array_key_exists('req', $pi) && array_key_exists('falt', $pi) ){
                                         $cantReq = $pi['req'];
-                                        $faltantes = $pi['falt'];
+                                        $faltantes = $pi['falt'] == 0 ? '' : $pi['falt'];
 
                                         $resaltar = $faltantes != '' ? 'bg-danger-subtle' : '';
                                     }
