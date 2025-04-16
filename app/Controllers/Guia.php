@@ -602,6 +602,40 @@ class Guia extends BaseController
         }
     }
 
+    public function eliminarDevolucion(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idguia = $this->request->getVar('id');
+
+            if( $guia = $this->modeloGuia->getGuia($idguia, [3]) ){
+                $idpresu = $guia['idpresupuesto'];
+                $piezas  = json_decode($guia['pre_piezas'],true);
+
+                $piezas_upd = [];
+                foreach( $piezas as $pi ){
+                    unset($pi['ingresa']);
+                    $piezas_upd[] = $pi;
+                }
+                
+                if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, '', '', '', 2) ){
+                    if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($piezas_upd), 2, $idpresu) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Devolución Eliminada",
+                                text: "",
+                                icon: "success",
+                                showConfirmButton: false,
+                                allowOutsideClick: false,
+                            });
+                            setTimeout(function(){location.href="devoluciones"},1500)
+                        </script>';
+                    }
+                }
+            }
+        }
+    }
+
     public function pdfGuiaIngreso($id,$fecha){
         $options = new \Dompdf\Options();
         $options->setIsRemoteEnabled(true);

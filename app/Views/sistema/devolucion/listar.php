@@ -58,6 +58,9 @@ if($guias){
             if( $g['gui_status'] == 2 || $g['gui_status'] == 3 ){
                 echo '<a href="devolver-'.$id.'" class="link-success" title="Devolver Piezas"><i class="fa-solid fa-right-left"></i></a>';
             }
+            if( $g['gui_status'] == 3 ){
+                echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
+            }
             echo '</td>';
 
             echo "</tr>";
@@ -113,5 +116,24 @@ if($guias){
 <div id="msjLista"></div>
 
 <script>
-
+$(".eliminar").on('click', function(e){
+    e.preventDefault();
+    let id = $(this).data('id');
+    
+    Swal.fire({
+        title: "¿Vas a eliminar la devolución, cambiará el stock de las piezas?",
+        showCancelButton: true,
+        confirmButtonText: "Confirmar",
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('eliminar-devolucion', {
+                id
+            }, function(data){
+                //console.log(data);
+                $('#msjLista').html(data);
+            });
+        }
+    });
+});
 </script>
