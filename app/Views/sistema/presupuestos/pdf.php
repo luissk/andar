@@ -4,18 +4,19 @@ $direc  = $params['par_direcc'];
 $telef  = $params['par_telef'];
 $correo = $params['par_correo'];
 
-$prenum     = $presu['pre_numero'];
-$prefecha   = $presu['pre_fechareg'];
-$periodo    = $presu['pre_periodo'];
-$nperiodo   = $presu['pre_periodonro'];
-$porcprecio = $presu['pre_porcenprecio'];
-$porcsem    = $presu['pre_porcsem'];
-$piezas     = $presu['pre_piezas'];
-$verPiezas  = $presu['pre_verpiezas'];
-$pentrega   = $presu['pre_pentrega'];
-$fpago      = $presu['pre_fpago'];
-$voferta    = $presu['pre_voferta'];
-$lentrega   = $presu['pre_lentrega'];
+$prenum      = $presu['pre_numero'];
+$prefecha    = $presu['pre_fechareg'];
+$periodo     = $presu['pre_periodo'];
+$nperiodo    = $presu['pre_periodonro'];
+$porcprecio  = $presu['pre_porcenprecio'];
+$porcsem     = $presu['pre_porcsem'];
+$piezas      = $presu['pre_piezas'];
+$verPiezas   = $presu['pre_verpiezas'];
+$pentrega    = $presu['pre_pentrega'];
+$fpago       = $presu['pre_fpago'];
+$voferta     = $presu['pre_voferta'];
+$lentrega    = $presu['pre_lentrega'];
+$preciotrans = $presu['pre_preciotrans'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -258,6 +259,18 @@ if( $periodo == 'm' ) $peri = 'Mes';
                 ?>
             </tbody>
             <tfoot class="pie_price">
+                <?php
+                if( $preciotrans != ''){
+                    $sum = $sum + $preciotrans;
+                ?>
+                <tr>
+                    <th colspan="6" align="left">
+                        * Precio transporte: S/. <?=$preciotrans?>
+                    </th>
+                </tr>
+                <?php
+                }
+                ?>
                 <tr>
                     <th colspan="6" align="left">
                         * Peso total: <?=number_format($pesoTotalPiezas / 1000,2,".","")?> Tn

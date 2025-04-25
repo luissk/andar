@@ -18,19 +18,20 @@ if( isset($presu_bd) && $presu_bd ){
     print_r($deta_bd);
     echo "</pre>"; */
 
-    $idpre      = $presu_bd['idpresupuesto'];
-    $pre_numero = $presu_bd['pre_numero'];
-    $periodo    = $presu_bd['pre_periodo'];
-    $periodonro = $presu_bd['pre_periodonro'];
-    $porcprecio = $presu_bd['pre_porcenprecio'];
-    $porcsem    = $presu_bd['pre_porcsem'];
-    $idcliente  = $presu_bd['idcliente'];
-    $verP       = $presu_bd['pre_verpiezas'];
-    $tcambio    = $presu_bd['pre_tcambio'];
-    $pentrega   = $presu_bd['pre_pentrega'];
-    $fpago      = $presu_bd['pre_fpago'];
-    $voferta    = $presu_bd['pre_voferta'];
-    $lentrega   = $presu_bd['pre_lentrega'];
+    $idpre       = $presu_bd['idpresupuesto'];
+    $pre_numero  = $presu_bd['pre_numero'];
+    $periodo     = $presu_bd['pre_periodo'];
+    $periodonro  = $presu_bd['pre_periodonro'];
+    $porcprecio  = $presu_bd['pre_porcenprecio'];
+    $porcsem     = $presu_bd['pre_porcsem'];
+    $idcliente   = $presu_bd['idcliente'];
+    $verP        = $presu_bd['pre_verpiezas'];
+    $tcambio     = $presu_bd['pre_tcambio'];
+    $pentrega    = $presu_bd['pre_pentrega'];
+    $fpago       = $presu_bd['pre_fpago'];
+    $voferta     = $presu_bd['pre_voferta'];
+    $lentrega    = $presu_bd['pre_lentrega'];
+    $preciotrans = $presu_bd['pre_preciotrans'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -73,19 +74,20 @@ if( isset($presu_bd) && $presu_bd ){
     //print_r($items);
 
 }else{
-    $idpre      = "";
-    $pre_numero = "";
-    $periodo    = "";
-    $periodonro = "";
-    $porcprecio = "";
-    $porcsem    = "";
-    $idcliente  = "";
-    $verP       = "";
-    $tcambio    = "";
-    $pentrega   = "";
-    $fpago      = "";
-    $voferta    = "";
-    $lentrega   = "";
+    $idpre       = "";
+    $pre_numero  = "";
+    $periodo     = "";
+    $periodonro  = "";
+    $porcprecio  = "";
+    $porcsem     = "";
+    $idcliente   = "";
+    $verP        = "";
+    $tcambio     = "";
+    $pentrega    = "";
+    $fpago       = "";
+    $voferta     = "";
+    $lentrega    = "";
+    $preciotrans = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -217,6 +219,11 @@ if( isset($presu_bd) && $presu_bd ){
                                     <tbody id="tbl_deta">
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="col-sm-2 mb-3">
+                                <label for="preciotrans" class="form-label">Precio Transporte</label>
+                                <input type="text" class="form-control numerocondecimal" id="preciotrans" name="preciotrans" value="<?=$preciotrans?>">
+                                <div id="msj-preciotrans" class="form-text text-danger"></div>
                             </div>
                             <div id="pesoT" class="fw-bolder"></div>
                             <div class="col-sm-12 text-end">
@@ -407,9 +414,11 @@ function calcular(){//calcularEnPrecioPiezas();
         }
     }
     let tt = items.reduce((acc,el) => acc + Number(el.tmonto),0);
-    $("#subT").text(tt.toFixed(2));
-    $("#igv").text((tt * 0.18).toFixed(2));
-    $("#total").text((tt * 1.18).toFixed(2));
+    let preciotrans = $("#preciotrans").val() == '' ? 0 : $("#preciotrans").val();
+    let subtotal = Number(tt.toFixed(2)) + Number(preciotrans);
+    $("#subT").text(subtotal);
+    $("#igv").text((subtotal * 0.18).toFixed(2));
+    $("#total").text((subtotal * 1.18).toFixed(2));
 }
 
 function llenaNroPeriodo(n){
@@ -465,6 +474,13 @@ $(function(){
             calcular();
             dibujaFilas();
         }
+    });
+
+    $("#preciotrans").on('input', function(e){
+        let preciotrans = $(this).val();
+        //console.log(_this.val())
+        calcular();
+        dibujaFilas();
     });
 
     $( '#cliente' ).select2( {
@@ -571,6 +587,13 @@ $(function(){
     }
     ?>
     //fin editar
+
+    $(".numerocondecimal").on("keypress keyup blur",function (event) {
+        $(this).val($(this).val().replace(/[^0-9\.]/g,''));
+        if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    });
 
 });
 
