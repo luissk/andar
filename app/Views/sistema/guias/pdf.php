@@ -118,10 +118,10 @@ if( $motivo == 'o' ) $motivo = "Otros";
                 </td>
                 <td align="center">
                     <div style="border:1px solid black; font-size: 12px;font-weight:600;border-radius:3px;padding-top:5px;padding-bottom:5px;font-family:Arial">
-                        RUC: 20100150112<br>
+                        RUC: 10108671055<br>
                         GUIA DE REMISIÓN ELECTRÓNICA<br>
                         REMITENTE<br>
-                        <span style="font-size:13px">N° EG01-00000001</span>
+                        <span style="font-size:13px">N° <?=$guiNro?></span>
                     </div>                    
                 </td>
             </tr>

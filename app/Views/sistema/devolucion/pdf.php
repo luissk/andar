@@ -168,6 +168,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                         <th>Descripción</th>
                         <th>Salió</th>
                         <th>Ingresó</th>
+                        <th>Saldo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -185,6 +186,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     $resetear     = $pi['resetear'];
 
                     //$reset = $resetear == 1 ? '<b>(reset)</b>' : '';
+                    $saldo = $salio - $nuevoingreso;
 
                     echo "<tr>";
                     echo "<td>$cont</td>";
@@ -192,6 +194,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     echo "<td class='left'>$piedesc</td>";
                     echo "<td>$salio</td>";
                     echo "<td>$nuevoingreso</td>";
+                    echo "<td>$saldo</td>";
                     echo "</tr>";
                 }
                 ?>

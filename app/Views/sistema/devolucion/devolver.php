@@ -281,11 +281,11 @@ $(function(){
                 yaingresado = 0;
             }
 
-            if( (cant + yaingresado) == '' && salio > 0 ){
+            /* if( (cant + yaingresado) == '' && salio > 0 ){
                 men = 'Coloque las cantidades que ingresan';
                 Swal.fire({title: men, icon: "error"});
                 return;
-            }
+            } */
 
             if( (cant + yaingresado) > salio ){
                 men = 'La cantidad que ingresa no puede ser mayor a lo que salió';
