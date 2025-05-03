@@ -115,7 +115,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
                     <p style="font-size: 14px;">
                         <?=$direc?><br>
                         <?=$correo?><br>
-                        <?=$telef?>
+                        <?=$telef?> / 957323010
                     </p>
                 </td>
             </tr>

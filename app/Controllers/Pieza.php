@@ -28,6 +28,29 @@ class Pieza extends BaseController
         $data['title']           = "Piezas del Sistema | ".help_nombreWeb();
         $data['piezasLinkActive'] = 1;
 
+        //PARA SACAR LOS TOTALES DE PESOS EN TONELADAS
+        $piezas = $this->modeloPieza->getPiezasAjax();
+        $peso_cantidad = 0;
+        $peso_stockact = 0;
+        if( $piezas ){
+            foreach($piezas as $p){
+                $idpieza  = $p['idpieza'];
+                $peso     = $p['pie_peso'];
+                $stockIni = $p['pie_cant'];
+                $stockAct = $p['stockActual'];
+    
+                $peso_cantidad += $stockIni * $peso;
+                $peso_stockact += $stockAct * $peso;
+    
+            }    
+            $peso_cantidad = number_format($peso_cantidad / 1000, 2, ".", "");
+            $peso_stockact = number_format($peso_stockact / 1000, 2, ".", "");
+        }
+        $data['peso_cant']  = $peso_cantidad;
+        $data['peso_stock'] = $peso_stockact;
+        //FIN PARA SACAR LOS TOTALES DE PESOS EN TONELADAS
+        
+
         return view('sistema/piezas/index', $data);
     }
 
@@ -244,7 +267,7 @@ class Pieza extends BaseController
         }
     }
 
-
+    /*
     public function reporteExcel(){
         if(!session('idusuario')){
             return redirect()->to('/');
@@ -288,13 +311,6 @@ class Pieza extends BaseController
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        /* 
-        $file_name = 'public/reporte-piezas.xlsx';
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($file_name);
-        $ruta = base_url().'/'.$file_name;                
-        echo "<script>window.open('".$ruta."','_blank' )</script>"; */
-
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="piezas.xls"');
         header('Cache-Control: max-age=0');
@@ -303,7 +319,83 @@ class Pieza extends BaseController
         $writer->save('php://output');
         
     }
+    */
 
+    public function reporteExcel(){
+        if(!session('idusuario')){
+            return redirect()->to('/');
+        }
+        $piezas = $this->modeloPieza->getPiezas(0, 200);
+
+        $tabla = '
+        <table border="1">
+            <tr>
+                <th>NRO</th>
+                <th>CODIGO</th>
+                <th>PIEZA</th>
+                <th>PESO</th>
+                <th>PRECIO</th>
+                <th>STOCK INI</th>
+                <th>STOCK ACT</th>
+            </tr>
+        ';
+
+        $cont = 0;
+        $peso_cantidad = 0;
+        $peso_stockact = 0;
+        foreach($piezas as $p){
+            $cont++;
+            $idpieza  = $p['idpieza'];
+            $codigo   = $p['pie_codigo'];
+            $desc     = $p['pie_desc'];
+            $fecha    = $p['pie_fechareg'];
+            $peso     = $p['pie_peso'];
+            $precio   = $p['pie_precio'];
+            $stockIni = $p['pie_cant'];
+            $stockAct = $p['stockActual'];
+
+            $peso_cantidad += $stockIni * $peso;
+            $peso_stockact += $stockAct * $peso;
+
+            $tabla .= "
+            <tr>
+                <td>$cont</td>
+                <td>$codigo</td>
+                <td>$desc</td>
+                <td>$peso</td>
+                <td>$precio</td>
+                <td>$stockIni</td>
+                <td>$stockAct</td>
+            </tr>
+            ";
+        }
+
+        $peso_cantidad = number_format($peso_cantidad / 1000, 2, ".", "");
+        $peso_stockact = number_format($peso_stockact / 1000, 2, ".", "");
+
+        $tabla .= "
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>$peso_cantidad Tn</td>
+            <td>$peso_stockact Tn</td>
+        </tr>
+        ";
+        $tabla .= "</table>";
+        
+        $filename = 'piezas_'.date('d-m-Y h:i:s').'.xls';
+        header ( "Content-Type: application/vnd.ms-excel" ); 
+        header ( "Content-Disposition: attachment; filename=$filename" ); 
+        
+        // Representar datos de Excel 
+        echo  $tabla; 
+
+        exit();
+
+    }
 
 
 }

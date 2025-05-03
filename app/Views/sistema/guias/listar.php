@@ -11,6 +11,7 @@ if($guias){
             <th style="width: 15px">#</th>            
             <th>Nro Guía</th>
             <!-- <th>Completo</th> -->
+            <th>Presupuesto</th>
             <th>Estado</th>
             <th>F. Traslado</th>
             <!-- <th>F. Entregado</th> -->
@@ -40,11 +41,14 @@ if($guias){
             $cli_nombrerazon   = $g['cli_nombrerazon'];
             $estadoguia        = help_statusPresu($g['gui_status']);
 
+            $pre_numero = $g['pre_numero'];
+
             echo "<tr>";
 
             echo "<td>$cont</td>";
             echo "<td>$gui_nro</td>";
             //echo "<td>$gui_completa</td>";
+            echo "<td>$pre_numero</td>";
             echo "<td>$estadoguia</td>";
             echo "<td>$gui_fechatraslado</td>";
             //echo "<td>$gui_fechaent</td>";

@@ -33,6 +33,10 @@
                     <div class="card-body table-responsive" id="divListar">
                         
                     </div>
+                    <div class="card-footer">
+                        Peso Cantidad = <?=$peso_cant?> Tn. <br>
+                        Peso Stock Actual = <?=$peso_stock?> Tn.
+                    </div>
                 </div>
             </div>
         </div>

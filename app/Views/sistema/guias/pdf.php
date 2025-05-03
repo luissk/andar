@@ -32,6 +32,7 @@ $clicorreocont = $guia['cli_correocontact'];
 $clitelefcont  = $guia['cli_telefcontact'];
 
 $idpresupuesto = $guia['idpresupuesto'];
+$pre_numero    = $guia['pre_numero'];
 
 $pre_piezas = json_decode($guia['pre_piezas'], true);
 
@@ -113,7 +114,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     <p style="font-size: 13px;">
                         <?=$direc?><br>
                         <?=$correo?><br>
-                        <?=$telef?>
+                        <?=$telef?> / 957323010
                     </p>
                 </td>
                 <td align="center">
@@ -139,10 +140,10 @@ if( $motivo == 'o' ) $motivo = "Otros";
     <section style='font-size:12px'>
         <table cellpadding="0" cellspacing="0">
             <tr>
-                <td width="250px">
+                <td width="300px">
                     <b>Fecha de Traslado:</b> <?=$fechatrasl?><br><br>
                     <b>Motivo de Traslado:</b> <?=$motivo?> <br><br>
-                    <b>Motivo de Traslado:</b> <?=$motivodesc?>
+                    <b>Motivo de Traslado:</b> <?=$motivodesc?><br>
                 </td>
                 <td width="20px"></td>
                 <td valign="top">
@@ -151,13 +152,20 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     <b>Punto de Llegada:</b> <?=$direcc_ll?> - <?=$distll?>, <?=$provll?>, <?=$depall?>
                 </td>
             </tr>
+            <tr>
+                <td width="300px">
+                    <b>Cliente:</b> <?=$cliente?><br>
+                    <b>DNI/RUC</b>: <?=$dniruc?><br><br>
+                    <b>Presupuesto: </b> <?=$pre_numero?>
+                </td>
+                <td width="20px"></td>
+                <td>
+                    <b>Transportista: </b> <?=$transportista?><br>
+                    <b>DNI</b>: <?=$trans_dni?><br>
+                    <b>Placa del Vehículo</b>: <?=$placa?>
+                </td>
+            </tr>
         </table>
-        <div style="padding-top:10px">
-            <b>Cliente: </b> <?=$cliente?> &nbsp;&nbsp;&nbsp; <b>DNI/RUC</b>: <?=$dniruc?> 
-        </div>
-        <div style="padding-top:10px">
-            <b>Transportista: </b> <?=$transportista?> &nbsp;&nbsp;&nbsp; <b>DNI</b>: <?=$trans_dni?> &nbsp;&nbsp;&nbsp; <b>Placa del Vehículo</b>: <?=$placa?>
-        </div>
         <div style="padding-top:10px">
             <b>Bienes a transportar: </b> 
         </div>

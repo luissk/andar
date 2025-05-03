@@ -114,7 +114,7 @@ if( $motivo == 'o' ) $motivo = "Otros";
                     <p style="font-size: 13px;">
                         <?=$direc?><br>
                         <?=$correo?><br>
-                        <?=$telef?>
+                        <?=$telef?> / 957323010
                     </p>
                 </td>
                 <td align="center">
