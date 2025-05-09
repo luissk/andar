@@ -76,3 +76,21 @@ $routes->get('devolver-(:num)', 'Guia::Devolver/$1');
 $routes->post('generar-devolucion', 'Guia::generarDevolucion');
 $routes->get('pdf-guia-ingreso/(:num)/(:any)', 'Guia::pdfGuiaIngreso/$1/$2');
 $routes->post('eliminar-devolucion', 'Guia::eliminarDevolucion');
+
+//compras
+$routes->get('compras', 'Compra::index');
+$routes->post('listar-compras', 'Compra::listarCompras');
+$routes->get('nueva-compra', 'Compra::nuevaCompra');
+$routes->post('registro-compra', 'Compra::guardarCompra');
+$routes->get('editar-compra-(:num)', 'Compra::nuevaCompra/$1');
+$routes->post('detalle-compra-modal', 'Compra::modalDetalleCompra');
+$routes->post('eliminar-compra', 'Compra::eliminarCompra');
+
+//ventas
+$routes->get('ventas', 'Venta::index');
+$routes->post('listar-ventas', 'Venta::listarVentas');
+$routes->get('nueva-venta', 'Venta::nuevaVenta');
+$routes->post('registro-venta', 'Venta::guardarVenta');
+$routes->get('editar-venta-(:num)', 'Venta::nuevaVenta/$1');
+$routes->post('detalle-venta-modal', 'Venta::modalDetalleVenta');
+$routes->post('eliminar-venta', 'Venta::eliminarVenta');

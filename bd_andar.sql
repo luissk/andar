@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-04-2025 a las 01:10:20
+-- Tiempo de generación: 10-05-2025 a las 01:42:57
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.0.25
 
@@ -74,6 +74,52 @@ INSERT INTO `cliente` (`idcliente`, `cli_dniruc`, `cli_nombrerazon`, `cli_nombre
 (13, '20419184111', 'ECOANDINO S.A.C.', 'EDUARDO TAFUR DÍAZ', '', '', 17, '2025-04-21 19:34:22'),
 (14, '20524983843', 'DESARROLLO Y SOLUCIONES AUTOMÁTICAS S.A.C.', 'Jannet Huamani', 'ventas2@dsa.com.pe', '', 17, '2025-04-22 15:11:44'),
 (15, '20612541532', 'TIFOSI SERVICES', '', 'proyectos@tifosi-services.com', '', 17, '2025-04-23 20:03:26');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `compra`
+--
+
+CREATE TABLE `compra` (
+  `idcompra` int(11) NOT NULL,
+  `com_fechareg` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `com_fecha` date NOT NULL,
+  `com_proveedor` varchar(150) NOT NULL,
+  `com_ruc` varchar(11) NOT NULL,
+  `idusuario` int(11) NOT NULL,
+  `com_nrodoc` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `compra`
+--
+
+INSERT INTO `compra` (`idcompra`, `com_fechareg`, `com_fecha`, `com_proveedor`, `com_ruc`, `idusuario`, `com_nrodoc`) VALUES
+(2, '2025-05-09 21:48:51', '2025-05-09', 'CAMSO SAC', '10449456888', 1, 'B001-123'),
+(3, '2025-05-09 21:50:04', '2025-05-09', 'dsdfsdf', '10454872296', 1, 'B001-5236');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_compra`
+--
+
+CREATE TABLE `detalle_compra` (
+  `idcompra` int(11) NOT NULL,
+  `idpieza` int(11) NOT NULL,
+  `cantidad` int(11) DEFAULT NULL,
+  `preciocom` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_compra`
+--
+
+INSERT INTO `detalle_compra` (`idcompra`, `idpieza`, `cantidad`, `preciocom`) VALUES
+(2, 63, 2, '12.00'),
+(2, 67, 4, '11.00'),
+(3, 66, 2, '12.25');
 
 -- --------------------------------------------------------
 
@@ -539,6 +585,28 @@ INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
 (53, 16, 8),
 (53, 26, 4),
 (53, 62, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_venta`
+--
+
+CREATE TABLE `detalle_venta` (
+  `idventa` int(11) NOT NULL,
+  `idpieza` int(11) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `preciopie` decimal(10,2) DEFAULT NULL,
+  `precioven` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_venta`
+--
+
+INSERT INTO `detalle_venta` (`idventa`, `idpieza`, `cantidad`, `preciopie`, `precioven`) VALUES
+(2, 63, 2, NULL, '1.20'),
+(2, 67, 3, NULL, '1.30');
 
 -- --------------------------------------------------------
 
@@ -3043,6 +3111,29 @@ INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `
 (1, '25836457', 'Alland', 'Ortega Reyna', 'alan_or', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-01-25 21:50:43', 1, 1),
 (17, '52637383', 'Ethel', 'Piscoya', 'episcoya', '$2a$12$YmtIBS/VsxVywSQHV4A2.uFU8VcIdeY.pJDE0ZjKocqkKMwFw/Hka', '2025-03-30 22:58:04', 2, 1);
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `venta`
+--
+
+CREATE TABLE `venta` (
+  `idventa` int(11) NOT NULL,
+  `ven_cliente` varchar(150) NOT NULL,
+  `ven_ruc` varchar(11) NOT NULL,
+  `ven_fechareg` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ven_fecha` date NOT NULL,
+  `idusuario` int(11) NOT NULL,
+  `ven_nrodoc` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `venta`
+--
+
+INSERT INTO `venta` (`idventa`, `ven_cliente`, `ven_ruc`, `ven_fechareg`, `ven_fecha`, `idusuario`, `ven_nrodoc`) VALUES
+(2, 'Cesar Acuña', '14785236', '2025-05-09 23:41:48', '2025-05-09', 1, 'B001-123');
+
 --
 -- Índices para tablas volcadas
 --
@@ -3052,6 +3143,20 @@ INSERT INTO `usuario` (`idusuario`, `usu_dni`, `usu_nombres`, `usu_apellidos`, `
 --
 ALTER TABLE `cliente`
   ADD PRIMARY KEY (`idcliente`);
+
+--
+-- Indices de la tabla `compra`
+--
+ALTER TABLE `compra`
+  ADD PRIMARY KEY (`idcompra`);
+
+--
+-- Indices de la tabla `detalle_compra`
+--
+ALTER TABLE `detalle_compra`
+  ADD PRIMARY KEY (`idcompra`,`idpieza`),
+  ADD KEY `fk_compra_has_compra_compra1_idx` (`idcompra`),
+  ADD KEY `fk_compra_has_compra_pieza1_idx` (`idpieza`);
 
 --
 -- Indices de la tabla `detalle_factura`
@@ -3076,6 +3181,14 @@ ALTER TABLE `detalle_torre`
   ADD PRIMARY KEY (`idtorre`,`idpieza`),
   ADD KEY `fk_torre_has_pieza_pieza1_idx` (`idpieza`),
   ADD KEY `fk_torre_has_pieza_torre1_idx` (`idtorre`);
+
+--
+-- Indices de la tabla `detalle_venta`
+--
+ALTER TABLE `detalle_venta`
+  ADD PRIMARY KEY (`idventa`,`idpieza`),
+  ADD KEY `fk_venta_has_pieza_venta1_idx` (`idventa`),
+  ADD KEY `fk_venta_has_pieza_pieza1_idx` (`idpieza`);
 
 --
 -- Indices de la tabla `factura`
@@ -3144,6 +3257,12 @@ ALTER TABLE `usuario`
   ADD KEY `fk_usuario_tipousuario1_idx` (`idtipousuario`);
 
 --
+-- Indices de la tabla `venta`
+--
+ALTER TABLE `venta`
+  ADD PRIMARY KEY (`idventa`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
@@ -3152,6 +3271,12 @@ ALTER TABLE `usuario`
 --
 ALTER TABLE `cliente`
   MODIFY `idcliente` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT de la tabla `compra`
+--
+ALTER TABLE `compra`
+  MODIFY `idcompra` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
@@ -3206,6 +3331,12 @@ ALTER TABLE `transportista`
 --
 ALTER TABLE `usuario`
   MODIFY `idusuario` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT de la tabla `venta`
+--
+ALTER TABLE `venta`
+  MODIFY `idventa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas

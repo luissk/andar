@@ -212,6 +212,18 @@ if(!session('idusuario')){
                                         <p>Devolución</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="<?=base_url('compras')?>" class="nav-link ps-4 <?php echo isset($comprasLinkActive) ? 'active': ''?>">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                        <p>Compras</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?=base_url('ventas')?>" class="nav-link ps-4 <?php echo isset($ventasLinkActive) ? 'active': ''?>">
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                        <p>Ventas</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <li class="nav-item">
