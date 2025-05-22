@@ -17,6 +17,7 @@ $fpago       = $presu['pre_fpago'];
 $voferta     = $presu['pre_voferta'];
 $lentrega    = $presu['pre_lentrega'];
 $preciotrans = $presu['pre_preciotrans'];
+$nrodias     = $presu['pre_nrodiasm'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -32,6 +33,7 @@ if( $periodo == 'd' ) $peri = 'Día';
 if( $periodo == 's' ) $peri = 'Semana';
 if( $periodo == 'm' ) $peri = 'Mes';
 
+if( $nrodias != '' ) $peri = 'Días';
 ?>
 
 <!doctype html>
@@ -228,7 +230,7 @@ if( $periodo == 'm' ) $peri = 'Mes';
 
                     echo "<td>$c</td>";
                     echo "<td style='text-align:left'>".$d['tor_desc']."</td>";
-                    echo "<td>$nperiodo</td>";
+                    echo "<td>".($nrodias != '' ? $nrodias : $nperiodo)."</td>";
                     echo "<td>".$d['dp_cant']."</td>";
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'] / $d['dp_cant'],2,".",",")."</td>";
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'],2,".",",")."</td>";
@@ -256,21 +258,21 @@ if( $periodo == 'm' ) $peri = 'Mes';
                         }                                    
                     }
                 }
+                if( $preciotrans != '' ){
+                    $sum = $sum + $preciotrans;
+
+                    echo "<tr>";
+                    echo "<td>".($c + 1)."</td>";
+                    echo "<td style='text-align:left'>Costo de flete</td>";
+                    echo "<td></td>";
+                    echo "<td>1</td>";
+                    echo "<td class='price'>S/. $preciotrans</td>";
+                    echo "<td class='price'>S/. $preciotrans</td>";
+                    echo "</tr>";
+                }
                 ?>
             </tbody>
             <tfoot class="pie_price">
-                <?php
-                if( $preciotrans != ''){
-                    $sum = $sum + $preciotrans;
-                ?>
-                <tr>
-                    <th colspan="6" align="left">
-                        * Precio transporte: S/. <?=$preciotrans?>
-                    </th>
-                </tr>
-                <?php
-                }
-                ?>
                 <tr>
                     <th colspan="6" align="left">
                         * Peso total: <?=number_format($pesoTotalPiezas / 1000,2,".","")?> Tn

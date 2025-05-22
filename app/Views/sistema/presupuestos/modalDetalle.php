@@ -32,6 +32,7 @@ echo "</pre>"; */
                     <li class='list-group-item'><b>Validez de la oferta:</b> <?=$presupuesto['pre_voferta']?></li>
                     <li class='list-group-item'><b>Lugar de entrega:</b> <?=$presupuesto['pre_lentrega']?></li>
                     <li class='list-group-item'><b>Precio transporte:</b> <?=$presupuesto['pre_preciotrans']?></li>
+                    <li class='list-group-item'><b>Días:</b> <?=$presupuesto['pre_nrodiasm']?></li>
                 </ul>
             </div>       
         </div>

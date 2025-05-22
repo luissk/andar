@@ -32,6 +32,7 @@ if( isset($presu_bd) && $presu_bd ){
     $voferta     = $presu_bd['pre_voferta'];
     $lentrega    = $presu_bd['pre_lentrega'];
     $preciotrans = $presu_bd['pre_preciotrans'];
+    $nrodias     = $presu_bd['pre_nrodiasm'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -88,6 +89,7 @@ if( isset($presu_bd) && $presu_bd ){
     $voferta     = "";
     $lentrega    = "";
     $preciotrans = "";
+    $nrodias     = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -128,7 +130,7 @@ if( isset($presu_bd) && $presu_bd ){
                                 <div id="msj-tcambio" class="form-text text-danger"></div>
                             </div> 
                             <div class="col-sm-2 mb-3">
-                                <label for="dias" class="form-label">Periodo</label>
+                                <label for="periodo" class="form-label">Periodo</label>
                                 <select class="form-select" name="periodo" id="periodo">
                                     <option value=""></option>
                                     <option value="d" <?=$periodo != '' && $periodo == 'd' ? 'selected' : ''?>>Día</option>
@@ -183,15 +185,21 @@ if( isset($presu_bd) && $presu_bd ){
                                 </select>
                                 <div id="msj-torre" class="form-text text-danger"></div>
                             </div>
-                            <div class="col-sm-2 mb-3">
+                            <div class="col-sm-1 mb-3">
                                 <label for="cantidad" class="form-label">Cantidad</label>
                                 <input type="text" class="form-control" id="cantidad" name="cantidad" value="" maxlength="3">
                                 <div id="msj-cantidad" class="form-text text-danger"></div>
                             </div>
-                            <div class="col-sm-2 mt-2 d-flex align-items-center">
+                            <div class="col-sm-1 mt-2 d-flex align-items-center">
                                 <input type="hidden" id="porcsem" name="porcsem" value="<?=$param['par_porcensem']?>">
                                 <a class="btn btn-outline-secondary btn-sm" id="btnAdd">Agregar</a>
                             </div>
+                            <div class="col-sm-1 mb-3">
+                                <label for="dias" class="form-label">Días</label>
+                                <input type="text" class="form-control" id="dias" name="dias" value="<?=$nrodias?>" maxlength="3">
+                                <div id="msj-dias" class="form-text text-danger"></div>
+                            </div>        
+
 
                             <div class="col-sm-3 mt-2 d-flex align-items-center">
                                 <input name="verP" id="verP" type="checkbox" onclick="$('#tbl_deta .piezasOcultas').toggle()" <?=$verP == 1 ? 'checked': ''?> />&nbsp;Ver piezas de la torre

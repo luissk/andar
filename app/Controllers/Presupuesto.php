@@ -198,6 +198,7 @@ class Presupuesto extends BaseController
             $voferta     = trim($this->request->getVar('validezoferta'));
             $lentrega    = trim($this->request->getVar('lugarentrega'));
             $preciotrans = $this->request->getVar('preciotrans');
+            $nrodias     = $this->request->getVar('dias');
 
             //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
@@ -238,7 +239,7 @@ class Presupuesto extends BaseController
                     }
                 }
 
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans) ){
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
                         $res = FALSE;
                         foreach( $items as $i ){
@@ -275,7 +276,7 @@ class Presupuesto extends BaseController
                     exit();
                 }
 
-                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans) ){
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias) ){
                     $res = FALSE;
                     foreach( $items as $i ){
                         $idtorre = $i['id'];
