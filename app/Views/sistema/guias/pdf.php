@@ -40,6 +40,8 @@ if( $motivo == 'v' ) $motivo = "Venta";
 if( $motivo == 'e' ) $motivo = "Exportación";
 if( $motivo == 'i' ) $motivo = "Importación";
 if( $motivo == 'o' ) $motivo = "Otros";
+
+$clienterecoge = $guia['gui_clienterecoge'];
 ?>
 
 <!doctype html>
@@ -160,9 +162,15 @@ if( $motivo == 'o' ) $motivo = "Otros";
                 </td>
                 <td width="20px"></td>
                 <td>
+                    <?php
+                    if( $clienterecoge != 1 ){
+                    ?>
                     <b>Transportista: </b> <?=$transportista?><br>
                     <b>DNI</b>: <?=$trans_dni?><br>
                     <b>Placa del Vehículo</b>: <?=$placa?>
+                    <?php
+                    }
+                    ?>
                 </td>
             </tr>
         </table>

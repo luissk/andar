@@ -202,6 +202,7 @@ class Guia extends BaseController
             $idpre          = $this->request->getVar('idpre');
             $idguia         = $this->request->getVar('idguia');
             $nroGuia        = trim($this->request->getVar('nroguia'));
+            $clienterecoge  = $this->request->getVar('clienterecoge');
 
             $ubigeop  = $this->modeloUbigeo->getUbigeo($distritop,$provinciap,$departamentop)['idubigeo'];
             $ubigeoll = $this->modeloUbigeo->getUbigeo($distritoll,$provinciall,$departamentoll)['idubigeo'];
@@ -220,7 +221,7 @@ class Guia extends BaseController
                     }
                 }
 
-                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia) ){
+                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia,$clienterecoge) ){
                     echo '<script>
                         Swal.fire({
                             title: "Guía Modificada",
@@ -287,7 +288,7 @@ class Guia extends BaseController
 
                     //$nroGuia = $this->modeloGuia->nroGuia()['nro'];
 
-                    if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2) ){
+                    if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2,$clienterecoge) ){
                         if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){
                             echo '<script>
                                 Swal.fire({

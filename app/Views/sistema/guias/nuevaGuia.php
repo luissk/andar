@@ -30,6 +30,8 @@ if( isset($guia_bd) && $guia_bd ){
 
     $pre_piezas_bd = json_decode($guia_bd['pre_piezas'], true);
 
+    $clienterecoge = $guia_bd['gui_clienterecoge'] == 1 ? 'checked' : '';
+
     $titulo   = "Modificar";
 }else{
     $idguia_bd     = "";
@@ -48,6 +50,8 @@ if( isset($guia_bd) && $guia_bd ){
     $placa_bd      = "";
 
     $pre_piezas_bd = json_decode($presupuesto['pre_piezas'], true);
+
+    $clienterecoge = '';
 
     $titulo   = "Generar";
 }
@@ -189,6 +193,14 @@ if( isset($guia_bd) && $guia_bd ){
                             <div class="col-sm-3 mb-3">
                                 <label for="nroguia" class="form-label">Nro de Guía</label>
                                 <input type="text" class="form-control" name="nroguia" id="nroguia" maxlength="20" value="<?=$nroGuia?>">
+                            </div>
+                            <div class="col-sm-4 d-flex align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="clienterecoge" name="clienterecoge" <?=$clienterecoge?> >
+                                    <label class="form-check-label" for="clienterecoge">
+                                        Cliente recoge
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -429,6 +441,7 @@ $(function(){
         idguia = $("#idguia_bd").val(),
         opt = $(this).data('opt'),
         nroguia = $("#nroguia").val().trim();
+        clienterecoge = $("#clienterecoge").is(':checked') ? 1 : 0;
 
         let men = '';
         if( transportista == '' ) men = 'Seleccione un transportista';
@@ -455,7 +468,7 @@ $(function(){
 
         $.post('generar-guia',{
             transportista,fechatrasl,motivo,desc_trasl,departamentop,provinciap,distritop,direccionp,
-            departamentoll,provinciall,distritoll,direccionll,placa,opt,idpre,idguia,nroguia
+            departamentoll,provinciall,distritoll,direccionll,placa,opt,idpre,idguia,nroguia,clienterecoge
         }, function(data){
             $(".btnGuia").removeAttr('disabled');
             _this.text(textBtn);

@@ -28,11 +28,11 @@ class PresupuestoModel extends Model{
         return $st->getRowArray();
     }
 
-    public function insertarPresupuesto($nroPre,$idusuario2,$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias){
-        $query = "insert into presupuesto(pre_numero,pre_fechareg,idusuario2,idcliente,pre_porcenprecio,pre_porcsem,pre_periodo,pre_periodonro,pre_piezas,pre_verpiezas,pre_tcambio,pre_pentrega,pre_fpago,pre_voferta,pre_lentrega,pre_preciotrans,pre_nrodiasm,pre_status) 
-        values(?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)";
+    public function insertarPresupuesto($nroPre,$idusuario2,$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd){
+        $query = "insert into presupuesto(pre_numero,pre_fechareg,idusuario2,idcliente,pre_porcenprecio,pre_porcsem,pre_periodo,pre_periodonro,pre_piezas,pre_verpiezas,pre_tcambio,pre_pentrega,pre_fpago,pre_voferta,pre_lentrega,pre_preciotrans,pre_nrodiasm,pre_preciomyd,pre_status) 
+        values(?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)";
 
-        $st = $this->db->query($query, [$nroPre,$idusuario2,$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias]);
+        $st = $this->db->query($query, [$nroPre,$idusuario2,$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd]);
 
         return $this->db->insertID();
     }
@@ -45,10 +45,10 @@ class PresupuestoModel extends Model{
         return $st;
     }
 
-    public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias){
-        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=?,pre_numero=?,pre_tcambio=?,pre_pentrega=?,pre_fpago=?,pre_voferta=?,pre_lentrega=?,pre_preciotrans=?,pre_nrodiasm=? where idpresupuesto = ? and pre_status=1";
+    public function modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpresu,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd){
+        $query = "update presupuesto set idcliente=?,pre_porcenprecio=?,pre_porcsem=?,pre_periodo=?,pre_periodonro=?,pre_piezas=?,pre_verpiezas=?,pre_numero=?,pre_tcambio=?,pre_pentrega=?,pre_fpago=?,pre_voferta=?,pre_lentrega=?,pre_preciotrans=?,pre_nrodiasm=?,pre_preciomyd=? where idpresupuesto = ? and pre_status=1";
 
-        $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$idpresu]);
+        $st = $this->db->query($query, [$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$idpresu]);
 
         return $st;
     }
@@ -57,7 +57,7 @@ class PresupuestoModel extends Model{
         $sql = $cri != '' ? " and (pre.pre_numero LIKE '%" . $this->db->escapeLikeString($cri) . "%' or cli.cli_nombrerazon LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_piezas,pre.pre_verpiezas,pre.pre_tcambio,
-        pre.pre_pentrega,pre.pre_fpago,pre.pre_voferta,pre.pre_lentrega,pre.pre_preciotrans,pre.pre_nrodiasm,
+        pre.pre_pentrega,pre.pre_fpago,pre.pre_voferta,pre.pre_lentrega,pre.pre_preciotrans,pre.pre_nrodiasm,pre.pre_preciomyd,
         cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos
         from presupuesto pre 
@@ -90,7 +90,7 @@ class PresupuestoModel extends Model{
     }
 
     public function getPresupuesto($idpresu, $status = [1,2,3]){
-        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,pre.pre_tcambio,pre.pre_pentrega,pre.pre_fpago,pre.pre_voferta,pre.pre_lentrega,pre.pre_preciotrans,pre.pre_nrodiasm,
+        $query = "select pre.idpresupuesto,pre.pre_numero,pre.pre_fechareg,pre.pre_periodo,pre.pre_periodonro,pre.pre_status,pre.pre_porcenprecio,pre.pre_porcsem,pre.pre_piezas,pre.pre_verpiezas,pre.pre_tcambio,pre.pre_pentrega,pre.pre_fpago,pre.pre_voferta,pre.pre_lentrega,pre.pre_preciotrans,pre.pre_nrodiasm,pre.pre_preciomyd,
         cli.idcliente,cli.cli_dniruc,cli.cli_nombrerazon,cli.cli_nombrecontact,cli.cli_correocontact,cli.cli_telefcontact,
         usu.usu_usuario,usu.usu_nombres,usu.usu_apellidos,usu.usu_dni
         from presupuesto pre 

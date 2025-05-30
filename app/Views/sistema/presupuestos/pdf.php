@@ -18,6 +18,7 @@ $voferta     = $presu['pre_voferta'];
 $lentrega    = $presu['pre_lentrega'];
 $preciotrans = $presu['pre_preciotrans'];
 $nrodias     = $presu['pre_nrodiasm'];
+$preciomyd   = $presu['pre_preciomyd'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -260,14 +261,27 @@ if( $nrodias != '' ) $peri = 'Días';
                 }
                 if( $preciotrans != '' ){
                     $sum = $sum + $preciotrans;
-
+                    $c++;
                     echo "<tr>";
-                    echo "<td>".($c + 1)."</td>";
-                    echo "<td style='text-align:left'>Costo de flete</td>";
+                    echo "<td>".($c)."</td>";
+                    echo "<td style='text-align:left'>COSTO DE FLETE</td>";
                     echo "<td></td>";
                     echo "<td>1</td>";
                     echo "<td class='price'>S/. $preciotrans</td>";
                     echo "<td class='price'>S/. $preciotrans</td>";
+                    echo "</tr>";
+                }
+
+                if( $preciomyd != '' ){
+                    $sum = $sum + $preciomyd;
+                    $c++;
+                    echo "<tr>";
+                    echo "<td>".($c)."</td>";
+                    echo "<td style='text-align:left'>COSTO DE MONTAJE Y DESMONTAJE</td>";
+                    echo "<td></td>";
+                    echo "<td>1</td>";
+                    echo "<td class='price'>S/. $preciomyd</td>";
+                    echo "<td class='price'>S/. $preciomyd</td>";
                     echo "</tr>";
                 }
                 ?>

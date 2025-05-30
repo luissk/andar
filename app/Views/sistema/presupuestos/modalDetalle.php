@@ -33,6 +33,7 @@ echo "</pre>"; */
                     <li class='list-group-item'><b>Lugar de entrega:</b> <?=$presupuesto['pre_lentrega']?></li>
                     <li class='list-group-item'><b>Precio transporte:</b> <?=$presupuesto['pre_preciotrans']?></li>
                     <li class='list-group-item'><b>Días:</b> <?=$presupuesto['pre_nrodiasm']?></li>
+                    <li class='list-group-item'><b>Montaje y Desmontaje:</b> <?=$presupuesto['pre_preciomyd']?></li>
                 </ul>
             </div>       
         </div>
@@ -134,6 +135,7 @@ echo "</pre>"; */
                             }
 
                             $sum = $sum + $presupuesto['pre_preciotrans'];
+                            $sum = $sum + $presupuesto['pre_preciomyd'];
                             ?>
                         </tbody>
                         <tfoot>

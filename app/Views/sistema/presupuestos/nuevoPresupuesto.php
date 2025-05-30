@@ -33,6 +33,7 @@ if( isset($presu_bd) && $presu_bd ){
     $lentrega    = $presu_bd['pre_lentrega'];
     $preciotrans = $presu_bd['pre_preciotrans'];
     $nrodias     = $presu_bd['pre_nrodiasm'];
+    $preciomyd   = $presu_bd['pre_preciomyd'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -90,6 +91,7 @@ if( isset($presu_bd) && $presu_bd ){
     $lentrega    = "";
     $preciotrans = "";
     $nrodias     = "";
+    $preciomyd   = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -232,6 +234,11 @@ if( isset($presu_bd) && $presu_bd ){
                                 <label for="preciotrans" class="form-label">Precio Transporte</label>
                                 <input type="text" class="form-control numerocondecimal" id="preciotrans" name="preciotrans" value="<?=$preciotrans?>">
                                 <div id="msj-preciotrans" class="form-text text-danger"></div>
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="preciomyd" class="form-label">Precio montaje y desmontaje</label>
+                                <input type="text" class="form-control numerocondecimal" id="preciomyd" name="preciomyd" value="<?=$preciomyd?>">
+                                <div id="msj-preciomyd" class="form-text text-danger"></div>
                             </div>
                             <div id="pesoT" class="fw-bolder"></div>
                             <div class="col-sm-12 text-end">
@@ -423,7 +430,8 @@ function calcular(){//calcularEnPrecioPiezas();
     }
     let tt = items.reduce((acc,el) => acc + Number(el.tmonto),0);
     let preciotrans = $("#preciotrans").val() == '' ? 0 : $("#preciotrans").val();
-    let subtotal = Number(tt.toFixed(2)) + Number(preciotrans);
+    let preciomyd = $("#preciomyd").val() == '' ? 0 : $("#preciomyd").val();
+    let subtotal = Number(tt.toFixed(2)) + Number(preciotrans) + Number(preciomyd);
     $("#subT").text(subtotal);
     $("#igv").text((subtotal * 0.18).toFixed(2));
     $("#total").text((subtotal * 1.18).toFixed(2));
@@ -486,6 +494,12 @@ $(function(){
 
     $("#preciotrans").on('input', function(e){
         let preciotrans = $(this).val();
+        //console.log(_this.val())
+        calcular();
+        dibujaFilas();
+    });
+    $("#preciomyd").on('input', function(e){
+        let preciomyd = $(this).val();
         //console.log(_this.val())
         calcular();
         dibujaFilas();
