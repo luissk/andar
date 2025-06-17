@@ -38,7 +38,10 @@ echo "</pre>"; */
     <div class="col-sm-12">
         <div class="card card-outline card-warning">
             <div class="card-header">                        
-                <h3 class="card-title">Detalle de Torre</h3>
+                <h3 class="card-title">
+                    Detalle de Torre 
+                    <a href="torre-a-excel-<?=$torre['idtorre']?>" title="Reporte a Excel" class="text-success fs-4" target="_blank"><i class="fa-solid fa-file-excel"></i></a>
+                </h3>
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                 </div>

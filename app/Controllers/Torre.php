@@ -352,4 +352,55 @@ class Torre extends BaseController
         }
     }
 
+
+    function reporteExcelTorre($idtorre){
+        $torre = $this->modeloTorre->getTorre($idtorre);
+        if( $torre ){
+            $detalle = $this->modeloTorre->getDetalleTorre($idtorre);
+            /* echo "<pre>";
+            print_r($torre);
+            print_r($detalle);
+            echo "</pre>"; */
+
+            $tabla = '
+            <table border="1">
+                <tr>
+                    <th>NRO</th>
+                    <th>TORRE</th>
+                    <th>CODIGO</th>
+                    <th>PIEZA</th>
+                    <th>CANT</th>
+                    <th>PRECIO U</th>
+                    <th>PRECIO T</th>
+                </tr>
+            ';
+
+            $cont = 0;
+            foreach($detalle as $d){
+                $cont++;
+                $tabla .= "
+                    <tr>
+                        <td>$cont</td>
+                        <td>".$torre['tor_desc']."</td>
+                        <td>".$d['pie_codigo']."</td>
+                        <td>".$d['pie_desc']."</td>
+                        <td>".$d['dt_cantidad']."</td>
+                        <td>".$d['pie_precio']."</td>
+                        <td>".$d['total']."</td>
+                    </tr>
+                ";
+            }
+            $tabla .= '</table>';
+
+            $filename = 'DetalleTorre_'.date('d-m-Y h:i:s').'.xls';
+            header ( "Content-Type: application/vnd.ms-excel" ); 
+            header ( "Content-Disposition: attachment; filename=$filename" ); 
+            
+            // Representar datos de Excel 
+            echo  $tabla; 
+
+            exit();
+        }
+    }
+
 }

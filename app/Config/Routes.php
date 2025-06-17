@@ -45,6 +45,7 @@ $routes->post('registro-torre', 'Torre::registrarTorre');
 $routes->post('eliminar-torre', 'Torre::eliminarTorre');
 $routes->post('eliminar-plano', 'Torre::eliminarPlano');
 $routes->post('detalle-torre-modal', 'Torre::modalDetalleTorre');
+$routes->get('torre-a-excel-(:num)', 'Torre::reporteExcelTorre/$1');
 
 $routes->get('presupuestos', 'Presupuesto::index');
 $routes->post('listar-presupuestos', 'Presupuesto::listarPresupuestos');
