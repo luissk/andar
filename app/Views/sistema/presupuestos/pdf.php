@@ -34,7 +34,7 @@ if( $periodo == 'd' ) $peri = 'Día';
 if( $periodo == 's' ) $peri = 'Semana';
 if( $periodo == 'm' ) $peri = 'Mes';
 
-if( $nrodias != '' ) $peri = 'Días';
+if( $nrodias != '' && $nrodias != 0 ) $peri = 'Días';
 ?>
 
 <!doctype html>
@@ -167,10 +167,10 @@ if( $nrodias != '' ) $peri = 'Días';
                             <th>Vendedor:</th>
                             <td><?=$nomusuario?></td>
                         </tr>
-                        <tr align="left">
+                        <!-- <tr align="left">
                             <th>Dni:</th>
                             <td><?=$dniusu?></td>
-                        </tr>
+                        </tr> -->
                         <tr align="left">
                             <th>Fecha:</th>
                             <td><?=Date('d/m/Y', strtotime($prefecha))?></td>
@@ -178,6 +178,10 @@ if( $nrodias != '' ) $peri = 'Días';
                         <tr align="left">
                             <th>Presupuesto:</th>
                             <td><?=$prenum?></td>
+                        </tr>
+                        <tr align="left">
+                            <th>RUC:</th>
+                            <td>10108671055</td>
                         </tr>
                     </table>
                 </td>
@@ -231,7 +235,7 @@ if( $nrodias != '' ) $peri = 'Días';
 
                     echo "<td>$c</td>";
                     echo "<td style='text-align:left'>".$d['tor_desc']."</td>";
-                    echo "<td>".($nrodias != '' ? $nrodias : $nperiodo)."</td>";
+                    echo "<td>".($nrodias != '' && $nrodias != 0 ? $nrodias : $nperiodo)."</td>";
                     echo "<td>".$d['dp_cant']."</td>";
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'] / $d['dp_cant'],2,".",",")."</td>";
                     echo "<td class='price'>S/. ".number_format($d['dp_precio'],2,".",",")."</td>";
@@ -259,7 +263,7 @@ if( $nrodias != '' ) $peri = 'Días';
                         }                                    
                     }
                 }
-                if( $preciotrans != '' ){
+                if( $preciotrans != '' && $preciotrans != 0 ){
                     $sum = $sum + $preciotrans;
                     $c++;
                     echo "<tr>";
@@ -272,7 +276,7 @@ if( $nrodias != '' ) $peri = 'Días';
                     echo "</tr>";
                 }
 
-                if( $preciomyd != '' ){
+                if( $preciomyd != '' && $preciomyd != 0 ){
                     $sum = $sum + $preciomyd;
                     $c++;
                     echo "<tr>";
