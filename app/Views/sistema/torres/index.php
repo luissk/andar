@@ -47,7 +47,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalTorre" tabindex="-1" aria-labelledby="modalTorreLabel" aria-hidden="true">
+<div class="modal fade" id="modalTorre" tabindex="-1" aria-labelledby="modalTorreLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header py-2">
@@ -59,8 +59,9 @@
                     <div class="row">
                         <div class="col-sm-12 mb-3">
                             <label for="desc" class="form-label">Descripción de la torre</label>
-                            <input type="text" class="form-control" id="desc" name="desc" value="" maxlength="200">
+                            <input type="text" class="form-control" id="desc" name="desc" value="" maxlength="200" autocomplete="off">
                             <div id="msj-desc" class="form-text text-danger"></div>
+                            <div id="lista-torres" class="list-group position-absolute w-75 z-2 invisible"></div>
                         </div>
                         <div class="col-sm-6 mb-3">
                             <label for="plano" class="form-label">Plano de torre <span id="divplano"></span></label>
@@ -79,6 +80,9 @@
                             <p class="text-center bg-body-secondary">DETALLE DE TORRE</p>
                         </div>
                         <div class="col-sm-12 table-responsive">
+                            <div class="text-end">
+                                <a href="javascript:void(0)" class="fs-5 text-danger" title="Limpiar Detalle" onclick="limpiarItems()"><i class='fas fa-trash-alt'></i></a>
+                            </div>
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -176,6 +180,27 @@ function limpiarCampos(){
     $("#id_torree").val("");   
     
     $("#divplano").html("");
+}
+
+function cargarDetalleTorre(id, desc){
+    //$("#desc").val(desc);
+    $.post('detalle-torre-ajax', {
+        id
+    }, function(res){
+        let arr = JSON.parse(res);
+        if( arr.data.length > 0 ){
+            //console.log(arr.data)
+            items = arr.data;
+            dibujaFilas();
+        }else{
+            //
+        }               
+    })
+}
+
+function limpiarItems(){
+    items = [];
+    dibujaFilas();
 }
 
 $(function(){
@@ -277,6 +302,39 @@ $(function(){
         });
 
     });
+
+    $("#desc").on("input", function(e){
+        e.preventDefault();
+        let div = $("#lista-torres"),
+            desc = $(this).val().trim();
+
+        if( desc.length> 2 ){
+            $.post('torres-ajax',{
+                desc
+            }, function(res){
+                let arr = JSON.parse(res);
+                if( arr.data.length > 0 ){
+                    div.removeClass('invisible');
+                    div.html('');
+                    let fila = '';
+                    for( const [i,value] of arr.data.entries() ){
+                        fila += `<a href="javascript:void(0)" class="list-group-item list-group-item-action" onclick="cargarDetalleTorre(${value.id},'${value.desc}')">${value.desc}</a>`;
+                    }
+                    div.html(fila);
+                }else{
+                    div.addClass('invisible');
+                }               
+            });            
+        }else{
+            div.addClass('invisible');
+        }
+    });
+
+    $("#desc").on('blur', function(){
+        setTimeout(() => {
+            $("#lista-torres").addClass('invisible');
+        }, 200);//un pequeño delay porque sino no procesa el click en la lista    
+    })
 
     const myModalEl = document.getElementById('modalTorre')
     myModalEl.addEventListener('hidden.bs.modal', event => {

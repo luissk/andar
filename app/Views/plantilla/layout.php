@@ -47,6 +47,9 @@ if(!session('idusuario')){
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <link rel="stylesheet" href="<?=base_url('public/css/styles.css')?>">
 
     <?php echo $this->renderSection("css");?>
@@ -212,18 +215,6 @@ if(!session('idusuario')){
                                         <p>Devolución</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="<?=base_url('compras')?>" class="nav-link ps-4 <?php echo isset($comprasLinkActive) ? 'active': ''?>">
-                                        <i class="fa-solid fa-arrow-left"></i>
-                                        <p>Compras</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="<?=base_url('ventas')?>" class="nav-link ps-4 <?php echo isset($ventasLinkActive) ? 'active': ''?>">
-                                        <i class="fa-solid fa-arrow-right"></i>
-                                        <p>Ventas</p>
-                                    </a>
-                                </li>
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -275,6 +266,9 @@ if(!session('idusuario')){
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
 
 
     <script>
@@ -300,6 +294,22 @@ if(!session('idusuario')){
                 });
             }
         });
+
+        //funcion global para quitar tildes datatables, cuando se busca
+        /* function quitarAcentos(data) {
+            if (typeof data === 'string') {
+                return data
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "") // Esto quita las tildes de forma universal
+                    .toLowerCase();
+            }
+            return data;
+        }
+
+        $.fn.dataTable.ext.type.search.string = function (data) {
+            return quitarAcentos(data);
+        }; */
+        //fin funcion global para quitar tildes datatables, cuando se busca
     </script>
 
     <?php echo $this->renderSection("scripts");?>

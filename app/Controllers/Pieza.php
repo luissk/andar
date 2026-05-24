@@ -26,59 +26,36 @@ class Pieza extends BaseController
         }
         
         $data['title']           = "Piezas del Sistema | ".help_nombreWeb();
-        $data['piezasLinkActive'] = 1;
-
-        //PARA SACAR LOS TOTALES DE PESOS EN TONELADAS
-        $piezas = $this->modeloPieza->getPiezasAjax();
-        $peso_cantidad = 0;
-        $peso_stockact = 0;
-        if( $piezas ){
-            foreach($piezas as $p){
-                $idpieza  = $p['idpieza'];
-                $peso     = $p['pie_peso'];
-                $stockIni = $p['pie_cant'];
-                $stockAct = $p['stockActual'];
-    
-                $peso_cantidad += $stockIni * $peso;
-                $peso_stockact += $stockAct * $peso;
-    
-            }    
-            $peso_cantidad = number_format($peso_cantidad / 1000, 2, ".", "");
-            $peso_stockact = number_format($peso_stockact / 1000, 2, ".", "");
-        }
-        $data['peso_cant']  = $peso_cantidad;
-        $data['peso_stock'] = $peso_stockact;
-        //FIN PARA SACAR LOS TOTALES DE PESOS EN TONELADAS
-        
+        $data['piezasLinkActive'] = 1;        
 
         return view('sistema/piezas/index', $data);
     }
 
     public function listarPiezas(){
-        if( $this->request->isAJAX() ){
-            if(!session('idusuario')){
+        if ($this->request->isAJAX()) {
+            if (!session('idusuario')) {
                 exit();
             }
+
+            // Llamamos al método del modelo que tiene la consulta con los 3 stocks
+            $piezas = $this->modeloPieza->getPiezasAjax();
             
-            $page  = $this->request->getVar('page');
-            $cri   = trim($this->request->getVar('cri'));
-            $campo = trim($this->request->getVar('campo'));
-            $order = trim($this->request->getVar('order'));
-            //print_r($_POST);
+            $data = [];
 
-            $desde        = $page * 50 - 50;
-            $hasta        = 50;
-            $data['page'] = $page;
+            foreach ($piezas as $row) {
+                $data[] = [
+                    "id"           => $row['idpieza'],
+                    "codigo"       => $row['pie_codigo'],
+                    "descripcion"  => $row['pie_desc'],
+                    "peso"         => $row['pie_peso'],
+                    "precio"       => $row['pie_precio'],
+                    "inicial"      => $row['stock_inicial'],      // Total histórico
+                    "alquilado"    => $row['stock_alquilado'],    // Lo que está en obra
+                    "stock_actual" => $row['stock_actual_real']   // Lo que tienes en almacén
+                ];
+            }
 
-            $cri = strlen($cri) > 2 ? $cri : '';
-            $data['cri']   = $cri;
-            $data['campo'] = $campo;
-            $data['order'] = $order;
-
-            $data['piezas']         = $this->modeloPieza->getPiezas($desde, $hasta, $cri, $campo, $order);
-            $data['totalRegistros'] = $this->modeloPieza->getPiezasCount($cri)['total'];
-
-            return view('sistema/piezas/listar', $data);
+            echo json_encode(["data" => $data]);
         }
     }
 
@@ -188,7 +165,7 @@ class Pieza extends BaseController
                             icon: "success",
                             showConfirmButton: true,
                         });
-                        listarPiezas(1);
+                        miTabla.ajax.reload(null, false);
                         limpiarCampos();
                         $("#modalPieza").modal("hide");
                     </script>';
@@ -214,7 +191,7 @@ class Pieza extends BaseController
                             icon: "success",
                             showConfirmButton: true,
                         });
-                        listarPiezas(1);
+                        miTabla.ajax.reload(null, false);
                         limpiarCampos();
                         $("#modalPieza").modal("hide");
                     </script>';
@@ -261,7 +238,7 @@ class Pieza extends BaseController
                         icon: "success",
                         showConfirmButton: true,
                     });
-                    listarPiezas(1);
+                    miTabla.ajax.reload(null, false);
                 </script>';
             }
         }
@@ -321,7 +298,7 @@ class Pieza extends BaseController
     }
     */
 
-    public function reporteExcel(){
+    public function reporteExcel(){ //MODIFICAR MAS ADELANTE
         if(!session('idusuario')){
             return redirect()->to('/');
         }

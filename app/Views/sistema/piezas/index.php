@@ -20,10 +20,7 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-sm-5">
-                                <div class="search-container">
-                                    <input type="search" class="form-control search-input" placeholder="Buscar por pieza o codigo..." id="txtBuscar">
-                                    <i class="fas fa-search search-icon"></i>
-                                </div>
+                                <a href="piezas-a-excel" title="Reporte a Excel" class="text-success fs-4" target="_blank"><i class="fa-solid fa-file-excel"></i></a> REHACER
                             </div>
                             <div class="col-sm-7 text-end">
                                 <a class="btn btn-warning" role="button" data-bs-toggle="modal" data-bs-target="#modalPieza">Nueva Pieza</a>
@@ -31,11 +28,33 @@
                         </div>
                     </div>
                     <div class="card-body table-responsive" id="divListar">
-                        
+                        <table class="table table-bordered w-100" id="tblPiezas">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15px">#</th>
+                                    <th>Código</th>
+                                    <th>Descripción de la pieza</i></th>
+                                    <th>Peso</th>
+                                    <th>Precio</th>
+                                    <th>Stock Ini. </th>
+                                    <th>Stock Act.</th>
+                                    <th>Stock Alqui.</th>
+                                    <th style="width: 100px">Opciones</th>
+                                </tr>
+                            </thead>
+                        </table>
                     </div>
                     <div class="card-footer">
-                        Peso Cantidad = <?=$peso_cant?> Tn. <br>
-                        Peso Stock Actual = <?=$peso_stock?> Tn.
+                        <div id="pesos" class="alert alert-info mt-3">
+                            <div class="row text-center">
+                                <div class="col-md-6">
+                                    <strong>Peso Cantidad:</strong> <span id="pesoInicial">0.00</span> Tn
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Peso Stock (Actual):</strong> <span id="pesoActual">0.00</span> Tn
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,7 +102,6 @@
                 </div>
                 <div id="msj"></div>
                 <div class="modal-footer py-2">
-                    <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
                     <button type="submit" class="btn btn-danger" id="btnGuardar">REGISTRAR PIEZA</button>
                     <input type="hidden" class="form-control" id="id_piezae" name="id_piezae">
                 </div>
@@ -92,42 +110,84 @@
     </div>
 </div>
 
+<div id="divMsj"></div>
+
 <?php echo $this->endSection();?>
 
 <?php echo $this->section('scripts');?>
 
 <script>
-function listarPiezas(page, cri = '', campo = 'pie_desc', order = 'ASC'){
-    $("#divListar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> CARGANDO DATOS');
-    $.post('listar-piezas', {
-        page,cri,campo,order
-    }, function(data){
-        $("#divListar").html(data);
-    })
-}
-
-listarPiezas(1, cri = '', campo = 'pie_desc', order = 'ASC');
-
-function limpiarCampos(){
-    $("#frmPieza")[0].reset();
-    $('[id^="msj-"').text("");
-    $("#id_piezae").val("");
-}
+let miTabla;
 
 $(function(){
-    let timeout;
-    $("#txtBuscar").on('input', function(e){
-        let cri = $(this).val();
-        //console.log(cri);
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-        	if( cri.length > 2 ){            
-                listarPiezas(1,cri);
-            }else if( cri.length == 0 ){
-                listarPiezas(1);
+    miTabla = $('#tblPiezas').DataTable({
+        "processing": true, // Muestra el mensaje de "Procesando"
+        "pageLength": 50, // <--- Carga 25 por defecto
+        "ajax": {
+            "url": "listar-piezas",
+            "type": "GET"
+        },
+        "columns": [
+            { "data": null, "render": (data, type, row, meta) => meta.row + 1 }, // Auto-incremento visual
+            { "data": "codigo" },
+            { "data": "descripcion" },
+            { "data": "peso" },
+            { "data": "precio" },
+            { "data": "inicial" },
+            { 
+                "data": "stock_actual",
+                "render": function(data, type, row) {
+                    // Si el stock actual es 0, lo pintamos de rojo para alertar
+                    let color = (data <= 0) ? 'text-danger fw-bold' : '';
+                    return `<span class="${color}">${data}</span>`;
+                }
+            },
+            { "data": "alquilado" },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return `
+                        <button class="btn btn-sm text-success" onclick="editar(${row.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm text-danger" onclick="eliminar(${row.id})"><i class="fas fa-trash"></i></button>
+                    `;
+                }
             }
-      	}, 600);
+        ],
+        // ESTO ES CLAVE: Filtra lo que el usuario escribe en el buscador
+        "initComplete": function() {
+            /* let api = this.api();
+            $('.dataTables_filter input').off('.DT').on('keyup.DT', function() {
+                api.search(quitarAcentos(this.value)).draw();
+            }); */
+        },
+        "drawCallback": function(settings) {
+            // 1. Obtenemos la API de DataTables
+            let api = this.api();
+            // 2. Obtener todos los datos que están visibles (o filtrados): 'apllied', sino 'none'
+            let datos = api.rows({ search: 'none' }).data();            
+            let totalPesoInicial = 0;
+            let totalPesoActual = 0;
+            // 3. Recorrer los registros y sumar (Peso * Cantidad)
+            datos.each(function(row) {
+                let pesoUnidad = parseFloat(row.peso) || 0;
+                let cantInicial = parseInt(row.cantidad) || 0;
+                let cantActual  = parseInt(row.stock_act) || 0;
+
+                totalPesoInicial += (pesoUnidad * cantInicial);
+                totalPesoActual  += (pesoUnidad * cantActual);
+            });
+            // Convertimos a toneladas
+            let toneladasInicial = totalPesoInicial / 1000;
+            let toneladasActual  = totalPesoActual / 1000;
+            // 4. Mostrar los resultados formateados a 2 decimales
+            $('#pesoInicial').text(toneladasInicial.toFixed(2));
+            $('#pesoActual').text(toneladasActual.toFixed(2));
+        },
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+        }
     });
+
 
     $("#frmPieza").on('submit', function(e){
         e.preventDefault();
@@ -153,11 +213,66 @@ $(function(){
 
     const myModalEl = document.getElementById('modalPieza')
     myModalEl.addEventListener('hidden.bs.modal', event => {
+        $('#tituloModal').text('Formulario Pieza');
         $("#btnGuardar").text("REGISTRAR PIEZA");
         limpiarCampos();
         $("#msj").html("");
-    })
-})
+    });
+});
+
+function limpiarCampos(){
+    $("#frmPieza")[0].reset();
+    $('[id^="msj-"').text("");
+    $("#id_piezae").val("");
+}
+
+function editar(id) {
+    // 1. Buscamos la fila en el DataTable usando el ID
+    // 'miTabla' es la variable donde inicializaste tu DataTable
+    let data = miTabla.rows().data().toArray().find(x => x.id == id);
+
+    if (data) {
+        // 2. Limpiamos mensajes de error previos (si usas validaciones)
+        $('#frmPieza')[0].reset();
+        $('.form-text').text(''); 
+
+        // 3. Llenamos los campos del modal con los datos del objeto 'data'
+        $('#id_piezae').val(data.id);
+        $('#desc').val(data.descripcion);
+        $('#codigo').val(data.codigo);
+        $('#peso').val(data.peso);
+        $('#precio').val(data.precio);
+        $('#cantidad').val(data.cantidad);
+
+        // 4. Cambiamos el estilo del modal para "Modo Edición"
+        $('#tituloModal').text('Editar Pieza');
+        $('#btnGuardar').text('ACTUALIZAR PIEZA').removeClass('btn-danger').addClass('btn-success');
+
+        // 5. Mostramos el modal
+        $('#modalPieza').modal('show');
+    } else {
+        // Usando SweetAlert2 como me indicaste anteriormente
+        Swal.fire('Error', 'No se pudieron recuperar los datos de la pieza', 'error');
+    }
+}
+
+function eliminar(id) {
+    Swal.fire({
+        title: "¿Vas a eliminar la pieza?",
+        showCancelButton: true,
+        confirmButtonText: "Confirmar",
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('eliminar-pieza', {
+                id
+            }, function(data){
+                //console.log(data);
+                $('#divMsj').html(data);
+            });
+        }
+    });
+}
 </script>
 
 <?php echo $this->endSection();?>

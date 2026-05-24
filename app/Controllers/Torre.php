@@ -45,7 +45,7 @@ class Torre extends BaseController
                         $data['id']     = $p['idpieza'];
                         $data['text']   = $p['pie_desc'];
                         $data['codigo'] = $p['pie_codigo'];
-                        $data['cant']   = $p['pie_cant'];
+                        $data['cant']   = $p['cantidad_inicial'];
 
                         array_push($pData, $data);
                     }
@@ -77,6 +77,43 @@ class Torre extends BaseController
             $data['totalRegistros'] = $this->modeloTorre->getTorresCount($cri)['total'];
 
             return view('sistema/torres/listar', $data);
+        }
+    }
+
+    public function listarTorresAjax(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            $desc   = $this->request->getVar('desc');
+            $torres = $this->modeloTorre->getTorres(0, 10, $desc);
+            $data = [];
+            foreach ($torres as $row) {
+                $data[] = [
+                    "id"   => $row['idtorre'],
+                    "desc" => $row['tor_desc'],
+                ];
+            }
+            echo json_encode(["data" => $data]);
+        }
+    }
+
+    public function listarDetalleTorreAjax(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            $idtorre   = $this->request->getVar('id');
+            $detalle = $this->modeloTorre->getDetalleTorre($idtorre);
+            $data = [];
+            foreach ($detalle as $row) {
+                $data[] = [
+                    "id"   => $row['idpieza'],
+                    "text" => $row['pie_desc'],
+                    "cant" => $row['dt_cantidad'],
+                ];
+            }
+            echo json_encode(["data" => $data]);
         }
     }
 

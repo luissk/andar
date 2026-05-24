@@ -11,7 +11,7 @@ class PiezaModel extends Model{
         return $st->getRowArray();
     }
 
-    public function getPieza($idpieza){
+    public function getPieza($idpieza){//MODIFICAR MAS ADELANTE
         $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
         ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
         ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
@@ -28,25 +28,36 @@ class PiezaModel extends Model{
     }
 
     public function getPiezasAjax($cri = ''){
-        $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
+        $sql = $cri != '' ? " and p.pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
+        $query ="SELECT 
+            p.idpieza,
+            p.pie_codigo,
+            p.pie_desc,
+            p.pie_peso,
+            p.pie_precio,
+            p.pie_cant AS cantidad_inicial,
+            -- 1. STOCK INICIAL: El total físico registrado en tu catálogo
+            p.pie_cant AS stock_inicial,
+            
+            -- 2. STOCK ALQUILADO: Lo que está en obra (Enviado - Devuelto)
+            IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
+                    FROM detalle_presupuesto_piezas 
+                    WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0) AS stock_alquilado,
 
-        $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
-        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
-        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
-        (
-            pie_cant + 
-            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) - 
-            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0)
-        ) as stockActual
-        from pieza 
-        where idpieza is not null $sql order by pie_desc asc";
+            -- 3. STOCK ACTUAL REAL: Lo que tienes físicamente disponible en tu almacén
+            (p.pie_cant - IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
+                                FROM detalle_presupuesto_piezas 
+                                WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0)) AS stock_actual_real
+        FROM pieza p 
+        WHERE p.idpieza is not null $sql
+        ORDER BY p.idpieza DESC";
 
         $st = $this->db->query($query);
 
         return $st->getResultArray();
     }
 
-    public function getPiezas($desde, $hasta, $cri = '', $campo = 'pie_desc', $order = 'ASC'){
+    public function getPiezas($desde, $hasta, $cri = '', $campo = 'pie_desc', $order = 'ASC'){//MODIFICAR MAS ADELANTE
         $sql = $cri != '' ? " and (pie_codigo LIKE '%" . $this->db->escapeLikeString($cri) . "%' or pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%') " : '';
 
         $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,

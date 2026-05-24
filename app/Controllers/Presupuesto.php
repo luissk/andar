@@ -101,8 +101,8 @@ class Presupuesto extends BaseController
         
         $data['presuLinkActive'] = 1;
 
-        $data['clientesCbo'] = $this->modeloCliente->getClientesCbo();//para llebar combobox
-        $data['torresCbo']   = $this->modeloTorre->getTorresCbo();//para llebar combobox
+        $data['clientesCbo'] = $this->modeloCliente->getClientesCbo();//para llenar combobox
+        $data['torresCbo']   = $this->modeloTorre->getTorresCbo();//para llenar combobox
         $data['param']       = $this->modeloParametros->getParametros();
 
         return view('sistema/presupuestos/nuevoPresupuesto', $data);
@@ -203,12 +203,16 @@ class Presupuesto extends BaseController
 
             //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
+            
             foreach( $items as $i ){
                 $idtorre = $i['id'];
                 $cant    = $i['cant'];
                 $tmonto  = $i['tmonto'];
 
                 $dtTorre = $this->modeloTorre->getDetalleTorre($idtorre);
+                print_r($dtTorre);
+                //GUARDAR TODO EL DETALLE O UNA IMAGEN EN LA NUEVA TABLA ..............
+                //TENER EN CUENTA SI EL USUARIO MODIFICA EL DETALLE DE LA TORRE EL PRESUPUESTO DEBE MANTENERSE A EXCEPTO QUE CAMBIE MANUALMENTE DE NUEVO LAS PIEZAS
                 
                 foreach( $dtTorre as $dtT ){
                     $a = [
@@ -223,6 +227,8 @@ class Presupuesto extends BaseController
             }
             $arrDT = json_encode($arrDT);
             //FIN PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
+
+            print_r($items);exit();
 
             if( $presu_bd = $this->modeloPresupuesto->getPresupuesto($idpre_e) ){
                 //EDITAR
