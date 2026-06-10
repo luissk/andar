@@ -74,10 +74,18 @@ class Guia extends BaseController
 
         if( $cri == 'g' ){
             if( $guia = $this->modeloGuia->getGuia($id) ){
-                $idpresu = $guia['idpresupuesto'];
-                $data['nroGuia']      = $guia['gui_nro'];
-                $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($idpresu);
-                $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
+                $idpresu                 = $guia['idpresupuesto'];
+                $data['nroGuia']         = $guia['gui_nro'];
+                $data['presupuesto']     = $this->modeloPresupuesto->getPresupuesto($idpresu);
+                $data['detalle_guia']    = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
+                $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu);
+
+                $idsPiezas = [];
+                foreach( $this->modeloPresupuesto->getDetallePresupuestoPiezas($id) as $p ){
+                    $idsPiezas[] = $p['idpieza'];
+                }
+                $idsPiezasUnicos = array_unique($idsPiezas);
+                $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
                 
                 $data['title']   = "Editar guía | ".help_nombreWeb();
                 $data['guia_bd'] = $guia;
@@ -86,10 +94,21 @@ class Guia extends BaseController
             }
         }else if( $cri == 'p' ){           
             if( $presu = $this->modeloPresupuesto->getPresupuesto($id,[1]) ){
-                $data['presupuesto']  = $presu;
-                $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($id);
-                $data['nroGuia']      = $this->modeloGuia->nroGuia()['nro'];
-                $data['title']        = "Nuevo guía | ".help_nombreWeb();  
+                $data['presupuesto']     = $presu;
+                $data['detalle_guia']    = $this->modeloPresupuesto->getDetallePresupuesto($id);
+                $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($id);
+                
+                //STOCK DE PIEZAS UNICAS (por temas de performance, de una vez obtener los stocks en vez de consultarlos en el bucle 1 por uno)
+                $idsPiezas = [];
+                foreach( $this->modeloPresupuesto->getDetallePresupuestoPiezas($id) as $p ){
+                    $idsPiezas[] = $p['idpieza'];
+                }
+                $idsPiezasUnicos = array_unique($idsPiezas);
+                $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
+                //FIN STOCK DE PIEZAS UNICAS
+
+                $data['nroGuia']         = $this->modeloGuia->nroGuia()['nro'];
+                $data['title']           = "Nuevo guía | ".help_nombreWeb();  
             }else{
                 return redirect()->to('/');
             }

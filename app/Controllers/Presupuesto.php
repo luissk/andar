@@ -68,11 +68,13 @@ class Presupuesto extends BaseController
             }
 
             $idpresu = $_POST['id'];
-            $presupuesto = $this->modeloPresupuesto->getPresupuesto($idpresu);
-            $detalle     = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
+            $presupuesto    = $this->modeloPresupuesto->getPresupuesto($idpresu);
+            $detalle        = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
+            $detalle_piezas = $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu);
 
-            $data['presupuesto'] = $presupuesto;
-            $data['detalle']     = $detalle;
+            $data['presupuesto']     = $presupuesto;
+            $data['detalle']         = $detalle;
+            $data['deta_pre_pie_bd'] = $detalle_piezas;
 
             return view('sistema/presupuestos/modalDetalle', $data);
 
@@ -87,9 +89,13 @@ class Presupuesto extends BaseController
         if( $id != '' ){
             if( $presu = $this->modeloPresupuesto->getPresupuesto($id,[1]) ){
                 
-                $data['nroPre']   = $presu['pre_numero'];
-                $data['presu_bd'] = $presu;
-                $data['deta_bd']  = $this->modeloPresupuesto->getDetallePresupuesto($id);
+                $data['nroPre']          = $presu['pre_numero'];
+                $data['presu_bd']        = $presu;
+                $data['deta_bd']         = $this->modeloPresupuesto->getDetallePresupuesto($id);
+                $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($id);
+
+                $data['huboCambiosEnMaestro'] = $this->modeloPresupuesto->verificarCambiosMaestro($id);
+                
                 $data['title']    = "Editar presupuesto | ".help_nombreWeb();
             }else{
                 return redirect()->to('/');
@@ -200,8 +206,8 @@ class Presupuesto extends BaseController
             $preciotrans = $this->request->getVar('preciotrans');
             $nrodias     = $this->request->getVar('dias');
             $preciomyd   = $this->request->getVar('preciomyd');
+            $pre_ruc     = $this->request->getVar('pre_ruc');
 
-            //PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
             $arrDT = [];
             
             foreach( $items as $i ){
@@ -209,26 +215,42 @@ class Presupuesto extends BaseController
                 $cant    = $i['cant'];
                 $tmonto  = $i['tmonto'];
 
-                $dtTorre = $this->modeloTorre->getDetalleTorre($idtorre);
-                print_r($dtTorre);
-                //GUARDAR TODO EL DETALLE O UNA IMAGEN EN LA NUEVA TABLA ..............
-                //TENER EN CUENTA SI EL USUARIO MODIFICA EL DETALLE DE LA TORRE EL PRESUPUESTO DEBE MANTENERSE A EXCEPTO QUE CAMBIE MANUALMENTE DE NUEVO LAS PIEZAS
+                /* $dtTorre = $this->modeloTorre->getDetalleTorre($idtorre);
+                //print_r($dtTorre);
                 
                 foreach( $dtTorre as $dtT ){
                     $a = [
-                        'idtor'  => $dtT['idtorre'],
-                        'idpie'  => $dtT['idpieza'],
-                        'dtcan'  => $dtT['dt_cantidad'],
-                        'piepre' => $dtT['pie_precio'],
-                        'dpcant' => $cant
+                        'idtor'    => $dtT['idtorre'],
+                        'idpie'    => $dtT['idpieza'],
+                        'codigo'   => $dtT['pie_codigo'],
+                        'pie_desc' => $dtT['pie_desc'],
+                        'pie_peso' => $dtT['pie_peso'],
+                        'dtcan'    => $dtT['dt_cantidad'],
+                        'piepre'   => $dtT['pie_precio'],
+                        'dpcant'   => $cant
                     ];
                     array_push($arrDT, $a);
-                }            
+                } */ 
+               
+                //AHORA GRABARA TODO LO QUE VIENE EN ITEMS
+                foreach( $i['piezas'] as $pi ){
+                    $a = [
+                        'idtor'    => $idtorre,
+                        'idpie'    => $pi[6],
+                        'codigo'   => $pi[5],
+                        'pie_desc' => $pi[0],
+                        'pie_peso' => $pi[4],
+                        'dtcan'    => $pi[2],
+                        'piepre'   => $pi[1],
+                        'dpcant'   => $cant
+                    ];
+                    array_push($arrDT, $a);
+                }
             }
-            $arrDT = json_encode($arrDT);
-            //FIN PARA GUARDAR LOS ITEMS DE LA TORRE DE ESE MOMENTO DEL PRESUPUESTO, EN CASO CAMBIE DESPUES
-
-            print_r($items);exit();
+            //$arrDT = json_encode($arrDT); //ya no se registrara directo en json items de la tabla, sino en la tabla detalle_presupuesto_peizas
+            //
+            /* echo "<pre>";print_r($arrDT);echo "</pre>";
+            echo "<pre>";print_r($items);echo "</pre>";exit(); */
 
             if( $presu_bd = $this->modeloPresupuesto->getPresupuesto($idpre_e) ){
                 //EDITAR
@@ -246,28 +268,40 @@ class Presupuesto extends BaseController
                     }
                 }
 
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd) ){
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
-                        $res = FALSE;
-                        foreach( $items as $i ){
-                            $idtorre = $i['id'];
-                            $cant    = $i['cant'];
-                            $tmonto  = $i['tmonto'];
-                            
-                            if( $this->modeloPresupuesto->insertarDetallePresu($idpre_e,$idtorre,$cant,$tmonto) ){
-                                $res = TRUE;
+                        if( $this->modeloPresupuesto->borrarDetallePresuPiezas($idpre_e) ){
+                            $res = FALSE;
+                            foreach( $items as $i ){
+                                $idtorre    = $i['id'];
+                                $desc_torre = $i['text'];
+                                $cant       = $i['cant'];
+                                $tmonto     = $i['tmonto'];
+                                
+                                if( $this->modeloPresupuesto->insertarDetallePresu($idpre_e,$idtorre,$cant,$tmonto,$desc_torre) ){
+                                    $res = TRUE;
+                                }
                             }
-                        }
-                        if( $res ){
-                            echo '<script>
-                                Swal.fire({
-                                    title: "Presupuesto Modificado",
-                                    text: "",
-                                    icon: "success",
-                                    showConfirmButton: true,
-                                });
-                                setTimeout(function(){location.reload()},1500)
-                            </script>';
+
+                            if( $res ){
+                                foreach( $arrDT as $ap ){
+                                    if( $this->modeloPresupuesto->insertarDetallePresuPiezas($idpre_e, $ap) ){
+                                        $res = TRUE;
+                                    }
+                                }
+                            }
+
+                            if( $res ){
+                                echo '<script>
+                                    Swal.fire({
+                                        title: "Presupuesto Modificado",
+                                        text: "",
+                                        icon: "success",
+                                        showConfirmButton: true,
+                                    });
+                                    setTimeout(function(){location.href="editar-presupuesto-'.$idpre_e.'"},1500)
+                                </script>';
+                            }
                         }
                     }
                 }
@@ -283,15 +317,23 @@ class Presupuesto extends BaseController
                     exit();
                 }
 
-                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$arrDT,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd) ){
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc) ){
                     $res = FALSE;
                     foreach( $items as $i ){
-                        $idtorre = $i['id'];
-                        $cant    = $i['cant'];
-                        $tmonto  = $i['tmonto'];
+                        $idtorre    = $i['id'];
+                        $desc_torre = $i['text'];
+                        $cant       = $i['cant'];
+                        $tmonto     = $i['tmonto'];
                         
-                        if( $this->modeloPresupuesto->insertarDetallePresu($idpre,$idtorre,$cant,$tmonto) ){
-                            $res = TRUE;
+                        if( $this->modeloPresupuesto->insertarDetallePresu($idpre,$idtorre,$cant,$tmonto,$desc_torre) ){
+                            $res = TRUE;                 
+                        }
+                    }
+                    if( $res ){
+                        foreach( $arrDT as $ap ){
+                            if( $this->modeloPresupuesto->insertarDetallePresuPiezas($idpre, $ap) ){
+                                $res = TRUE;
+                            }
                         }
                     }
                     if( $res ){
@@ -324,9 +366,10 @@ class Presupuesto extends BaseController
         $options->setIsRemoteEnabled(true);
         $dompdf = new \Dompdf\Dompdf($options);
 
-        $data['params'] = $this->modeloParametros->getParametros();
-        $data['presu'] = $this->modeloPresupuesto->getPresupuesto($id);
-        $data['detalle'] = $this->modeloPresupuesto->getDetallePresupuesto($id);
+        $data['params']          = $this->modeloParametros->getParametros();
+        $data['presu']           = $this->modeloPresupuesto->getPresupuesto($id);
+        $data['detalle']         = $this->modeloPresupuesto->getDetallePresupuesto($id);
+        $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($id);
 
         $dompdf->loadHtml(view('sistema/presupuestos/pdf', $data));
 
@@ -383,16 +426,18 @@ class Presupuesto extends BaseController
             }
             
             if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpresu) ){
-                if( $this->modeloPresupuesto->eliminarPresupuesto($idpresu) ){
-                    echo '<script>
-                        Swal.fire({
-                            title: "Presupuesto eliminado",
-                            text: "",
-                            icon: "success",
-                            showConfirmButton: true,
-                        });
-                        listarPresupuestos(1);
-                    </script>';
+                if( $this->modeloPresupuesto->borrarDetallePresuPiezas($idpresu) ){
+                    if( $this->modeloPresupuesto->eliminarPresupuesto($idpresu) ){
+                        echo '<script>
+                            Swal.fire({
+                                title: "Presupuesto eliminado",
+                                text: "",
+                                icon: "success",
+                                showConfirmButton: true,
+                            });
+                            listarPresupuestos(1);
+                        </script>';
+                    }
                 }
             }
         }

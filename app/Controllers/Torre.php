@@ -204,7 +204,7 @@ class Torre extends BaseController
                 //verificar si ya esta presupuesto, si esta no se puede eliminar ni agregar piezas
                 $t = 'detalle_presupuesto';
                 $total = $this->modeloTorre->verificarTorTieneRegEnTablas($id_torree,$t)['total'];
-                if( $total > 0 ){
+                /* if( $total > 0 ){
                     echo '<script>
                         Swal.fire({
                             title: "",
@@ -217,7 +217,7 @@ class Torre extends BaseController
                         $("#modalTorre").modal("hide");
                     </script>';
                     exit();
-                }
+                } */
 
                 $detalle_bd = $this->modeloTorre->getDetalleTorre($id_torree);
                 $nombre_plano = $plano->getError() === 0 ? 'plano_'.help_stringRandom(10,2).".pdf" : $torre_bd['tor_plano'];
@@ -238,9 +238,10 @@ class Torre extends BaseController
                         }
 
                         if( $res ){
+                            $msj = $total > 0 ? "Torre modificada, pero ya tiene presupuesto(s)." : "Torre modificada.";
                             echo '<script>
                                 Swal.fire({
-                                    title: "Torre Modificada",
+                                    title: "'.$msj.'",
                                     text: "",
                                     icon: "success",
                                     showConfirmButton: true,

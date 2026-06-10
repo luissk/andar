@@ -3,6 +3,10 @@
 print_r($presupuesto);
 print_r($detalle);
 echo "</pre>"; */
+
+/** @var array $presupuesto */ 
+/** @var array $detalle */ 
+/** @var array $deta_pre_pie_bd */ 
 ?>
 
 <div class="row">
@@ -65,17 +69,13 @@ echo "</pre>"; */
                         </thead>
                         <tbody>
                             <?php
-                            $piezaModel = model('PiezaModel');
+                            //$piezaModel = model('PiezaModel');
 
                             $periodo    = $presupuesto['pre_periodo'];
                             $nroperiodo = $presupuesto['pre_periodonro'];
                             $porcpre    = $presupuesto['pre_porcenprecio'];
                             $porcsem    = $presupuesto['pre_porcsem'];
                             $verPiezas  = $presupuesto['pre_verpiezas'];
-                            $piezas     = json_decode($presupuesto['pre_piezas'], true);
-                            /* echo "<pre>";
-                            print_r($piezas);
-                            echo "</pre>"; */
 
                             $c = 0;
                             $sum = 0;
@@ -87,19 +87,19 @@ echo "</pre>"; */
                                 //para sacar los pesos totales
                                 $pesoUnTotal = 0;
                                 $pesoTT = 0;
-                                $piezasFilter = array_filter($piezas, fn($p) => $p['idtor'] == $d['idtorre']);
-                                foreach( $piezasFilter as $pi ){
-                                    $pieza_bd = $piezaModel->getPieza($pi['idpie']);
-                                    $pie_peso = $pieza_bd['pie_peso'];
-                                    $pie_peso_t = $pie_peso * $pi['dtcan'] * $d['dp_cant'];
-                                    $pesoUnTotal += $pie_peso;
-                                    $pesoTT += $pie_peso_t;
+                                foreach( $deta_pre_pie_bd as $pi ){
+                                    if( $d['idtorre'] == $pi['idtorre'] ){
+                                        $pie_peso    =  $pi['dp_peso_hist'];
+                                        $pie_peso_t  =  $pie_peso * $pi['dp_cant_x_torre'] * $pi['dp_cant_x_presu'];
+                                        $pesoUnTotal += $pie_peso;
+                                        $pesoTT      += $pie_peso_t;
+                                    }                                    
                                 }
                                 $pesoTotalPiezas += $pesoTT;
 
                                 echo '<tr>';
                                 echo '<td>'.$c.'</td>';
-                                echo '<td>'.$d['tor_desc'].'</td>';
+                                echo '<td>'.$d['dp_torredesc'].'</td>';
                                 echo '<td>'.$d['dp_cant'].'</td>';
                                 echo '<td>'.number_format($pesoUnTotal,2,".","").'</td>';
                                 echo '<td>'.number_format($pesoTT,2,".","").'</td>';
@@ -108,28 +108,29 @@ echo "</pre>"; */
                                 echo '</tr>';
 
                                 if( $verPiezas == 1 ){//para ver el detalle de piezas
-                                    $piezasFilter = array_filter($piezas, fn($p) => $p['idtor'] == $d['idtorre']);
+                                    //$piezasFilter = array_filter($piezas, fn($p) => $p['idtor'] == $d['idtorre']);
                                     $c2 = 0;
-                                    foreach( $piezasFilter as $pi ){
+                                    foreach( $deta_pre_pie_bd as $pi ){
                                         $c2++;
-                                        $pieza_bd = $piezaModel->getPieza($pi['idpie']);//solo para sacar los nombres de las piezas, porque los precios de las piezas se obtienen del presupuesto guardado, ya que con esos precios se grabaron
-                                        $preciop = $pi['piepre'] * $pi['dtcan'];
+                                        
+                                        if( $d['idtorre'] == $pi['idtorre'] ){
+                                            $preciop = $pi['dp_precio_hist'] * $pi['dp_cant_x_torre'];
 
-                                        $pie_peso = $pieza_bd['pie_peso'];
-                                        $pie_peso_t = $pie_peso * $pi['dtcan'] * $d['dp_cant'];
+                                            $pie_peso = $pi['dp_peso_hist'];
+                                            $pie_peso_t = $pie_peso * $pi['dp_cant_x_torre'] * $pi['dp_cant_x_presu'];
 
-                                        //$subt = number_format(help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $presupuesto['pre_tcambio'],2,".","");
-                                        $tott = help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $d['dp_cant'] * $presupuesto['pre_tcambio'];
+                                            $tott = help_calcularPresu($preciop,$periodo,$nroperiodo,$porcpre,$porcsem) * $pi['dp_cant_x_presu'] * $presupuesto['pre_tcambio'];
 
-                                        echo "<tr style='color:#666'>";
-                                        echo "<td>$c.$c2.</td>";
-                                        echo "<td>".$pieza_bd['pie_desc']."</td>";
-                                        echo "<td>".$pi['dtcan'] * $d['dp_cant']."</td>";
-                                        echo "<td>".$pie_peso."</td>";
-                                        echo "<td>".number_format($pie_peso_t,2,".","")."</td>";
-                                        echo "<td class='text-end'>".number_format($tott/($pi['dtcan'] * $d['dp_cant']),2,".","")."</td>";                                        
-                                        echo "<td class='text-end'>".number_format($tott,2,".","")."</td>";
-                                        echo "</tr>";
+                                            echo "<tr style='color:#666'>";
+                                            echo "<td>$c.$c2.</td>";
+                                            echo "<td>".$pi['dp_desc_hist']."</td>";
+                                            echo "<td>".$pi['dp_cant_x_torre'] * $pi['dp_cant_x_presu']."</td>";
+                                            echo "<td>".$pie_peso."</td>";
+                                            echo "<td>".number_format($pie_peso_t,2,".","")."</td>";
+                                            echo "<td class='text-end'>".number_format($tott/($pi['dp_cant_x_torre'] * $pi['dp_cant_x_presu']),2,".","")."</td>";                                        
+                                            echo "<td class='text-end'>".number_format($tott,2,".","")."</td>";
+                                            echo "</tr>";
+                                        }
                                     }                                    
                                 }
                             }

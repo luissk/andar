@@ -9,14 +9,17 @@
 
 
 <?php echo $this->section('contenido');?>
+
 <?php
 $torreModel = model('TorreModel');
 
 if( isset($presu_bd) && $presu_bd ){
-    /* echo "<pre>";
+   /*  echo "<pre>";
     print_r($presu_bd);
     print_r($deta_bd);
+    print_r($deta_pre_pie_bd);
     echo "</pre>"; */
+    //exit();
 
     $idpre       = $presu_bd['idpresupuesto'];
     $pre_numero  = $presu_bd['pre_numero'];
@@ -34,12 +37,13 @@ if( isset($presu_bd) && $presu_bd ){
     $preciotrans = $presu_bd['pre_preciotrans'];
     $nrodias     = $presu_bd['pre_nrodiasm'];
     $preciomyd   = $presu_bd['pre_preciomyd'];
+    $pre_ruc     = $presu_bd['pre_ruc'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
 
-    $piezas_pre = $presu_bd['pre_piezas'];
-    $piezas_enc = json_decode($piezas_pre, true);
+    //$piezas_pre = $presu_bd['pre_piezas'];
+    //$piezas_enc = json_decode($piezas_pre, true);
     /* echo "<pre>";
     print_r($piezas_enc);
     echo "</pre>"; */
@@ -47,29 +51,58 @@ if( isset($presu_bd) && $presu_bd ){
     $items = [];
     foreach($deta_bd as $d){
         $to = 0;
-        foreach( $piezas_enc as $pe ){
+        /* foreach( $piezas_enc as $pe ){
             if( $d['idtorre'] == $pe['idtor'] ){
                 $to += $pe['piepre'] * $pe['dtcan'];
             }
-        }
+        } */
         //echo $to;
 
-        $dt_torre   = $torreModel->getDetalleTorre($d['idtorre']);
         $arrDT = [];
-        foreach( $dt_torre as $dtt ){
-            array_push($arrDT,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total'],$dtt['pie_peso']]);
-        }
 
-        $item = array(
-            'id'     => $d['idtorre'],
-            'text'   => $d['tor_desc'],
-            'cant'   => $d['dp_cant'],
-            'total'  => $to,
-            'monto'  => $d['dp_precio'] / $d['dp_cant'],
-            'tmonto' => $d['dp_precio'],
-            'piezas' => $arrDT,
-        );
-        array_push($items, $item);
+        if( isset($_GET['upd']) && $_GET['upd'] == 1 ){
+            //OBTENER DEL MAESTRO ACTUAL TANTO LA TORRE COMO SU PIEZAS Y PRECIO Y CANTIDADES
+            $dt_torre  = $torreModel->getDetalleTorre($d['idtorre']);
+            foreach( $dt_torre as $dtt ){
+                if( $d['idtorre'] == $dtt['idtorre'] ){
+                    $total_x_pieza = $dtt['total'];
+                    $to += $total_x_pieza;
+                    array_push($arrDT,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$total_x_pieza,$dtt['pie_peso'],$dtt['pie_codigo'],$dtt['idpieza']]);
+                }
+            }
+
+            $item = array(
+                'id'     => $d['idtorre'],
+                'text'   => $d['tor_desc'],//usamos la torre descricpion que se guardo en ese momento
+                'cant'   => $d['dp_cant'],
+                'total'  => $to,
+                'monto'  => 0,//ya que la funcion calcular de js lo calcula
+                'tmonto' => 0,//ya que la funcion calcular de js lo calcula
+                'piezas' => $arrDT,
+            );
+            array_push($items, $item);
+        }else{
+            //OBTENER DEL DETALLE YA GUARDADO ANTERIORMENTE ($deta_pre_pie_bd)
+            foreach( $deta_pre_pie_bd as $dtt ){
+                if( $d['idtorre'] == $dtt['idtorre'] ){
+                    $total_x_pieza = ($dtt['dp_precio_hist'] * $dtt['dp_cant_x_torre']);
+                    $to += $total_x_pieza;
+                    array_push($arrDT,[$dtt['dp_desc_hist'],$dtt['dp_precio_hist'],$dtt['dp_cant_x_torre'],$total_x_pieza,$dtt['dp_peso_hist'],$dtt['dp_cod_hist'],$dtt['idpieza']]);
+                }
+            }
+
+            $item = array(
+                'id'     => $d['idtorre'],
+                'text'   => $d['dp_torredesc'],//usamos la torre descricpion que se guardo en ese momento
+                'cant'   => $d['dp_cant'],
+                'total'  => $to,
+                'monto'  => $d['dp_precio'] / $d['dp_cant'],
+                'tmonto' => $d['dp_precio'],
+                'piezas' => $arrDT,
+            );
+            array_push($items, $item);
+
+        }
     }
 
     $items = json_encode($items, JSON_HEX_APOS);
@@ -92,13 +125,22 @@ if( isset($presu_bd) && $presu_bd ){
     $preciotrans = "";
     $nrodias     = "";
     $preciomyd   = "";
+    $pre_ruc     = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
 
     $items = json_encode([]);
 }
+
+//echo "<pre>";print_r($items);echo "</pre>";
+//exit();
 ?>
+
+
+
+
+
 
 <div class="app-content pt-3">
     <div class="container-fluid">
@@ -177,7 +219,7 @@ if( isset($presu_bd) && $presu_bd ){
 
                                         $arr = [];
                                         foreach( $dt_torre as $dtt ){
-                                            array_push($arr,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total'],$dtt['pie_peso']]);
+                                            array_push($arr,[$dtt['pie_desc'],$dtt['pie_precio'],$dtt['dt_cantidad'],$dtt['total'],$dtt['pie_peso'],$dtt['pie_codigo'],$dtt['idpieza']]);
                                         }
                                         $arr = json_encode($arr, JSON_HEX_APOS);
 
@@ -240,6 +282,14 @@ if( isset($presu_bd) && $presu_bd ){
                                 <input type="text" class="form-control numerocondecimal" id="preciomyd" name="preciomyd" value="<?=$preciomyd?>">
                                 <div id="msj-preciomyd" class="form-text text-danger"></div>
                             </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="pre_ruc" class="form-label">RUC Presupuesto</label>
+                                <select class="form-select" name="pre_ruc" id="pre_ruc">
+                                    <option value="10108671055" <?=$pre_ruc != '' && $pre_ruc == '10108671055' ? 'selected' : ''?>>10108671055</option>
+                                    <option value="20614876175" <?=$pre_ruc != '' && $pre_ruc == '20614876175' ? 'selected' : ''?>>20614876175</option>
+
+                                </select>
+                            </div>
                             <div id="pesoT" class="fw-bolder"></div>
                             <div class="col-sm-12 text-end">
                                 <div class="fw-bolder">SUB TOTAL: S/. <span id="subT">0.00</span></div>
@@ -275,6 +325,7 @@ if( isset($presu_bd) && $presu_bd ){
                         <div class="row">
                             <div class="col-sm-12 text-center">
                                 <input type="hidden" name="idpre" id="idpre" value="<?=$idpre?>">
+                                <!-- <input type="hidden" name="upd" id="upd" value="<?=isset($_GET['upd']) ?? ''?>"> -->
                                 <button id="btnPresu" class="btn btn-warning"><?=$btnTexto?></button>
                             </div>
                         </div>
@@ -289,10 +340,46 @@ if( isset($presu_bd) && $presu_bd ){
     </div>
 </div>
 
+
+
+<!-- MODAL DETECTAR SI HUBO CAMBIOS EN EL MAESTRO -->
+<div class="modal fade" id="modalCambiosMaestro" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> ¡Estructura de Torres Modificada!</h5>
+      </div>
+      <div class="modal-body">
+        <p>Se ha detectado que los precios, nombres o componentes de las torres en el catálogo maestro han sido modificados desde que se creó este presupuesto.</p>
+        <p>¿Qué acción deseas tomar para esta edición?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="editar-presupuesto-<?=$idpre?>?upd=1" class="btn btn-primary">Actualizar Torres y Piezas</a>
+        
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mantener Presupuesto Original</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- MODAL DETECTAR SI HUBO CAMBIOS EN EL MAESTRO -->
+
 <?php echo $this->endSection();?>
 
 
 <?php echo $this->section('scripts');?>
+
+<!-- DETECTAR SI HUBO CAMBIOS EN EL MAESTRO -->
+<?php if (isset($huboCambiosEnMaestro) && $huboCambiosEnMaestro && !isset($_GET['upd']) ): ?>
+<script>
+    $(document).ready(function() {
+        // Levantamos el modal de inmediato apenas abre la página
+        var myModal = new bootstrap.Modal(document.getElementById('modalCambiosMaestro'));
+        myModal.show();
+    });
+</script>
+<?php endif; ?>
+<!-- FIN DETECTAR SI HUBO CAMBIOS EN EL MAESTRO -->
+ 
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
@@ -335,8 +422,8 @@ function dibujaFilas(){
                 <td>${j[2] * i.cant}</td>
                 <td>${j[4]}</td>
                 <td>${(j[4] * (j[2] * i.cant)).toFixed(2)}</td>
-                <td>${( (i.cant * j[5])/(j[2] * i.cant) ).toFixed(2)}</td>
-                <td>${(i.cant * j[5]).toFixed(2)}</td>
+                <td>${( (i.cant * j[7])/(j[2] * i.cant) ).toFixed(2)}</td>
+                <td>${(i.cant * j[7]).toFixed(2)}</td>
                 <td></td>
             </tr>
             `;
@@ -385,14 +472,14 @@ function calcular(){//calcularEnPrecioPiezas();
             monto  = (pre_cant / 4 * p_pre * p_sem * tcambio) / i.cant;//para items
             tmonto = pre_cant / 4 * p_pre * p_sem * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[5] = pr / 4 * p_pre * p_sem * tcambio });
+            calcularEnPrecioPiezas( (a, pr) => { a[7] = pr / 4 * p_pre * p_sem * tcambio });
         }else if( periodo == 's' ){
             if( nroperiodo < 4 ){
                 //suma += pre_cant / 4 * nroperiodo * p_pre * p_sem;
                 monto  = (pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio) / i.cant;//para items
                 tmonto = pre_cant / 4 * nroperiodo * p_pre * p_sem * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[5] = pr / 4 * nroperiodo * p_pre * p_sem * tcambio });
+                calcularEnPrecioPiezas( (a, pr) => { a[7] = pr / 4 * nroperiodo * p_pre * p_sem * tcambio });
             }
             if( nroperiodo % 4 == 0 ){//es mes
                 let nromes = nroperiodo / 4;
@@ -400,7 +487,7 @@ function calcular(){//calcularEnPrecioPiezas();
                 monto  = (pre_cant * nromes * p_pre * tcambio) / i.cant;//para items
                 tmonto = pre_cant * nromes * p_pre * tcambio;//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[5] = pr * nromes * p_pre * tcambio });
+                calcularEnPrecioPiezas( (a, pr) => { a[7] = pr * nromes * p_pre * tcambio });
             }
             if( nroperiodo > 4 && nroperiodo % 4 != 0 ){
                 let res = nroperiodo / 4;
@@ -412,14 +499,14 @@ function calcular(){//calcularEnPrecioPiezas();
                 monto  = ((pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio)) / i.cant;//para items
                 tmonto = (pre_cant * mes * p_pre) + (pre_cant / 4 * sem * p_pre * p_sem * tcambio);//para items
 
-                calcularEnPrecioPiezas( (a, pr) => { a[5] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem * tcambio) });
+                calcularEnPrecioPiezas( (a, pr) => { a[7] = (pr * mes * p_pre) + (pr / 4 * sem * p_pre * p_sem * tcambio) });
             }
         }else if( periodo == 'm' ){
             //suma += pre_cant * nroperiodo * p_pre;
             monto  = (pre_cant * nroperiodo * p_pre * tcambio) / i.cant;//para items
             tmonto = pre_cant * nroperiodo * p_pre * tcambio;//para items
 
-            calcularEnPrecioPiezas( (a, pr) => { a[5] = pr * nroperiodo * p_pre * tcambio });
+            calcularEnPrecioPiezas( (a, pr) => { a[7] = pr * nroperiodo * p_pre * tcambio });
         }
 
         let indice = items.findIndex(x => x.id == i.id);
@@ -587,7 +674,7 @@ $(function(){
             contentType: false,
             processData: false,
             success: function(data){
-                console.log(data);
+                //console.log(data);
                 btn.removeAttribute('disabled');
                 btn.innerHTML = txtbtn; 
                 $('#msj').html(data);

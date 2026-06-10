@@ -41,7 +41,7 @@ if($presupuestos){
             echo "<td>$pre_numero</td>";
             echo "<td style='font-size:15px;'>";
             foreach($torres as $tor){
-                echo "- ".$tor['tor_desc']."<br>";
+                echo "- ".$tor['dp_torredesc']."<br>";
             }
             echo "</td>";
             echo "<td>$cli_nombrerazon</td>";

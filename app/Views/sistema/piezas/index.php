@@ -242,7 +242,7 @@ function editar(id) {
         $('#codigo').val(data.codigo);
         $('#peso').val(data.peso);
         $('#precio').val(data.precio);
-        $('#cantidad').val(data.cantidad);
+        $('#cantidad').val(data.inicial);
 
         // 4. Cambiamos el estilo del modal para "Modo Edición"
         $('#tituloModal').text('Editar Pieza');

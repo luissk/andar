@@ -211,9 +211,64 @@ if( isset($guia_bd) && $guia_bd ){
                             <div class="col-sm-12 table-responsive">                           
                                 <table class="table">
                                 <?php
-                                $presuModel = model('PresupuestoModel');
+                                /* $presuModel = model('PresupuestoModel');
                                 $torreModel = model('TorreModel');
-                                $piezaModel = model('PiezaModel');
+                                $piezaModel = model('PiezaModel'); */
+
+                                echo "<pre>";
+                                $piezas_acumuladas = array_values(array_reduce($deta_pre_pie_bd, function ($acumulador, $item) {
+                                    // Creamos la llave única
+                                    $llave = $item['idpieza'];                                    
+                                    // Sumamos la cantidad si ya existe, si no, inicializamos el registro
+                                    isset($acumulador[$llave]) ? $acumulador[$llave]['dp_cant_hist'] += $item['dp_cant_hist'] : $acumulador[$llave] = $item;                                    
+                                    return $acumulador;
+                                }, []));
+
+                                /* print_r($piezas_acumuladas);
+                                print_r($stockDePiezasUnicas);
+                                print_r($detalle_guia);
+                                print_r($deta_pre_pie_bd); */
+
+                                $guiacompleta = TRUE;
+
+                                echo "<tr>";
+                                echo "<th>N°</th>";
+                                echo "<th>Piezas</th>";                                    
+                                echo "<td class='text-center'>Requerido</td>";
+                                if( $idguia_bd == '' )
+                                    echo "<td class='text-center'>Stock Act</td>";                                    
+                                echo "<td class='text-center'>Stock sale</td>";
+                                echo "<td class='text-center'>Faltantes</td>";
+                                echo "</tr>";
+
+                                $cont = 0;
+                                foreach( $piezas_acumuladas as $pa ){
+                                    $cont++;
+                                    $stockAct = $stockDePiezasUnicas[ array_search($pa['idpieza'], array_column($stockDePiezasUnicas, 'idpieza')) ]['stock_actual_real'];
+
+                                    $stock_que_sale = $stockAct >= $pa['dp_cant_hist'] ? $pa['dp_cant_hist'] : $pa['dp_cant_hist'] - $stockAct;
+                                    $faltantes = $stockAct < $pa['dp_cant_hist'] ? abs($stockAct - $pa['dp_cant_hist']) : 0;
+
+                                    $resaltar = "";
+                                    $boton_faltantes = "";
+                                    if( $faltantes > 0 ){
+                                        $resaltar = "bg-danger-subtle";
+                                        $guiacompleta = FALSE;
+                                        $boton_faltantes = "<a class='btn btn-sm btn-danger ml-2' data-idpieza=".$pa['idpieza'].">xD</a>";
+                                    }
+
+                                    echo "<tr class='$resaltar'>";
+                                    echo "<td>$cont</td>";
+                                    echo "<td>".$pa['dp_desc_hist']."</td>";                                            
+                                    echo "<td class='text-center'>".$pa['dp_cant_hist']."</td>";
+                                    if( $idguia_bd == '' )
+                                        echo "<td class='text-center'>$stockAct</td>";                                          
+                                    echo "<td class='text-center'>$stock_que_sale</td>";
+                                    echo "<td class='text-center'>$faltantes $boton_faltantes</td>";
+                                    echo "</tr>";
+                                }
+
+                                //exit();
                                 
                                 /* $arr_tor = [];//para separar las torres, sin que se repitan
                                 foreach( $pre_piezas_bd as $pie_bd ){
@@ -222,14 +277,14 @@ if( isset($guia_bd) && $guia_bd ){
                                     array_push($arr_tor, array($torre_bd['idtorre'],$torre_bd['tor_desc']));
                                 }
                                 $arr_tor = array_unique($arr_tor, SORT_REGULAR); */
-                                echo "<pre>";
+                               
                                 //print_r($presupuesto);
                                 //print_r($detalle_guia);
                                 //print_r($transportitas);
                                 //print_r($departamentos);
                                 //print_r($pre_piezas_bd);
                                 
-                                $arr_aux = array_map(function($v){
+                                /* $arr_aux = array_map(function($v){
                                     if( array_key_exists('falt', $v) && array_key_exists('st_sale', $v) ){//editar
                                         return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
                                     }else{
@@ -257,12 +312,12 @@ if( isset($guia_bd) && $guia_bd ){
                                         continue;
                                     }
                                     $newarr[] = $ax;
-                                }
+                                } */
                                 //print_r($newarr);
                                 echo "</pre>";
 
                                 //$arr_existentes = [];//cuando hay mas de una pieza que se repite, y asi poder ir restando su stock para el sgte
-                                $guiacompleta = TRUE;
+                                /* $guiacompleta = TRUE;
 
                                 echo "<tr>";
                                 echo "<th>N°</th>";
@@ -284,26 +339,15 @@ if( isset($guia_bd) && $guia_bd ){
                                     $stockIni      = $pieza_bd['pie_cant'];
                                     $cantReq       = $pi['req'];
                 
-                                    /* $nroEntregados = $presuModel->getStockPieza($idpieza, $estadoPresu = [3], 'e');
-                                    $nroSalidas    = $presuModel->getStockPieza($idpieza, $estadoPresu = [2,3], 's');
-                                    $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
                                     $stockAct      = $pieza_bd['stockActual'];
                                     $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
-                                    
-                                    /* $arr_e = array_filter($arr_existentes, fn($pie) => $pie[0] == $idpieza);
-                                    $arr_e = array_values($arr_e);
-                                    if( count($arr_e) > 0 ){
-                                        $stockAct = ($stockAct - $arr_e[0][1]) <= 0 ? 0 : ($stockAct - $arr_e[0][1]);
-                                        $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
-                                    } */
+                    
 
                                     $resaltar = "";
                                     if( $faltantes != "" ){
                                         $resaltar = "bg-danger-subtle";
                                         $guiacompleta = FALSE;
                                     }                                           
-
-                                    //array_push($arr_existentes, [$idpieza, $cantReq]);
                                     
                                     //editar, de frfente las cantidades
                                     if( array_key_exists('req', $pi) && array_key_exists('falt', $pi) ){
@@ -327,18 +371,17 @@ if( isset($guia_bd) && $guia_bd ){
                                     echo "<td class='text-center'>$faltantes</td>";
                                     echo "</tr>";
                                     
-                                }
-                                //print_r($arr_existentes);                                                                        
+                                } */                                                      
                                 ?>
                                 </table>
                             </div>
                             <div class="col-sm-12 pb-3 fw-bolder">
                             <?php
-                            $detalle_presu = $presuModel->getDetallePresupuesto($presupuesto['idpresupuesto']);
-                            foreach($detalle_presu as $d){
+
+                            foreach($detalle_guia as $d){
                                 $idtorre  = $d['idtorre'];
                                 $dp_cant  = $d['dp_cant'];
-                                $tor_desc = $d['tor_desc'];
+                                $tor_desc = $d['dp_torredesc'];
                                 echo "$dp_cant $tor_desc.<br>";
                             }
                             ?>

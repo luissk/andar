@@ -35,7 +35,7 @@ class TorreModel extends Model{
     }
     
     public function insertarTorre($desc, $nombre_plano, $idusuario2){
-        $query = "insert into torre(tor_desc,tor_plano,idusuario2,tor_fechareg) values(?,?,?,now())";
+        $query = "insert into torre(tor_desc,tor_plano,idusuario2,tor_fechareg) values(UPPER(?),?,?,now())";
 
         $st = $this->db->query($query, [$desc, $nombre_plano, $idusuario2]);
 
@@ -51,7 +51,7 @@ class TorreModel extends Model{
     }
 
     public function modificarTorre($desc, $nombre_plano, $idtorre){
-        $query = "update torre set tor_desc=?,tor_plano=? where idtorre=?";
+        $query = "update torre set tor_desc=UPPER(?),tor_plano=? where idtorre=?";
 
         $st = $this->db->query($query, [$desc, $nombre_plano, $idtorre]);
 
