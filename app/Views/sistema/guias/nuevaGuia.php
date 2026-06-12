@@ -254,17 +254,17 @@ if( isset($guia_bd) && $guia_bd ){
                                     if( $faltantes > 0 ){
                                         $resaltar = "bg-danger-subtle";
                                         $guiacompleta = FALSE;
-                                        $boton_faltantes = "<a class='btn btn-sm btn-danger ml-2' data-idpieza=".$pa['idpieza'].">xD</a>";
+                                        $boton_faltantes = "<a class='btn btn-sm btn-danger ml-2' data-idpieza=".$pa['idpieza']." onclick='alquilar(".$pa['idpieza'].",\"".$pa['dp_desc_hist']."\",$faltantes,$stockAct)'>A</a>";
                                     }
 
-                                    echo "<tr class='$resaltar'>";
+                                    echo "<tr class='$resaltar' id='fila_pieza_".$pa['idpieza']."'>";
                                     echo "<td>$cont</td>";
                                     echo "<td>".$pa['dp_desc_hist']."</td>";                                            
-                                    echo "<td class='text-center'>".$pa['dp_cant_hist']."</td>";
+                                    echo "<td class='text-center columna-requerido'>".$pa['dp_cant_hist']."</td>";
                                     if( $idguia_bd == '' )
                                         echo "<td class='text-center'>$stockAct</td>";                                          
                                     echo "<td class='text-center'>$stock_que_sale</td>";
-                                    echo "<td class='text-center'>$faltantes $boton_faltantes</td>";
+                                    echo "<td class='text-center columna-faltante'>$faltantes $boton_faltantes</td>";
                                     echo "</tr>";
                                 }
 
@@ -391,9 +391,8 @@ if( isset($guia_bd) && $guia_bd ){
                         <div class="row">
                             <div class="col-sm-12 text-center">
                                 <input type="hidden" id="idpre" value="<?=$presupuesto['idpresupuesto']?>">
-
                                 <input type="hidden" id="idguia_bd" value="<?=$idguia_bd?>">
-                                <button class="btn btn-warning btnGuia" data-opt="<?=$guiacompleta ? 1 : 0?>"><?=strtoupper($titulo)?> GUIA</button>
+                                <button <?=$guiacompleta ? '' : 'disabled'?> id="btn_generar_guia" class="btn btn-warning btnGuia" data-opt="<?=$guiacompleta ? 1 : 0?>"><?=strtoupper($titulo)?> GUIA</button>
                             </div>
                             <div id="msj"></div>
                         </div>
@@ -403,6 +402,79 @@ if( isset($guia_bd) && $guia_bd ){
             </div>            
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="modalAlquiler" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalAlquilerLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header bg-dark text-white py-2">
+        <h5 class="modal-title fs-6" id="modalAlquilerLabel">Asignar Alquiler Externo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="modal_idpieza" value="">
+        <input type="hidden" id="modal_limite_faltante" value="0">
+
+        <div class="alert alert-secondary py-2 mb-3 shadow-sm">
+          <div class="fw-bold" id="modal_txt_pieza">PIEZA LUIS X</div>
+          <small class="text-danger fw-bold">Cantidad requerida por cubrir: <span id="modal_txt_faltante">0</span> und.</small>
+        </div>
+
+        <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
+          <div class="col-md-7">
+            <label class="form-label small fw-bold mb-1">Seleccionar Proveedor</label>
+            <select class="form-select form-select-sm" id="modal_select_proveedor">
+              <option value="">-- Seleccione --</option>
+              <?php foreach ($proveedores as $prov): ?>
+                <option value="<?= $prov['idproveedor']; ?>">
+                  <?= $prov['pro_ruc'] . ' - ' . $prov['pro_razon']; ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold mb-1">Cantidad</label>
+            <input type="number" class="form-select text-start form-control-sm" id="modal_input_cantidad" min="1" value="1">
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-primary btn-sm w-100" id="btn_modal_agregar_lista" title="Agregar">
+              <i class="bi bi-plus-lg"></i> +
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive border rounded" style="max-height: 200px; overflow-y: auto;">
+          <table class="table table-sm table-striped mb-0" id="tabla_modal_desglose">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th class="small py-1">Proveedor</th>
+                <th class="small py-1 text-end" style="width: 80px;">Cant.</th>
+                <th class="small py-1 text-center" style="width: 50px;">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="fila_modal_vacia">
+                <td colspan="3" class="text-center text-muted small py-2">Ningún proveedor asignado aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light py-2 d-flex justify-content-between align-items-center">
+        <div class="small fw-bold border p-1 rounded bg-white">
+          Progreso: <span id="modal_txt_progreso" class="text-primary">0</span> / <span id="modal_txt_total_esperado">0</span>
+        </div>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success btn-sm" id="btn_modal_confirmar" disabled>Confirmar y Aplicar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <?php echo $this->endSection();?>
@@ -532,6 +604,307 @@ $(function(){
     }
     ?>
 });
+
+
+/////
+// ==========================================
+// SOURCE OF TRUTH (CEREBRO DE LA PANTALLA)
+// ==========================================
+// Validamos si la variable viene precargada desde PHP (Modo Edición), sino inicia vacía
+let guia_materiales_db = <?= isset($guia_guardada) ? json_encode($guia_guardada) : 'null'; ?>;
+let guia_materiales = (typeof guia_materiales_db !== 'undefined' && guia_materiales_db !== null) ? guia_materiales_db : {};
+
+$(document).ready(function() {
+    // Si ya viene data de la base de datos, pintamos la pantalla de inmediato al cargar
+    renderizarTablaPrincipal();
+
+    // ==========================================
+    // INTERACCIÓN INTERNA DEL MODAL
+    // ==========================================
+
+    // --- BOTÓN: AGREGAR PROVEEDOR A LA LISTA TEMPORAL DEL MODAL ---
+    $('#btn_modal_agregar_lista').on('click', function() {
+        let idprov = $('#modal_select_proveedor').val();
+        let textProv = $('#modal_select_proveedor option:selected').text().trim();
+        let cant = parseInt($('#modal_input_cantidad').val());
+        let limite = parseInt($('#modal_limite_faltante').val());
+
+        if (!idprov) { alert('Debe seleccionar un proveedor.'); return; }
+        if (isNaN(cant) || cant <= 0) { alert('Ingrese una cantidad válida mayor a 0.'); return; }
+
+        // Validar si el proveedor ya está en la lista del modal
+        let existe = false;
+        $('#tabla_modal_desglose tbody tr').each(function() {
+            if ($(this).data('idprov') == idprov) { existe = true; }
+        });
+        if (existe) { alert('Este proveedor ya está en la lista.'); return; }
+
+        // Calcular la suma de lo que ya se va agregando en el modal
+        let sumaActual = 0;
+        $('#tabla_modal_desglose tbody tr').each(function() {
+            let c = parseInt($(this).data('cant'));
+            if (!isNaN(c)) { sumaActual += c; }
+        });
+
+        // Validar que no pase el límite estricto de los faltantes
+        if ((sumaActual + cant) > limite) {
+            alert(`No puedes superar los faltantes requeridos (${limite} und). Quedan disponibles: ${limite - sumaActual} und.`);
+            return;
+        }
+
+        // Quitar fila vacía si existe
+        $('#fila_modal_vacia').remove();
+
+        // Inyectar fila en la tablita del modal
+        $('#tabla_modal_desglose tbody').append(`
+            <tr data-idprov="${idprov}" data-cant="${cant}">
+                <td class="small align-middle">${textProv}</td>
+                <td class="small align-middle text-end fw-bold text-secondary">${cant}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-eliminar-prov-modal">X</button>
+                </td>
+            </tr>
+        `);
+
+        // Resetear campos de entrada básicos
+        $('#modal_select_proveedor').val('');
+        $('#modal_input_cantidad').val(1);
+
+        calcularProgresoModal();
+    });
+
+    // --- BOTÓN: ELIMINAR PROVEEDOR DE LA TABLITA DEL MODAL ---
+    $(document).on('click', '.btn-eliminar-prov-modal', function() {
+        $(this).closest('tr').remove();
+        
+        if ($('#tabla_modal_desglose tbody tr').length === 0) {
+            ponerFilaVaciaModal();
+        }
+        calcularProgresoModal();
+    });
+
+    // --- BOTÓN VERDE: CONFIRMAR Y APLICAR CAMBIOS AL OBJETO GLOBAL ---
+    $('#btn_modal_confirmar').on('click', function() {
+        let idpieza = $('#modal_idpieza').val();
+
+        // Vaciamos el sub-array externo para reconstruirlo con lo que quedó en la tablita
+        guia_materiales[idpieza].externo = [];
+
+        $('#tabla_modal_desglose tbody tr').each(function() {
+            let idprov = $(this).data('idprov');
+            let cant = $(this).data('cant');
+            
+            if (idprov && cant) {
+                guia_materiales[idpieza].externo.push({
+                    id_proveedor: idprov,
+                    cantidad: cant
+                });
+            }
+        });
+
+        // El modal CUMPLE su único objetivo: Alterar la data. Ahora mandamos a redibujar la pantalla.
+        renderizarTablaPrincipal();
+
+        // Cerramos el modal limpiamente
+        let modalEl = document.getElementById('modalAlquiler');
+        bootstrap.Modal.getInstance(modalEl).hide();
+    });
+});
+
+// ==========================================
+// FUNCIONES CENTRALES (LOGICA LOGÍSTICA)
+// ==========================================
+
+// 1. FUNCIÓN QUE ACTIVA TU BOTÓN DE FALTANTES EN LA TABLA PRINCIPAL
+function alquilar(idpieza, pieza, faltantes, stockActual) {
+    idpieza = parseInt(idpieza);
+    faltantes = parseInt(faltantes);
+    stockActual = parseInt(stockActual);
+
+    // PASO CLAVE: Si la pieza no existe en nuestro objeto global, la inicializamos sin romper data existente
+    if (!guia_materiales[idpieza]) {
+        guia_materiales[idpieza] = {
+            propio: stockActual, // Captura dinámicamente tu parámetro real
+            externo: []          // Nace vacío listo para recibir proveedores
+        };
+    }
+
+    // Setear controles ocultos y textos estéticos del modal
+    $('#modal_idpieza').val(idpieza);
+    $('#modal_limite_faltante').val(faltantes);
+    $('#modal_txt_pieza').text(pieza.toUpperCase());
+    $('#modal_txt_faltante').text(faltantes);
+    $('#modal_txt_total_esperado').text(faltantes);
+
+    // Limpiar tabla interna del modal
+    ponerFilaVaciaModal();
+    $('#modal_select_proveedor').val('');
+    $('#modal_input_cantidad').val(1);
+
+    // SI EL OBJETO YA TIENE PROVEEDORES (Cargados por edición o aperturas previas), LOS DIBUJAMOS EN EL MODAL
+    if (guia_materiales[idpieza].externo.length > 0) {
+        $('#fila_modal_vacia').remove();
+        
+        guia_materiales[idpieza].externo.forEach(item => {
+            let textProveedor = $(`#modal_select_proveedor option[value="${item.id_proveedor}"]`).text().trim();
+            
+            $('#tabla_modal_desglose tbody').append(`
+                <tr data-idprov="${item.id_proveedor}" data-cant="${item.cantidad}">
+                    <td class="small align-middle">${textProveedor}</td>
+                    <td class="small align-middle text-end fw-bold text-secondary">${item.cantidad}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-eliminar-prov-modal">X</button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    calcularProgresoModal();
+
+    // Abrir Modal
+    let myModal = new bootstrap.Modal(document.getElementById('modalAlquiler'));
+    myModal.show();
+}
+
+// 2. LA FUNCIÓN SUPREMA: Lee el objeto global 'guia_materiales' y dibuja la interfaz completa
+function renderizarTablaPrincipal() {
+    let piezasConFaltantes = 0;
+
+    Object.keys(guia_materiales).forEach(idpieza => {
+        let dataPieza = guia_materiales[idpieza];
+        let filaPrincipal = $(`#fila_pieza_${idpieza}`);
+
+        // 1. Limpieza absoluta de sub-filas hijas previas
+        $(`.hija_pieza_${idpieza}`).remove();
+
+        // 2. EVALUACIÓN DE ESTADO
+        // Buscamos cualquier elemento con la clase .btn (sea <a> o <button>) dentro de la columna faltante
+        let celdaFaltante = filaPrincipal.find('.columna-faltante');
+        let botonModal = celdaFaltante.find('.btn').detach();
+
+        if (dataPieza.externo.length > 0) {
+            // ESCENARIO A: Ya se asignaron proveedores externos
+            filaPrincipal.removeClass('table-danger bg-danger-subtle'); 
+            
+            // Cambiamos el color del botón "A" a gris para denotar que ya está gestionado
+            botonModal.removeClass('btn-danger').addClass('btn-secondary');
+            
+            // Seteamos el valor 0 y le regresamos el botón
+            celdaFaltante.html('0 ').append(botonModal);           
+        } else {
+            // ESCENARIO B: No hay proveedores externos asignados
+            let textoRequerido = filaPrincipal.find('.columna-requerido').text().trim();
+            let requerido = parseInt(textoRequerido) || 0;
+            
+            let faltanteOriginal = requerido - dataPieza.propio;
+
+            if (faltanteOriginal > 0) {
+                filaPrincipal.addClass('table-danger bg-danger-subtle'); 
+                botonModal.removeClass('btn-secondary').addClass('btn-danger');
+                
+                celdaFaltante.html(faltanteOriginal + ' ').append(botonModal);
+                piezasConFaltantes++; 
+            } else {
+                filaPrincipal.removeClass('table-danger bg-danger-subtle');
+                botonModal.removeClass('btn-danger').addClass('btn-secondary');
+                
+                celdaFaltante.html('0 ').append(botonModal);
+            }
+        }
+
+        // 3. Dibujamos las sub-filas
+        dataPieza.externo.forEach(item => {
+            let textProveedor = $(`#modal_select_proveedor option[value="${item.id_proveedor}"]`).text().trim();
+
+            let subFilaHTML = `
+                <tr class="table-light hija_pieza_${idpieza} text-muted border-top-0">
+                    <td></td>
+                    <td class="small py-1 ps-4 text-start"><span class="text-secondary">↳ Alquiler:</span> ${textProveedor}</td>
+                    <td></td>
+                    <td></td>
+                    <td class="small py-1 text-center font-monospace fw-bold">${item.cantidad}</td>
+                    <td>
+                        <input type="hidden" name="piezas[${idpieza}][externo][${item.id_proveedor}]" value="${item.cantidad}">
+                    </td>
+                </tr>
+            `;
+            filaPrincipal.after(subFilaHTML);
+        });
+
+        if ($(`#input_propio_${idpieza}`).length === 0) {
+            filaPrincipal.append(`<input type="hidden" id="input_propio_${idpieza}" name="piezas[${idpieza}][propio]" value="${dataPieza.propio}">`);
+        } else {
+            $(`#input_propio_${idpieza}`).val(dataPieza.propio);
+        }
+    });
+
+    // =================================================================
+    // CONTROL INTELIGENTE DEL BOTÓN PRINCIPAL
+    // =================================================================
+    let cantidadPiezasInteractuadas = Object.keys(guia_materiales).length;
+
+    if (cantidadPiezasInteractuadas === 0) {
+        console.log("No hay interacción aún. Se respeta el estado inicial de PHP.");
+        return; 
+    }
+
+    let faltantesRealesEnPantalla = 0;
+    
+    // Validamos usando la clase fija que agregamos en el PHP
+    $('.columna-faltante').each(function() {
+        let textoFaltante = $(this).text().trim(); 
+        let valor = parseInt(textoFaltante) || 0;
+        
+        if (valor > 0) {
+            faltantesRealesEnPantalla++;
+        }
+    });
+
+    console.log("Piezas con faltantes reales en la pantalla:", faltantesRealesEnPantalla);
+
+    if (faltantesRealesEnPantalla > 0) {
+        $('#btn_generar_guia').prop('disabled', true).addClass('disabled');
+    } else {
+        $('#btn_generar_guia').prop('disabled', false).removeClass('disabled');
+    }
+}
+
+// ==========================================
+// HELPERS / AUXILIARES
+// ==========================================
+function calcularProgresoModal() {
+    let limite = parseInt($('#modal_limite_faltante').val());
+    let sumaTotal = 0;
+
+    $('#tabla_modal_desglose tbody tr').each(function() {
+        let c = parseInt($(this).data('cant'));
+        if (!isNaN(c)) { sumaTotal += c; }
+    });
+
+    $('#modal_txt_progreso').text(sumaTotal);
+
+    // NUEVA REGLA: El botón se activa si completaste el límite estricto O si limpiaste por completo la tabla (sumaTotal === 0)
+    if (sumaTotal === limite && limite > 0) {
+        $('#modal_txt_progreso').removeClass('text-primary text-danger').addClass('text-success');
+        $('#btn_modal_confirmar').prop('disabled', false); // Candado abierto por completar saldo
+    } else if (sumaTotal === 0) {
+        $('#modal_txt_progreso').removeClass('text-success text-primary').addClass('text-danger');
+        $('#btn_modal_confirmar').prop('disabled', false); // ¡Candado abierto para permitir limpiar/resetear la fila!
+    } else {
+        // Si está a medias (ej: faltan 8 y va sumando 3) se bloquea
+        $('#modal_txt_progreso').removeClass('text-success text-danger').addClass('text-primary');
+        $('#btn_modal_confirmar').prop('disabled', true);  
+    }
+}
+
+function ponerFilaVaciaModal() {
+    $('#tabla_modal_desglose tbody').html(`
+        <tr id="fila_modal_vacia">
+            <td colspan="3" class="text-center text-muted small py-2">Ningún proveedor asignado aún.</td>
+        </tr>
+    `);
+}
 </script>
 
 <?php echo $this->endSection();?>

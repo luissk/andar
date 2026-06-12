@@ -17,6 +17,7 @@ class Guia extends BaseController
     protected $modeloGuia;
     protected $modeloTransportista;
     protected $modeloUbigeo;
+    protected $modeloProveedor;
     protected $helpers = ['funciones'];
 
     public function __construct(){
@@ -29,6 +30,7 @@ class Guia extends BaseController
         $this->modeloGuia          = model('GuiaModel');
         $this->modeloTransportista = model('TransportistaModel');
         $this->modeloUbigeo = model('UbigeoModel');
+        $this->modeloProveedor = model('ProveedorModel');
         $this->session;
     }
 
@@ -106,6 +108,7 @@ class Guia extends BaseController
                 $idsPiezasUnicos = array_unique($idsPiezas);
                 $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
                 //FIN STOCK DE PIEZAS UNICAS
+                $data['proveedores'] = $this->modeloProveedor->getProveedores();
 
                 $data['nroGuia']         = $this->modeloGuia->nroGuia()['nro'];
                 $data['title']           = "Nuevo guía | ".help_nombreWeb();  

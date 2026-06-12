@@ -27,21 +27,42 @@ class PiezaModel extends Model{
         return $st->getRowArray();
     }
 
-    public function listarStockDePiezas($idsPiezas = []){
+    public function listarStockDePiezas($idsPiezas = []) {
+        // Si por alguna razón el array llega vacío, evitamos lanzar un error de sintaxis en el IN de SQL
+        if (empty($idsPiezas)) {
+            return [];
+        }
+
         $query = "SELECT 
                         p.idpieza,
                         p.pie_cant AS stock_inicial,
                         
-                        IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
-                                FROM detalle_presupuesto_piezas 
-                                WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0) AS stock_alquilado,
+                        -- 1. STOCK ALQUILADO: Lo que realmente está afuera en obra hoy (Salidas - Devoluciones)
+                        (
+                            IFNULL((SELECT SUM(gsd.cantidad_enviada) 
+                                    FROM guia_salida_detalle gsd 
+                                    WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
+                            - 
+                            IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
+                                    FROM guia_devolucion_detalle gdd 
+                                    WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
+                        ) AS stock_alquilado,
 
-                        (p.pie_cant - IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
-                                            FROM detalle_presupuesto_piezas 
-                                            WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0)) AS stock_actual_real
+                        -- 2. STOCK ACTUAL REAL: El físico disponible en tu almacén en este microsegundo
+                        (p.pie_cant - (
+                            IFNULL((SELECT SUM(gsd.cantidad_enviada) 
+                                    FROM guia_salida_detalle gsd 
+                                    WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
+                            - 
+                            IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
+                                    FROM guia_devolucion_detalle gdd 
+                                    WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
+                        )) AS stock_actual_real
+
                     FROM pieza p 
-                    WHERE p.idpieza IN ?"; // <--- Aquí pasamos el bloque de IDs únicos
+                    WHERE p.idpieza IN ?";
 
+        // Se ejecuta pasando el array limpio con tu estructura original
         $st = $this->db->query($query, [$idsPiezas]);
         return $st->getResultArray();
     }

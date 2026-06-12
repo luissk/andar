@@ -198,6 +198,12 @@ if(!session('idusuario')){
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="<?=base_url('proveedores')?>" class="nav-link ps-4 <?php echo isset($provLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-file"></i>
+                                        <p>Proveedores</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="<?=base_url('guias')?>" class="nav-link ps-4 <?php echo isset($guiaLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-file"></i>
                                         <p>Guía de Remisión</p>

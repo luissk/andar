@@ -79,3 +79,10 @@ $routes->get('devolver-(:num)', 'Guia::Devolver/$1');
 $routes->post('generar-devolucion', 'Guia::generarDevolucion');
 $routes->get('pdf-guia-ingreso/(:num)/(:any)', 'Guia::pdfGuiaIngreso/$1/$2');
 $routes->post('eliminar-devolucion', 'Guia::eliminarDevolucion');
+
+
+
+$routes->get('proveedores', 'Proveedor::index');
+$routes->get('listar-proveedores', 'Proveedor::listarProveedores');
+$routes->post('registro-proveedor', 'Proveedor::registrarProveedor');
+$routes->post('eliminar-proveedor', 'Proveedor::eliminarProveedor');
