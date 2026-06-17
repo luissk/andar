@@ -79,15 +79,17 @@ class Guia extends BaseController
                 $idpresu                 = $guia['idpresupuesto'];
                 $data['nroGuia']         = $guia['gui_nro'];
                 $data['presupuesto']     = $this->modeloPresupuesto->getPresupuesto($idpresu);
-                $data['detalle_guia']    = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
+                $data['detalle_guia']    = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
                 $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu);
 
                 $idsPiezas = [];
-                foreach( $this->modeloPresupuesto->getDetallePresupuestoPiezas($id) as $p ){
+                foreach( $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu) as $p ){
                     $idsPiezas[] = $p['idpieza'];
                 }
                 $idsPiezasUnicos = array_unique($idsPiezas);
                 $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
+
+                $data['guia_guardada'] = $this->modeloGuia->guiaGuardadaDetalle($id);//para mostrar en la tablita de tabla  guisa_salida_detalle
                 
                 $data['title']   = "Editar guía | ".help_nombreWeb();
                 $data['guia_bd'] = $guia;
@@ -107,8 +109,7 @@ class Guia extends BaseController
                 }
                 $idsPiezasUnicos = array_unique($idsPiezas);
                 $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
-                //FIN STOCK DE PIEZAS UNICAS
-                $data['proveedores'] = $this->modeloProveedor->getProveedores();
+                //FIN STOCK DE PIEZAS UNICAS                
 
                 $data['nroGuia']         = $this->modeloGuia->nroGuia()['nro'];
                 $data['title']           = "Nuevo guía | ".help_nombreWeb();  
@@ -121,6 +122,8 @@ class Guia extends BaseController
 
         $data['transportitas'] = $this->modeloTransportista->getTransportistas(0,100);
         $data['departamentos'] = $this->modeloUbigeo->listarDepartamentos();
+
+        $data['proveedores'] = $this->modeloProveedor->getProveedores();
 
         return view('sistema/guias/nuevaGuia', $data);
     }
@@ -220,7 +223,7 @@ class Guia extends BaseController
             $distritoll     = $this->request->getVar('distritoll');
             $direccionll    = $this->request->getVar('direccionll');
             $placa          = $this->request->getVar('placa');
-            $opt            = $this->request->getVar('opt');
+            $opt            = 1; //$this->request->getVar('opt'); Siempre sería 1, porque la guia ya saldría completa con los alquileres.
             $idpre          = $this->request->getVar('idpre');
             $idguia         = $this->request->getVar('idguia');
             $nroGuia        = trim($this->request->getVar('nroguia'));
@@ -228,6 +231,18 @@ class Guia extends BaseController
 
             $ubigeop  = $this->modeloUbigeo->getUbigeo($distritop,$provinciap,$departamentop)['idubigeo'];
             $ubigeoll = $this->modeloUbigeo->getUbigeo($distritoll,$provinciall,$departamentoll)['idubigeo'];
+
+            // El array de materiales que procesamos en JS
+            $piezas = $this->request->getPost('piezas');
+
+            if (empty($piezas) || !is_array($piezas)) {
+                echo '<script>Swal.fire("Error", "No hay piezas seleccionadas para procesar.", "error");</script>';
+                return;
+            }
+
+            // Conexión limpia para queries directas y transacciones
+            $db = \Config\Database::connect();
+            $db->transStart();
 
             if( $idguia != '' && $guia = $this->modeloGuia->getGuia($idguia) ){
                 $nroGuia_bd = $guia['gui_nro'];
@@ -243,7 +258,13 @@ class Guia extends BaseController
                     }
                 }
 
-                if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia,$clienterecoge) ){
+                $sql_update = "update guia set gui_fechatraslado=?,gui_motivo=?,gui_motivodesc=?,gui_ptopartida=?,gui_direccionp=?,gui_ptollegada=?,gui_direccionll=?,gui_placa=?,idtransportista=?,gui_completa=?,gui_status=?,gui_nro=?,gui_clienterecoge=? where idguia = ?";
+
+                $db->query($sql_update, [$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia,$clienterecoge,$idguia]);
+
+                $db->query("DELETE FROM guia_salida_detalle WHERE idguia = ?", [$idguia]);
+
+                /* if( $this->modeloGuia->modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,2,$nroGuia,$clienterecoge) ){
                     echo '<script>
                         Swal.fire({
                             title: "Guía Modificada",
@@ -254,7 +275,7 @@ class Guia extends BaseController
                         });
                         setTimeout(function(){location.href="guias"},1500)
                     </script>';
-                }                        
+                }          */               
             }else{
                 //echo "$ubigeop - $ubigeoll";
                 if( $presu = $this->modeloPresupuesto->getPresupuesto($idpre, [1]) ){        
@@ -267,50 +288,16 @@ class Guia extends BaseController
                             });
                         </script>';
                         exit();
-                    }
+                    }             
+                 
+                    $query = "insert into guia(gui_nro,gui_fecha,gui_fechatraslado,gui_motivo,gui_motivodesc,gui_ptopartida,gui_direccionp,gui_ptollegada,gui_direccionll,gui_placa,idpresupuesto,idtransportista,idusuario2,gui_completa,gui_status,gui_clienterecoge) values(?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-                    $piezas = json_decode($presu['pre_piezas'], true);
-                    /* echo "<pre>";
-                    print_r($piezas);
-                    echo "</pre>"; */
-                    $arr_existentes = [];//cuando hay mas de una pieza que se repite, y asi poder ir restando su stock para el sgte y tbn para modificar item en presupuesto
-                    foreach( $piezas as $pi ){
-                        $pieza    = $this->modeloPieza->getPieza($pi['idpie']);
-                        $stockIni = $pieza['pie_cant'];
-                        $pie_desc = $pieza['pie_desc'];
-                        $cantReq  = $pi['dtcan'] * $pi['dpcant'];                    
+                    $db->query($query, [$nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2,$clienterecoge]);
 
-                        /* $nroEntregados = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [3],'e');
-                        $nroSalidas    = $this->modeloPresupuesto->getStockPieza($pi['idpie'], $estadoPresu = [2,3], 's');
-                        $stockAct      = ($stockIni + $nroEntregados - $nroSalidas) <= 0 ? 0 : ($stockIni + $nroEntregados - $nroSalidas); */
-                        $stockAct = $pieza['stockActual'];
-                        $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
+                    // Rescatamos el ID de la guía recién creada
+                    $idguia = $db->insertID();                    
 
-                        $arr_e = array_filter($arr_existentes, fn($pie) => $pie['idpie'] == $pi['idpie']);
-                        $arr_e = array_values($arr_e);
-                        //print_r($arr_e);
-                        if( count($arr_e) > 0 ){
-                            $stockAct  = ($stockAct - $arr_e[0]['req']) <= 0 ? 0 : ($stockAct - $arr_e[0]['req']);
-                            $faltantes = $cantReq > $stockAct ? abs($stockAct - $cantReq): "";
-                        }
-
-                        $stock_que_sale = $cantReq <= $stockAct ? $cantReq : $stockAct;
-
-                        array_push($arr_existentes, array(
-                            'idtor'   => $pi['idtor'],
-                            'idpie'   => $pi['idpie'],
-                            'dtcan'   => $pi['dtcan'],
-                            'piepre'  => $pi['piepre'],
-                            'dpcant'  => $pi['dpcant'],
-                            'req'     => $cantReq,
-                            'falt'    => $faltantes,
-                            'st_sale' => $stock_que_sale,
-                        ));
-                    }
-
-                    //$nroGuia = $this->modeloGuia->nroGuia()['nro'];
-
-                    if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2,$clienterecoge) ){
+                    /* if( $this->modeloGuia->generarGuia($nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,session('idusuario'),$opt,2,$clienterecoge) ){
                         if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($arr_existentes), 2, $idpre) ){
                             echo '<script>
                                 Swal.fire({
@@ -324,9 +311,76 @@ class Guia extends BaseController
                             </script>';
                         }
                             
-                    }
+                    } */
+
+                    $this->modeloPresupuesto->modificaStatusPre($idpre, 2);
 
                 }
+            }
+
+            // 3. PROCESAR DETALLES (TABLA: guia_salida_detalle)
+            foreach ($piezas as $idpieza => $datos) {
+                
+                // Buscamos el 'idtorre' original asociado a esta pieza dentro del presupuesto en ejecución
+                // (Esto resuelve el problema de las piezas agrupadas en la interfaz)
+                $sql_torre = "SELECT idtorre FROM detalle_presupuesto_piezas WHERE idpresupuesto = ? AND idpieza = ? LIMIT 1";
+                $res_torre = $db->query($sql_torre, [$idpre, $idpieza])->getRow();
+                
+                // Si por algún motivo no encuentra relación, le asignamos 0 o un valor controlado para evitar fallos de clave foránea
+                $idtorre = (!empty($res_torre)) ? $res_torre->idtorre : 0;
+
+                // A. GUARDAR STOCK PROPIO (Si es mayor a 0)
+                $cant_propia = isset($datos['propio']) ? intval($datos['propio']) : 0;
+                if ($cant_propia > 0) {
+                    $sql_det_propio = "INSERT INTO guia_salida_detalle (
+                        idguia, idtorre, idpieza, cantidad_enviada, dp_origen, idproveedor
+                    ) VALUES (?, ?, ?, ?, 'propio', NULL)";
+
+                    $db->query($sql_det_propio, [$idguia, $idtorre, $idpieza, $cant_propia]);
+                }
+
+                // B. GUARDAR STOCK EXTERNO / ALQUILERES (Si existen)
+                if (isset($datos['externo']) && is_array($datos['externo'])) {
+                    foreach ($datos['externo'] as $alquiler) {
+                        $id_prov      = intval($alquiler['id_proveedor']);
+                        $cant_alquiler = intval($alquiler['cantidad']);
+
+                        if ($cant_alquiler > 0) {
+                            $sql_det_externo = "INSERT INTO guia_salida_detalle (
+                                idguia, idtorre, idpieza, cantidad_enviada, dp_origen, idproveedor
+                            ) VALUES (?, ?, ?, ?, 'externo', ?)";
+
+                            $db->query($sql_det_externo, [$idguia, $idtorre, $idpieza, $cant_alquiler, $id_prov]);
+                        }
+                    }
+                }
+            }
+
+            // 4. CIERRE Y VERIFICACIÓN DE TRANSACCIÓN
+            $db->transComplete();
+
+            if ($db->transStatus() === FALSE) {
+                $error = $db->error(); 
+
+                // Creamos un mensaje detallado con el código y la descripción del error de MySQL
+                $mensaje_error = "Error DB (" . $error['code'] . "): " . $error['message'];
+                
+                // Escapamos comillas por seguridad para que no rompa el JS de SweetAlert
+                $mensaje_error = addslashes($mensaje_error);
+
+                echo '<script>Swal.fire("Error en Base de Datos", "' . $mensaje_error . '", "error");</script>';
+            } else {
+                // Retornamos un script para que tu contenedor div "#msj" lo ejecute y limpie o redireccione
+                echo '<script>
+                    Swal.fire({
+                        title: "Guía Generada",
+                        text: "",
+                        icon: "success",
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                    });
+                    setTimeout(function(){location.href="guias"},1500)
+                </script>';
             }
 
             

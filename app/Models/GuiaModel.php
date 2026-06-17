@@ -91,7 +91,8 @@ class GuiaModel extends Model{
 
         $st = $this->db->query($query, [$nroGuia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$idpre,$transportista,$idusuario2,$opt,$estado,$clienterecoge]);
 
-        return $st;
+        //return $st;
+        return $this->db->insertID();
     }
 
     public function modificarGuia($idguia,$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$nroGuia,$clienterecoge){
@@ -100,6 +101,42 @@ class GuiaModel extends Model{
         $st = $this->db->query($query, [$fechatrasl,$motivo,$desc_trasl,$ubigeop,$direccionp,$ubigeoll,$direccionll,$placa,$transportista,$opt,$estado,$nroGuia,$clienterecoge,$idguia]);
 
         return $st;
+    }
+
+    public function guiaGuardadaDetalle($idguia){
+        $sql_detalles = "SELECT idpieza, cantidad_enviada, dp_origen, idproveedor 
+                     FROM guia_salida_detalle 
+                     WHERE idguia = ?";
+        $detalles_reg = $this->db->query($sql_detalles, [$idguia])->getResultArray();
+
+        // 3. CONSTRUIR LA MATRIZ DE PRECARGA PARA JAVASCRIPT
+        $guia_guardada = [];
+
+        foreach ($detalles_reg as $det) {
+            $idpieza = intval($det['idpieza']);
+
+            // Si es la primera vez que mapeamos esta pieza en el bucle, inicializamos su estructura
+            if (!isset($guia_guardada[$idpieza])) {
+                $guia_guardada[$idpieza] = [
+                    'propio'  => 0,
+                    'externo' => []
+                ];
+            }
+
+            if ($det['dp_origen'] === 'propio') {
+                // Asignamos la cantidad que salió del stock de la empresa
+                $guia_guardada[$idpieza]['propio'] = intval($det['cantidad_enviada']);
+            } else if ($det['dp_origen'] === 'externo') {
+                // Insertamos en el sub-array cada uno de los proveedores de alquiler asociados
+                $guia_guardada[$idpieza]['externo'][] = [
+                    'id_proveedor' => intval($det['idproveedor']),
+                    'cantidad'     => intval($det['cantidad_enviada'])
+                ];
+            }
+        }
+
+        // 4. Enviamos la matriz estructurada al controlador
+        return $guia_guardada;
     }
 
     public function eliminarGuia($idguia){

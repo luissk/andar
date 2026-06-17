@@ -50,7 +50,7 @@ class Pieza extends BaseController
                     "peso"         => $row['pie_peso'],
                     "precio"       => $row['pie_precio'],
                     "inicial"      => $row['stock_inicial'],      // Total histórico
-                    "alquilado"    => $row['stock_alquilado'],    // Lo que está en obra
+                    "alquilado"    => $row['stock_alquilado_externo'],    // Lo que está en obra
                     "stock_actual" => $row['stock_actual_real']   // Lo que tienes en almacén
                 ];
             }

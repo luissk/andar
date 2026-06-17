@@ -69,63 +69,51 @@ class PiezaModel extends Model{
 
     public function getPiezasAjax($cri = ''){
         $sql = $cri != '' ? " and p.pie_desc LIKE '%" . $this->db->escapeLikeString($cri) . "%' " : '';
-        /* $query ="SELECT 
+        $query = "SELECT 
             p.idpieza,
             p.pie_codigo,
             p.pie_desc,
             p.pie_peso,
             p.pie_precio,
             p.pie_cant AS cantidad_inicial,
-            -- 1. STOCK INICIAL: El total físico registrado en tu catálogo
             p.pie_cant AS stock_inicial,
             
-            -- 2. STOCK ALQUILADO: Lo que está en obra (Enviado - Devuelto)
-            IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
-                    FROM detalle_presupuesto_piezas 
-                    WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0) AS stock_alquilado,
+            -- 1. EN OBRA (PROPIO): Tu material físico que está fuera del almacén actualmente
+            (
+                IFNULL((SELECT SUM(gsd.cantidad_enviada) 
+                        FROM guia_salida_detalle gsd 
+                        WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
+                - 
+                IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
+                        FROM guia_devolucion_detalle gdd 
+                        WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
+            ) AS stock_en_obra,
 
-            -- 3. STOCK ACTUAL REAL: Lo que tienes físicamente disponible en tu almacén
-            (p.pie_cant - IFNULL((SELECT SUM(dp_cant_enviada - dp_cant_devuelta) 
-                                FROM detalle_presupuesto_piezas 
-                                WHERE idpieza = p.idpieza AND dp_origen = 'propio'), 0)) AS stock_actual_real
+            -- 2. ALQUILADO A TERCEROS (EXTERNO): Lo que traes de proveedores externos para cubrir faltantes
+            (
+                IFNULL((SELECT SUM(gsd.cantidad_enviada) 
+                        FROM guia_salida_detalle gsd 
+                        WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'externo'), 0) 
+                - 
+                IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
+                        FROM guia_devolucion_detalle gdd 
+                        WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'externo'), 0)
+            ) AS stock_alquilado_externo,
+
+            -- 3. STOCK ACTUAL REAL: Tu inventario físico disponible en patio (Stock Inicial - Lo que está en obra)
+            (p.pie_cant - (
+                IFNULL((SELECT SUM(gsd.cantidad_enviada) 
+                        FROM guia_salida_detalle gsd 
+                        WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
+                - 
+                IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
+                        FROM guia_devolucion_detalle gdd 
+                        WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
+            )) AS stock_actual_real
+
         FROM pieza p 
-        WHERE p.idpieza is not null $sql
-        ORDER BY p.idpieza DESC"; */
-        $query = "SELECT 
-                p.idpieza,
-                p.pie_codigo,
-                p.pie_desc,
-                p.pie_peso,
-                p.pie_precio,
-                p.pie_cant AS cantidad_inicial,
-                -- 1. STOCK INICIAL: El total físico registrado en tu catálogo
-                p.pie_cant AS stock_inicial,
-                
-                -- 2. STOCK ALQUILADO: Lo que está en obra actualmente (Enviado Propio - Devuelto Propio)
-                (
-                    IFNULL((SELECT SUM(gsd.cantidad_enviada) 
-                            FROM guia_salida_detalle gsd 
-                            WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
-                    - 
-                    IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
-                            FROM guia_devolucion_detalle gdd 
-                            WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
-                ) AS stock_alquilado,
-
-                -- 3. STOCK ACTUAL REAL: Lo que tienes físicamente disponible en tu almacén hoy
-                (p.pie_cant - (
-                    IFNULL((SELECT SUM(gsd.cantidad_enviada) 
-                            FROM guia_salida_detalle gsd 
-                            WHERE gsd.idpieza = p.idpieza AND gsd.dp_origen = 'propio'), 0) 
-                    - 
-                    IFNULL((SELECT SUM(gdd.cantidad_devuelta) 
-                            FROM guia_devolucion_detalle gdd 
-                            WHERE gdd.idpieza = p.idpieza AND gdd.dp_origen = 'propio'), 0)
-                )) AS stock_actual_real
-
-            FROM pieza p 
-            WHERE p.idpieza IS NOT NULL $sql
-            ORDER BY p.idpieza DESC";
+        WHERE p.idpieza IS NOT NULL $sql
+        ORDER BY p.idpieza DESC";
 
         $st = $this->db->query($query);
 
