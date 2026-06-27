@@ -75,7 +75,7 @@ class Guia extends BaseController
         }
 
         if( $cri == 'g' ){
-            if( $guia = $this->modeloGuia->getGuia($id) ){
+            if( $guia = $this->modeloGuia->getGuia($id,[2]) ){
                 $idpresu                 = $guia['idpresupuesto'];
                 $data['nroGuia']         = $guia['gui_nro'];
                 $data['presupuesto']     = $this->modeloPresupuesto->getPresupuesto($idpresu);
@@ -244,7 +244,7 @@ class Guia extends BaseController
             $db = \Config\Database::connect();
             $db->transStart();
 
-            if( $idguia != '' && $guia = $this->modeloGuia->getGuia($idguia) ){
+            if( $idguia != '' && $guia = $this->modeloGuia->getGuia($idguia, [2]) ){
                 $nroGuia_bd = $guia['gui_nro'];
                 if( $nroGuia != $nroGuia_bd ){
                     if( $this->modeloGuia->getGuia_x_nroGuia($nroGuia) ){
@@ -395,15 +395,15 @@ class Guia extends BaseController
 
             if( $guia = $this->modeloGuia->getGuia($idguia, [1,2]) ){
                 $idpresu = $guia['idpresupuesto'];
-                $piezas  = json_decode($guia['pre_piezas'],true);
+                /* $piezas  = json_decode($guia['pre_piezas'],true);
 
                 $piezas_upd = [];
                 foreach( $piezas as $pi ){
                     unset($pi['req'],$pi['falt'],$pi['st_sale'],$pi['ingresa']);
                     $piezas_upd[] = $pi;
-                }
+                } */
                 
-                if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($piezas_upd), 1, $idpresu) ){
+                if( $this->modeloPresupuesto->modificaStatusPre($idpresu, 1) ){
                     if( $this->modeloGuia->eliminarGuia($idguia) ){
                         echo '<script>
                             Swal.fire({
@@ -427,9 +427,25 @@ class Guia extends BaseController
         $dompdf = new \Dompdf\Dompdf($options);
 
         $data['params'] = $this->modeloParametros->getParametros();
+        
+        $guia_bd = $this->modeloGuia->getGuia($id);
+        $idpresu = $guia_bd['idpresupuesto'];
 
-        $data['guia'] = $this->modeloGuia->getGuia($id);
-        $data['opt'] = $opt;
+        $data['guia'] = $guia_bd;
+        $data['opt']  = $opt;
+
+        //$data['presupuesto']     = $this->modeloPresupuesto->getPresupuesto($idpresu);
+        $data['detalle_guia']    = $this->modeloPresupuesto->getDetallePresupuesto($idpresu);
+        $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu);
+
+        $idsPiezas = [];
+        foreach( $this->modeloPresupuesto->getDetallePresupuestoPiezas($idpresu) as $p ){
+            $idsPiezas[] = $p['idpieza'];
+        }
+        $idsPiezasUnicos = array_unique($idsPiezas);
+        $data['stockDePiezasUnicas'] = $this->modeloPieza->listarStockDePiezas($idsPiezasUnicos);
+
+        //$data['guia_guardada'] = $this->modeloGuia->guiaGuardadaDetalle($id);
 
         $dompdf->loadHtml(view('sistema/guias/pdf', $data));
 
@@ -527,17 +543,20 @@ class Guia extends BaseController
     public function Devolver($id){
         if( !session('idusuario') ){
             return redirect()->to('/');
-        }
-        
-        $data['title']           = "Devoluciones del Sistema | ".help_nombreWeb();
-        $data['devolLinkActive'] = 1;
+        }        
 
         if( $guia = $this->modeloGuia->getGuia($id,[2,3]) ){            
             $idpresu              = $guia['idpresupuesto'];
-            $data['nroGuia']      = $guia['gui_nro'];
-            $data['presupuesto']  = $this->modeloPresupuesto->getPresupuesto($idpresu);
-            $data['detalle_guia'] = $this->modeloPresupuesto->getDetaPresuParaGuia($idpresu);
-            $data['guia_bd']      = $guia;
+
+            $data = [
+                'title' => "Devoluciones del Sistema | ".help_nombreWeb(),
+                'devolLinkActive' => 1,
+                'guia_bd'      => $guia,
+                'idguia_bd'        => $guia['idguia'],
+                'idpresupuesto_bd' => $idpresu,
+                'guia_cabecera'    => $guia,
+                'detalle_piezas_obra' => $this->modeloGuia->paraDevolver($idpresu, $guia['idguia'])// Contiene piezas, stock propio, externos e historial
+            ];
         }else{
             return redirect()->to('/');
         }
@@ -545,7 +564,7 @@ class Guia extends BaseController
         return view('sistema/devolucion/devolver', $data);
     }
 
-    public function generarDevolucion(){
+    public function generarDevolucion(){//ELIMINAR ESTA FUNCION
         if( $this->request->isAJAX() ){
             if(!session('idusuario')){
                 exit();
@@ -687,17 +706,20 @@ class Guia extends BaseController
 
             if( $guia = $this->modeloGuia->getGuia($idguia, [3]) ){
                 $idpresu = $guia['idpresupuesto'];
-                $piezas  = json_decode($guia['pre_piezas'],true);
 
-                $piezas_upd = [];
-                foreach( $piezas as $pi ){
-                    unset($pi['ingresa']);
-                    $piezas_upd[] = $pi;
-                }
+                $db = \Config\Database::connect();
+
+                $db->transStart();
+
+                if( $this->modeloGuia->eliminarDevolucionCompleta($idguia) ){
+                    $this->modeloGuia->modificarFechaDevolucionGuia($idguia, null, 0, 2);//cambiar el estado a la guia
+                    $this->modeloPresupuesto->modificaStatusPre($idpresu, 2);//cambiar el estado al presupuesto
+                }           
                 
-                if( $this->modeloGuia->modificarFechaDevolucionGuia($idguia, '', '', '', 2) ){
-                    if( $this->modeloPresupuesto->modificaPresuPiezasEstatus(json_encode($piezas_upd), 2, $idpresu) ){
-                        echo '<script>
+                $db->transComplete();
+                
+                if ($db->transStatus() === TRUE) {
+                    echo '<script>
                             Swal.fire({
                                 title: "Devolución Eliminada",
                                 text: "",
@@ -707,13 +729,12 @@ class Guia extends BaseController
                             });
                             setTimeout(function(){location.href="devoluciones"},1500)
                         </script>';
-                    }
                 }
             }
         }
     }
 
-    public function pdfGuiaIngreso($id,$fecha){
+    public function pdfGuiaIngreso($id,$fecha){//ELIMINAR ESTA FUNCION
         $options = new \Dompdf\Options();
         $options->setIsRemoteEnabled(true);
         $dompdf = new \Dompdf\Dompdf($options);
@@ -736,6 +757,172 @@ class Guia extends BaseController
 
         
     }
+
+
+
+
+
+
+    public function guardar_devolucion()
+    {
+        // 1. Capturamos los datos clave de la vista
+        $idguia        = $this->request->getPost('idguia'); 
+        $idpresupuesto = $this->request->getPost('idpresupuesto');
+        $piezas        = $this->request->getPost('piezas'); 
+
+        if (empty($idguia) || empty($piezas) || !is_array($piezas)) {
+            echo '<script>Swal.fire("Error", "No se recibieron datos válidos para procesar.", "error");</script>';
+            return;
+        }
+
+        $db = \Config\Database::connect();
+        //$db->DBDebug = true;
+
+        try {
+            $db->transStart();
+
+            // 2. Recorremos e insertamos los nuevos reingresos parciales en caliente
+            foreach ($piezas as $idpieza => $datos) {
+
+                // Buscamos el idtorre correspondiente en el presupuesto para mantener la consistencia
+                $sql_torre = "SELECT idtorre FROM detalle_presupuesto_piezas WHERE idpresupuesto = ? AND idpieza = ? LIMIT 1";
+                $res_torre = $db->query($sql_torre, [$idpresupuesto, $idpieza])->getRow();
+                $idtorre = (!empty($res_torre)) ? $res_torre->idtorre : 0;
+
+                // A. REGISTRAR REINGRESO DE STOCK PROPIO
+                $cant_propia = isset($datos['propio']) ? intval($datos['propio']) : 0;
+                if ($cant_propia > 0) {
+                    $sql_ins_propio = "INSERT INTO guia_devolucion_detalle (
+                        idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor
+                    ) VALUES (?, ?, ?, ?, 'propio', NULL)";
+
+                    $db->query($sql_ins_propio, [$idguia, $idtorre, $idpieza, $cant_propia]);
+                }
+
+                // B. REGISTRAR REINGRESO DE PROVEEDORES EXTERNOS (ALQUILERES)
+                if (isset($datos['externo']) && is_array($datos['externo'])) {
+                    foreach ($datos['externo'] as $alquiler) {
+                        $id_prov       = intval($alquiler['id_proveedor']);
+                        $cant_alquiler = intval($alquiler['cantidad']);
+
+                        if ($cant_alquiler > 0) {
+                            $sql_ins_externo = "INSERT INTO guia_devolucion_detalle (
+                                idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor
+                            ) VALUES (?, ?, ?, ?, 'externo', ?)";
+
+                            $db->query($sql_ins_externo, [$idguia, $idtorre, $idpieza, $cant_alquiler, $id_prov]);
+                        }
+                    }
+                }
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === FALSE) {
+                throw new \Exception("Error al procesar la transacción en guia_devolucion_detalle.");
+            }
+
+            // =========================================================================
+            // 🔍 AUDITORÍA POST-GUARDADO: ¿QUEDA ALGO FLOTANDO EN LA OBRA?
+            // =========================================================================
+            
+            // A. Sumamos todo lo enviado originalmente en esta guía
+            $sql_tot_enviado = "SELECT IFNULL(SUM(cantidad_enviada), 0) AS total FROM guia_salida_detalle WHERE idguia = ?";
+            $tot_enviado = $db->query($sql_tot_enviado, [$idguia])->getRow()->total;
+
+            // B. Sumamos todo lo devuelto históricamente acumulado hasta hoy
+            $sql_tot_devuelto = "SELECT IFNULL(SUM(cantidad_devuelta), 0) AS total FROM guia_devolucion_detalle WHERE idguia = ?";
+            $tot_devuelto = $db->query($sql_tot_devuelto, [$idguia])->getRow()->total;
+
+            // C. Evaluamos saldos para decidir el mensaje de SweetAlert
+            if (intval($tot_devuelto) >= intval($tot_enviado)) {
+                // Caso A: Obra en cero. Todo el andamiaje y piezas regresaron al almacén.
+
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 1, 3);//cambiar el estado a la guia
+                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3);//cambiar el estado al presupuesto
+
+                echo '<script>
+                    Swal.fire({
+                        icon: "success",
+                        title: "¡Retorno Completado!",
+                        text: "Se ha completado toda la devolución. No quedan saldos pendientes en obra para esta guía.",
+                        confirmButtonColor: "#198754"
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                </script>';
+            } else {
+                // Caso B: Devolución parcial (Aún quedan piezas en el proyecto)
+                $pendientes = intval($tot_enviado) - intval($tot_devuelto);
+
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3);//cambiar el estado a la guia
+                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3);//cambiar el estado al presupuesto
+                echo '<script>
+                    Swal.fire({
+                        icon: "success",
+                        title: "¡Reingreso Parcial Registrado!",
+                        text: "Se guardaron los cambios correctamente. Aún quedan ' . $pendientes . ' unidades pendientes en obra.",
+                        confirmButtonColor: "#0d6efd"
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                </script>';
+            }
+
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            $error_mensaje = addslashes($e->getMessage());
+            echo '<script>Swal.fire("Error", "' . $error_mensaje . '", "error");</script>';
+        }
+    }
+
+
+    public function eliminar_devolucion_item()
+    {
+        $idguia_dev_det = $this->request->getPost('idguia_dev_det');
+        $idguia = $this->request->getPost('idguia');
+
+        if (empty($idguia_dev_det)) {
+            echo '<script>Swal.fire("Error", "ID de registro no válido.", "error");</script>';
+            return;
+        }
+
+        $db = \Config\Database::connect();
+        //$db->DBDebug = true;
+
+        try {
+            $db->transStart();
+
+            // Ejecutamos la eliminación usando parámetros "?" apuntando al campo PK real de tu captura
+            $sql_delete = "DELETE FROM guia_devolucion_detalle WHERE idguia_dev_det = ?";
+            $db->query($sql_delete, [$idguia_dev_det]);
+
+            $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3);//cambiar el estado a la guia
+
+            $db->transComplete();
+
+            if ($db->transStatus() === FALSE) {
+                throw new \Exception("No se pudo eliminar el registro de la base de datos.");
+            }
+
+            echo '<script>
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Registro Anulado!",
+                    text: "El reingreso fue eliminado del historial y los saldos fueron recalculados.",
+                    confirmButtonColor: "#198754"
+                }).then(() => {
+                    window.location.reload();
+                });
+            </script>';
+
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            $error_mensaje = addslashes($e->getMessage());
+            echo '<script>Swal.fire("Error al eliminar", "' . $error_mensaje . '", "error");</script>';
+        }
+    }
+
 
 
 }

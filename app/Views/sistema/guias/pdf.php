@@ -33,8 +33,9 @@ $clitelefcont  = $guia['cli_telefcontact'];
 
 $idpresupuesto = $guia['idpresupuesto'];
 $pre_numero    = $guia['pre_numero'];
+$pre_ruc       = $guia['pre_ruc'];
 
-$pre_piezas = json_decode($guia['pre_piezas'], true);
+//$pre_piezas = json_decode($guia['pre_piezas'], true);
 
 if( $motivo == 'v' ) $motivo = "Venta";
 if( $motivo == 'e' ) $motivo = "Exportación";
@@ -121,7 +122,7 @@ $clienterecoge = $guia['gui_clienterecoge'];
                 </td>
                 <td align="center">
                     <div style="border:1px solid black; font-size: 12px;font-weight:600;border-radius:3px;padding-top:5px;padding-bottom:5px;font-family:Arial">
-                        RUC: 10108671055<br>
+                        RUC: <?=$pre_ruc?><br>
                         GUIA DE REMISIÓN ELECTRÓNICA<br>
                         REMITENTE<br>
                         <span style="font-size:13px">N° <?=$guiNro?></span>
@@ -179,42 +180,13 @@ $clienterecoge = $guia['gui_clienterecoge'];
         </div>
         <div style="padding-top:8px"></div>
         <?php
-        $presuModel = model('PresupuestoModel');
-        $torreModel = model('TorreModel');
-        $piezaModel = model('PiezaModel');
-
-        /* echo "<pre>";
-        print_r($pre_piezas);
-        echo "</pre>"; */
-        $arr_aux = array_map(function($v){
-            if( array_key_exists('falt', $v) && array_key_exists('st_sale', $v) ){//editar
-                return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
-            }else{
-                return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant']];
-            }
-            
-        }, $pre_piezas);
-
-        $newarr = [];
-        foreach( $arr_aux as $ax ){
-            if( in_array($ax['idpie'], array_column($newarr, 'idpie')) ){
-                $aa = array_filter($newarr, fn($v) => $v['idpie'] == $ax['idpie']);
-                $aa = array_keys($aa)[0];
-                $newarr[$aa]['req'] = $newarr[$aa]['req'] + $ax['req'];
-
-                if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){//editar
-                    $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
-                    $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
-                    $newarr[$aa]['falt'] = $e_falt + ($ax['falt'] == '' ? 0 : $ax['falt']);
-                    $newarr[$aa]['st_sale'] = $e_stsale + $ax['st_sale'];
-                    //echo $aa;
-                    //print_r($ax);
-                }
-
-                continue;
-            }
-            $newarr[] = $ax;
-        }
+        $piezas_acumuladas = array_values(array_reduce($deta_pre_pie_bd, function ($acumulador, $item) {
+            // Creamos la llave única
+            $llave = $item['idpieza'];                                    
+            // Sumamos la cantidad si ya existe, si no, inicializamos el registro
+            isset($acumulador[$llave]) ? $acumulador[$llave]['dp_cant_hist'] += $item['dp_cant_hist'] : $acumulador[$llave] = $item;                                    
+            return $acumulador;
+        }, []));
         ?>
         <div>
             <table cellspacing="0" cellpadding="0" width="100%" class="tablapdf">
@@ -231,18 +203,16 @@ $clienterecoge = $guia['gui_clienterecoge'];
                 <?php
                 $cont = 0;
                 $suma_peso = 0;
-                foreach( $newarr as $pi ){                                                        
+                foreach( $piezas_acumuladas as $pi ){                                                        
                     $cont++;
-                    $idpieza  = $pi['idpie'];
-                    $pieza_bd = $piezaModel->getPieza($idpieza);
+                    $idpieza  = $pi['idpieza'];
 
-                    $piecodigo = $pieza_bd['pie_codigo'];
-                    $piedesc   = $pieza_bd['pie_desc'];
-                    $stockIni  = $pieza_bd['pie_cant'];
-                    $piepeso   = $pieza_bd['pie_peso'];
-                    $cantReq   = $opt == 1 ? $pi['req'] : $pi['st_sale'];
+                    $piecodigo = $pi['dp_cod_hist'];
+                    $piedesc   = $pi['dp_desc_hist'];
+                    $piepeso   = $pi['dp_peso_hist'];
+                    $cantReq   = $pi['dp_cant_hist'];
 
-                    $suma_peso += $piepeso * $pi['req'];
+                    $suma_peso += $piepeso * $pi['dp_cant_hist'];
 
                     echo "<tr>";
                     echo "<td>$cont</td>";
@@ -265,11 +235,10 @@ $clienterecoge = $guia['gui_clienterecoge'];
                     <th valign="top">Observaciones:</th>
                     <td>
                     <?php
-                    $detalle_presu = $presuModel->getDetallePresupuesto($idpresupuesto);
-                    foreach($detalle_presu as $d){
+                    foreach($detalle_guia as $d){
                         $idtorre  = $d['idtorre'];
                         $dp_cant  = $d['dp_cant'];
-                        $tor_desc = $d['tor_desc'];
+                        $tor_desc = $d['dp_torredesc'];
                         echo "$dp_cant $tor_desc.<br>";
                     }
                     ?>

@@ -76,9 +76,14 @@ $routes->get('pdf-guia-(:num)-(:num)', 'Guia::pdfGuia/$1/$2');
 $routes->get('devoluciones', 'Guia::devoluciones');
 $routes->post('listar-guias-devo', 'Guia::listarGuiasDevo');
 $routes->get('devolver-(:num)', 'Guia::Devolver/$1');
-$routes->post('generar-devolucion', 'Guia::generarDevolucion');
-$routes->get('pdf-guia-ingreso/(:num)/(:any)', 'Guia::pdfGuiaIngreso/$1/$2');
+//$routes->post('generar-devolucion', 'Guia::generarDevolucion');
+//$routes->get('pdf-guia-ingreso/(:num)/(:any)', 'Guia::pdfGuiaIngreso/$1/$2');
 $routes->post('eliminar-devolucion', 'Guia::eliminarDevolucion');
+
+
+
+$routes->post('guardar-devolucion', 'Guia::guardar_devolucion');
+$routes->post('eliminar_devolucion_item', 'Guia::eliminar_devolucion_item');
 
 
 

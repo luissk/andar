@@ -3,341 +3,333 @@
 <?php echo $this->section('contenido');?>
 <?php
 /* echo "<pre>";
-print_r($guia_bd);
+print_r($detalle_piezas_obra);
 echo "</pre>"; */
-$idguia_bd     = $guia_bd['idguia'];
-$idtrans_bd    = $guia_bd['idtransportista'];
-$fechatrasl_bd = $guia_bd['gui_fechatraslado'];
-$motivo_bd     = $guia_bd['gui_motivo'];
-$motivodesc_bd = $guia_bd['gui_motivodesc'];
-$iddepap_bd    = $guia_bd['iddepap'];
-$idprovp_bd    = $guia_bd['idprovp'];
-$iddistp_bd    = $guia_bd['iddistp'];
-$iddepall_bd   = $guia_bd['iddepall'];
-$idprovll_bd   = $guia_bd['idprovll'];
-$iddistll_bd   = $guia_bd['iddistll'];
-$direcp_bd     = $guia_bd['gui_direccionp'];
-$direcll_bd    = $guia_bd['gui_direccionll'];
-$placa_bd      = $guia_bd['gui_placa'];
-$fechadev_bd   = $guia_bd['gui_fechadev'];
-$track_bd      = $guia_bd['guia_track'];
-
-$status = $guia_bd['gui_status'];
-
-$pre_piezas_bd = json_decode($guia_bd['pre_piezas'], true);
-
-$fecha_dev = $fechadev_bd == '' ? date('Y-m-d') : $fechadev_bd;
 ?>
-
 <div class="app-content pt-3">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="card card-outline card-warning">
-                    <div class="card-header">
-                        <h3 class="card-title">Devolución de Piezas</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header bg-dark text-white font-weight-bold d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-file-invoice text-warning"></i> Operación: Retorno de Materiales desde Obra</span>
+                <span class="badge bg-secondary fs-6">Guía de Salida: <?= $guia_cabecera['gui_nro']; ?></span>
+            </div>
+            <div class="card-body bg-light-subtle">
+                <div class="row small font-weight-bold text-secondary">
+                    <div class="col-md-4">
+                        <i class="fas fa-calendar-alt"></i> Despachado el: <span class="text-dark"><?= date('d/m/Y', strtotime($guia_cabecera['gui_fecha'])); ?></span>
                     </div>
-                    <div class="card-body" id="cbody">
-                        <div class="d-flex justify-content-between flex-wrap">
-                            <div class="">
-                                Guía: <b><?=$nroGuia?></b>
-                            </div>
-                            <div class="">
-                                Cliente: <b><?=$presupuesto['cli_nombrerazon']?></b>
-                            </div>
-                            <div class="">
-                                Ruc o Dni: <b><?=$presupuesto['cli_dniruc']?></b>
-                            </div>
-                            <div class="">
-                                Fecha Traslado: <b><?=date("d/m/Y", strtotime($fechatrasl_bd))?></b>
-                            </div>                            
-                        </div>
-
-                        <div class="row pt-3">
-                            <div class="col-sm-3 mb-3">
-                                <label for="fechadevo" class="form-label">Fecha Devolución</label>
-                                <input type="date" class="form-control" name="fechadevo" id="fechadevo" value="<?=$fecha_dev?>">
-                            </div>
-
-                            <?php
-                            if( $track_bd != '' ){
-                                $ingresos = json_decode($track_bd, true);
-                            ?>
-                            <div class="col-sm-3 mb-3">
-                                <span>Ya ingresados</span>
-                                <ul class="list-group">
-                                    <?php
-                                    foreach( $ingresos as $in ){
-                                        $fecha = $in['fecha'];
-                                        $fecha_url = date('d-m-Y h:i:s a', strtotime(str_replace("/","-",$fecha)));
-                                        echo "<li class='list-group-item'><a href='javascript:void(0);' class='btn-link' onclick='verEnPdf($idguia_bd,\"$fecha_url\")'>$fecha_url</a></li>";
-                                    }
-                                    ?>
-                                </ul>
-                            </div>
-                            <?php
-                            }
-                            ?>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-12 text-center">
-                                <p class="mt-4 fw-bolder border-bottom border-black">PIEZAS</p>
-                            </div>
-                            <div class="col-sm-12 table-responsive">                           
-                                <table class="table" id="tbl_piezas">
-                                <?php
-                                $presuModel = model('PresupuestoModel');
-                                $torreModel = model('TorreModel');
-                                $piezaModel = model('PiezaModel');
-                                
-                                echo "<pre>";                                
-                                $arr_aux = array_map(function($v){
-                                    if( array_key_exists('ingresa', $v) ){//editar
-                                        return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale'], 'ingresa' => $v['ingresa']];
-                                    }
-                                    return ['idpie' => $v['idpie'], 'req' => $v['dtcan'] * $v['dpcant'],'falt' => $v['falt'], 'st_sale' => $v['st_sale']];
-                                                                       
-                                }, $pre_piezas_bd);
-
-                                $newarr = [];
-                                $ya_ingreso = FALSE;//para saber si el array tiene ingresos. Sirve para editar
-                                foreach( $arr_aux as $ax ){
-                                    if( in_array($ax['idpie'], array_column($newarr, 'idpie')) ){
-                                        $aa = array_filter($newarr, fn($v) => $v['idpie'] == $ax['idpie']);
-                                        $aa = array_keys($aa)[0];
-                                        $newarr[$aa]['req'] = $newarr[$aa]['req'] + $ax['req'];
-
-                                        if( array_key_exists('falt', $ax) && array_key_exists('st_sale', $ax) ){
-                                            $e_falt = $newarr[$aa]['falt'] == '' ? 0 : $newarr[$aa]['falt'];
-                                            $e_stsale = $newarr[$aa]['st_sale'] == '' ? 0 : $newarr[$aa]['st_sale'];
-                                            $newarr[$aa]['falt'] = $e_falt + ($ax['falt'] == '' ? 0 : $ax['falt']);
-                                            $newarr[$aa]['st_sale'] = $e_stsale + $ax['st_sale'];
-                                            //echo $aa;
-                                            //print_r($ax);
-                                        }
-
-                                        if( array_key_exists('ingresa', $ax) ){//editar
-                                            $newarr[$aa]['ingresa'] = $newarr[$aa]['ingresa'] + $ax['ingresa'];
-                                            $ya_ingreso = TRUE;
-                                        }
-
-                                        continue;
-                                    }
-                                    $newarr[] = $ax;
-                                }
-                                //print_r($newarr);
-                                echo "</pre>";
-
-                                echo "<tr>";
-                                echo "<th>N°</th>";
-                                echo "<th>Código</th>";
-                                echo "<th>Piezas</th>";                                    
-                                echo "<td class='text-center'>Cant. Salió</td>";
-                                if( $ya_ingreso )
-                                    echo "<td class='text-center'>Cant. Pend.</td>";
-                                else
-                                    echo "<td class='text-center'>Cant. Ingresa</td>";
-                                echo "</tr>";
-                                $cont = 0;
-                                foreach( $newarr as $pi ){                                                        
-                                    $cont++;
-                                    $idpieza  = $pi['idpie'];
-                                    $pieza_bd = $piezaModel->getPieza($idpieza);
-
-                                    $piecodigo     = $pieza_bd['pie_codigo'];
-                                    $piedesc       = $pieza_bd['pie_desc'];
-                                    $stockIni      = $pieza_bd['pie_cant'];
-                                    $cantReq       = $pi['req'];
-                
-                                    $stockAct      = $pieza_bd['stockActual'];
-                                    $faltantes     = $cantReq > $stockAct ? abs($stockAct - $cantReq)  : "";
-
-                                    $stock_que_sale = $pi['st_sale'];
-                                    $stock_input_default = $pi['st_sale'];
-
-                                    $readonly = $stock_que_sale == 0 ? 'readonly' : '';//cuando lo que salio es cero, el input debe estar READONLY
-                                    $checkbox = FALSE;//para visualizar el checkbox
-                                    $pintar_fila = '';//para resaltar la fila que aun tiene pendiente de stock
-                                    $stock_ya_ingresado = 0; //para saber cuanto ya ingresó anteriormente
-
-                                    if( array_key_exists('ingresa', $pi) ){//editar
-                                        $stock_ya_ingresado = $pi['ingresa'];                                        
-
-                                        if( $stock_que_sale > 0 && $stock_ya_ingresado < $stock_que_sale ){//pinta lo que falta
-                                            $pintar_fila = 'class="bg-danger-subtle"';
-                                        }
-
-                                        if( $stock_que_sale > 0 && $stock_ya_ingresado == $stock_que_sale ){//si lo que salio y lo que ingresa es igual, readonly a la caja y un checkbox
-                                            $readonly = 'readonly';
-                                            $checkbox = TRUE;                                            
-                                        }
-
-                                        $stock_input_default = $stock_que_sale - $stock_ya_ingresado;
-                                    }                                    
-
-                                    echo "<tr $pintar_fila>";
-                                    echo "<td>$cont</td>";
-                                    echo "<td>$piecodigo</td>";
-                                    echo "<td>$piedesc</td>";                                                                                 
-                                    echo "<td class='text-center'>$stock_que_sale</td>";
-                                    echo "<td class='text-center'>";
-                                    echo "<input type='text' size='2' class='numerosindecimal' data-sale=$stock_que_sale data-yaingresado=$stock_ya_ingresado id='cant-$idpieza' value=$stock_input_default $readonly />";
-                                    if( $checkbox )
-                                        echo "&nbsp;<input type='checkbox' id='chk-$idpieza' onclick='habilitarCaja($idpieza, this)' />";
-                                    echo "</td>";
-                                    echo "</tr>";
-                                    
-                                }
-                                //print_r($arr_existentes);                                                                        
-                                ?>
-                                </table>
-                            </div>
-                            <div class="col-sm-12 pb-3 fw-bolder">
-                            <?php
-                            $detalle_presu = $presuModel->getDetallePresupuesto($presupuesto['idpresupuesto']);
-                            foreach($detalle_presu as $d){
-                                $idtorre  = $d['idtorre'];
-                                $dp_cant  = $d['dp_cant'];
-                                $tor_desc = $d['tor_desc'];
-                                echo "$dp_cant $tor_desc.<br>";
-                            }
-                            ?>
-                            </div>                      
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-12 text-center">
-                                <input type="hidden" id="idguia_bd" value="<?=$idguia_bd?>">
-                                <button class="btn btn-warning btnGuia" data-opt="">REGISTRAR DEVOLUCION</button>
-                            </div>
-                            <div id="msj"></div>
-                        </div>
-
+                    <div class="col-md-8 text-md-end">
+                        <i class="fas fa-clipboard-list"></i> Código Interno Presupuesto Origen: <span class="text-dark"><?= $idpresupuesto_bd; ?></span>
                     </div>
                 </div>
-            </div>            
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white font-weight-bold">
+                <i class="fas fa-boxes-stacked"></i> Control y Balance de Piezas en Proyecto
+            </div>
+            <div class="card-body">
+                <form id="formDevolucion" autocomplete="off">
+                    <input type="hidden" name="idguia" value="<?= $idguia_bd; ?>">
+                    <input type="hidden" name="idpresupuesto" value="<?= $idpresupuesto_bd; ?>">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0" id="tablaDevoluciones">
+                            <thead class="table-light text-center small text-uppercase font-weight-bold">
+                                <tr>
+                                    <th style="width: 8%;">ID Pieza</th>
+                                    <th style="width: 25%;">Descripción del Material</th>
+                                    <th style="width: 10%;">Despachado</th>
+                                    <th style="width: 12%;">Saldo en Obra</th>
+                                    <th style="width: 35%;">Registrar Reingreso (Hoy)</th>
+                                    <th style="width: 10%;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                foreach ($detalle_piezas_obra as $value) { 
+                                    $idpieza = $value['idpieza'];
+                                    
+                                    // 1. Calculamos el límite del Stock Propio que queda libre en obra
+                                    $saldo_propio_max = intval($value['cant_enviada_propio']) - intval($value['cant_devuelta_propio']);
+                                    $saldo_total_obra = $saldo_propio_max; 
+                                ?>
+                                <tr class="fila-pieza-maestra" data-idpieza="<?= $idpieza; ?>">
+                                    <td class="text-center font-weight-bold text-secondary bg-light-subtle"><?= $idpieza; ?></td>
+                                    <td>
+                                        <span class="d-block font-weight-bold text-dark fs-6"><?= $value['pieza_nombre']; ?></span>
+                                    </td>
+                                    <td class="text-center bg-light font-weight-bold text-muted">
+                                        <?= $value['cantidad_total_enviada']; ?>
+                                    </td>
+                                    <td class="text-center table-primary font-weight-bold">
+                                        <span class="badge bg-primary fs-6 dynamic-saldo-badge" id="saldo_total_<?= $idpieza; ?>">
+                                            </span>
+                                    </td>
+                                    <td>
+                                        <div class="p-2 border rounded bg-light-subtle shadow-sm">
+                                            
+                                            <?php if ($value['cant_enviada_propio'] > 0): ?>
+                                            <div class="row align-items-center g-2 mb-2 border-bottom pb-1">
+                                                <div class="col-7 small font-weight-bold text-success text-truncate">
+                                                    <i class="fas fa-warehouse"></i> Stock Propio:
+                                                </div>
+                                                <div class="col-5">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number" 
+                                                            name="piezas[<?= $idpieza; ?>][propio]" 
+                                                            class="form-control text-center input-devolucion input-propio font-weight-bold text-success" 
+                                                            min="0" 
+                                                            max="<?= $saldo_propio_max; ?>" 
+                                                            placeholder="Máx: <?= $saldo_propio_max; ?>"
+                                                            data-idpieza="<?= $idpieza; ?>">
+                                                        <span class="input-group-text bg-white small text-muted">Und</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($value['externos'])): ?>
+                                                <?php foreach ($value['externos'] as $index => $ext): 
+                                                    $saldo_ext_max = intval($ext['cant_enviada_ext']) - intval($ext['cant_devuelta_ext']);
+                                                    $saldo_total_obra += $saldo_ext_max; // Acumulación real del total flotante
+                                                ?>
+                                                <div class="row align-items-center g-2 mb-1">
+                                                    <div class="col-7 small font-weight-bold text-warning-emphasis text-truncate" title="<?= $ext['pro_razon']; ?>">
+                                                        <i class="fas fa-truck-moving text-warning"></i> <?= $ext['pro_razon']; ?>:
+                                                    </div>
+                                                    <div class="col-5">
+                                                        <div class="input-group input-group-sm">
+                                                            <input type="hidden" name="piezas[<?= $idpieza; ?>][externo][<?= $index; ?>][id_proveedor]" value="<?= $ext['idproveedor']; ?>">
+                                                            <input type="number" 
+                                                                name="piezas[<?= $idpieza; ?>][externo][<?= $index; ?>][cantidad]" 
+                                                                class="form-control text-center input-devolucion input-externo font-weight-bold text-warning-emphasis" 
+                                                                min="0" 
+                                                                max="<?= $saldo_ext_max; ?>" 
+                                                                placeholder="Máx: <?= $saldo_ext_max; ?>"
+                                                                data-idpieza="<?= $idpieza; ?>">
+                                                            <span class="input-group-text bg-white small text-muted">Und</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-secondary btn-sm font-weight-bold px-3 btn-historial" 
+                                                type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#collapse_hist_<?= $idpieza; ?>" 
+                                                aria-expanded="false">
+                                            <i class="fas fa-history"></i> Historial
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr class="p-0 border-0 bg-light-subtle">
+                                    <td colspan="6" class="p-0 border-0">
+                                        <div class="collapse" id="collapse_hist_<?= $idpieza; ?>">
+                                            <div class="p-3 border-start border-end border-bottom bg-white mx-2 my-1 rounded shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-1">
+                                                    <h6 class="font-weight-bold text-secondary mb-0">
+                                                        <i class="fas fa-clock text-info"></i> Trazabilidad de Retornos de la Pieza
+                                                    </h6>
+                                                    <small class="text-muted">Tabla: <code>guia_devolucion_detalle</code></small>
+                                                </div>
+                                                
+                                                <?php if (!empty($value['historial_devoluciones'])): ?>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-striped table-bordered mb-0 text-center align-middle" style="font-size: 0.85rem;">
+                                                        <thead class="table-secondary font-weight-bold small">
+                                                            <tr>
+                                                                <th>Fecha y Hora de Reingreso</th>
+                                                                <th>Destino Asignado</th>
+                                                                <th>Cantidad Recibida</th>
+                                                                <th style="width: 10%;">Acción</th> </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach ($value['historial_devoluciones'] as $hist): ?>
+                                                            <tr>
+                                                                <td class="font-weight-bold text-dark">
+                                                                    <?= date('d/m/Y h:i A', strtotime($hist['gdd_fecha'])); ?>
+                                                                </td>
+                                                                <td class="text-start ps-3">
+                                                                    <?php if ($hist['dp_origen'] == 'propio'): ?>
+                                                                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1"><i class="fas fa-warehouse"></i> Almacén de Empresa</span>
+                                                                    <?php else: ?>
+                                                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-2 py-1"><i class="fas fa-truck"></i> Devuelto a: <?= $hist['pro_razon']; ?></span>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                                <td class="font-weight-bold text-primary bg-white fs-6">
+                                                                    <?= $hist['cantidad_devuelta']; ?> Unidades
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" 
+                                                                            class="btn btn-outline-danger btn-sm btn-eliminar-registro" 
+                                                                            data-id="<?= $hist['idguia_dev_det']; ?>" 
+                                                                            data-idguia = "<?= $idguia_bd; ?>"
+                                                                            data-idpresupuesto="<?= $idpresupuesto_bd; ?>"
+                                                                            title="Anular este reingreso">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <?php else: ?>
+                                                <div class="text-center text-muted small py-2">
+                                                    <i class="fas fa-info-circle text-secondary"></i> No existen ingresos ni parciales registrados para esta pieza aún.
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <script>document.getElementById('saldo_total_<?= $idpieza; ?>').innerText = '<?= $saldo_total_obra; ?>';</script>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
+                        <!-- <a href="<?= base_url('almacen/guias_lista'); ?>" class="btn btn-outline-secondary font-weight-bold px-4">
+                            <i class="fas fa-arrow-left"></i> Volver al Listado
+                        </a> -->
+                        <button type="submit" class="btn btn-success btn-lg px-5 font-weight-bold shadow-sm" id="btnProcesarDev">
+                            <i class="fas fa-save"></i> Guardar Reingreso de Material
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
-
-<div class="modal fade" id="modalPdfGuia" tabindex="-1" aria-labelledby="modalPdfGuiaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header py-2">
-                <h1 class="modal-title fs-5" id="tituloModal">Ingreso PDF</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center" id="pdf_div">
-
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php echo $this->endSection();?>
 
 <?php echo $this->section('scripts');?>
 
 <script>
-$(function(){
-    $(".numerosindecimal").on("keypress keyup blur",function (event) {    
-        $(this).val($(this).val().replace(/[^\d].+/, ""));
-        if ((event.which < 48 || event.which > 57)) {
-            event.preventDefault();
+$(document).ready(function() {
+
+    // 1. VALIDACIÓN REACTIVA DIRECTA EN LA CELDA DE LA TABLA
+    $('.input-devolucion').on('input change', function() {
+        let input  = $(this);
+        let valor  = parseInt(input.val()) || 0;
+        let maximo = parseInt(input.attr('max')) || 0;
+
+        // Limpieza de valores menores a cero
+        if (valor < 0) {
+            input.val(0);
+            valor = 0;
+        }
+
+        // Candado en Caliente: Si supera el saldo real disponible en obra
+        if (valor > maximo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Cantidad excedida',
+                text: 'Físicamente en la obra solo quedan ' + maximo + ' unidades disponibles de este grupo.',
+                confirmButtonColor: '#0d6efd'
+            });
+            input.val(maximo);
+            //input.addClass('is-invalid');
+        } else {
+            //input.removeClass('is-invalid');
         }
     });
 
-    $(".btnGuia").on('click', function(e){
+    // 2. ENVÍO DINÁMICO ASÍNCRONO DEL FORMULARIO (GUARDAR Y EDITAR HISTORIAL)
+    $('#formDevolucion').on('submit', function(e) {
         e.preventDefault();
-        let _this = $(this);
-        let textBtn = _this.text();
-        $(".btnGuia").attr('disabled', 'disabled');
-        _this.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> PROCESANDO...`);
 
-        let fechadevo = $("#fechadevo").val(),
-        idguia = $("#idguia_bd").val(),
-        opt = $(this).data('opt');
-
-        let men = '';
-        if( fechadevo == '' ) men = 'Seleccione la fecha de devolución';
-
-        let items = [];
-        $('[id^="cant-"').each(function(i, v){
-            let idpieza = v.id.split("-")[1],
-                cant = Number(v.value),
-                salio = Number(v.getAttribute('data-sale'))
-                yaingresado = Number(v.getAttribute('data-yaingresado'));
-
-            let resetear = 0;
-            if ( $("#chk-"+idpieza).length && $("#chk-"+idpieza).is(":checked") ) {//si existe el checkobox y esta checkeado
-                resetear    = 1;
-                yaingresado = 0;
-            }
-
-            /* if( (cant + yaingresado) == '' && salio > 0 ){
-                men = 'Coloque las cantidades que ingresan';
-                Swal.fire({title: men, icon: "error"});
-                return;
-            } */
-
-            if( (cant + yaingresado) > salio ){
-                men = 'La cantidad que ingresa no puede ser mayor a lo que salió';
-                Swal.fire({title: men, icon: "error"});
-                return;
-            }
-
-            let nuevoingreso = cant;
-
-            items.push({idpieza,cant:(cant + yaingresado),salio,nuevoingreso,yaingresado,resetear});
-        });//HACER LOGICA CHECK BOX RESETEARRR
-        
-
-        if( men != '' ){
-            Swal.fire({title: men, icon: "error"});
-            $(".btnGuia").removeAttr('disabled');
-            _this.text(textBtn);
-            return;
-        }
-        
-        console.log(items)
-
-        $.post('generar-devolucion',{
-            idguia, fechadevo, items
-        }, function(data){
-            $(".btnGuia").removeAttr('disabled');
-            _this.text(textBtn);
-            $("#msj").html(data);       
+        // Verificamos si el almacenero ingresó datos en el patio antes de procesar
+        let controlCantidades = 0;
+        $('.input-devolucion').each(function() {
+            controlCantidades += parseInt($(this).val()) || 0;
         });
 
-    });
+        if (controlCantidades === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Campos Vacíos',
+                text: 'Por favor, ingresa una cantidad válida de piezas recibidas en los casilleros antes de guardar.',
+                confirmButtonColor: '#6c757d'
+            });
+            return;
+        }
 
+        // Cuadro de diálogo moderno de confirmación
+        Swal.fire({
+            title: '¿Confirmar Reingreso?',
+            text: "Se anexarán los nuevos registros al historial de la guía y se actualizará el stock.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, Registrar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+                // Animación de bloqueo del botón para prevenir doble submit
+                let btn = $('#btnProcesarDev');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+
+                $.ajax({
+                    url: 'guardar-devolucion',
+                    type: 'POST',
+                    data: $('#formDevolucion').serialize(),
+                    success: function(response) {
+                        // El controlador inyectará directo el script con el SweetAlert de éxito y recarga
+                        $('body').append(response);
+                    },
+                    error: function() {
+                        Swal.fire('Error del Sistema', 'No se pudo entablar comunicación asíncrona con el servidor.', 'error');
+                        btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Reingreso de Material');
+                    }
+                });
+            }
+        });
+    });
 });
 
-function habilitarCaja(idpieza, event){
-    //console.dir(event.checked)
-    //console.log(idpieza);
-    if( event.checked ){
-        $("#cant-" + idpieza).removeAttr('readonly');
-    }else{
-        $("#cant-" + idpieza).attr('readonly', true);
-        $("#cant-" + idpieza).val(0);
-    }
-}
+// EVENTO PARA ELIMINAR UN REGISTRO ESPECÍFICO DEL HISTORIAL
+$(document).on('click', '.btn-eliminar-registro', function() {
+    let id_registro = $(this).data('id'); // Captura el idguia_dev_det
+    let idguia = $(this).data('idguia');
+    let idpresupuesto = $(this).data('idpresupuesto');
 
-function verEnPdf(id, fecha){
-    $("#modalPdfGuia").modal('show');
-    
-    var iframe = $('<iframe width="100%" height="100%">');
-    iframe.attr('src','pdf-guia-ingreso/'+id+'/'+fecha);
-    $('#pdf_div').html(iframe);
-}
+    Swal.fire({
+        title: '¿Anular este reingreso?',
+        text: "Se restará esta cantidad del historial y el saldo en obra volverá a aumentar.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, Anular',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: 'eliminar_devolucion_item',
+                type: 'POST',
+                data: { idguia_dev_det: id_registro, idguia, idpresupuesto },
+                success: function(response) {
+                    $('body').append(response); // Ejecuta el SweetAlert que manda el controlador
+                },
+                error: function() {
+                    Swal.fire('Error', 'No se pudo procesar la solicitud de eliminación.', 'error');
+                }
+            });
+        }
+    });
+});
 </script>
 
 <?php echo $this->endSection();?>

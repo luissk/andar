@@ -62,8 +62,8 @@ if($guias){
                 echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             }
             echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Guía Cliente" data-id='.$id.' data-opt=1><i class="fa-regular fa-file-pdf"></i></a>';
-            if( $g['gui_completa'] != 1 ){
-                echo '<a href="javascript:;" class="link-dark ms-2 pdf text-danger" title="Guía almacén" data-id='.$id.' data-opt=0><i class="fa-regular fa-file-pdf"></i></a>';    
+            if( $g['gui_completa'] != 1 ){//YA NO VA YA QUE TODOS SALEN COMPLETOS CON LOS ALQUILERES
+                //echo '<a href="javascript:;" class="link-dark ms-2 pdf text-danger" title="Guía almacén" data-id='.$id.' data-opt=0><i class="fa-regular fa-file-pdf"></i></a>';    
             }
             //echo '<a href="javascript:;" class="link-dark ms-2 estado" title="Cambiar Estado" data-id='.$id.'><i class="fa-solid fa-list-check"></i></a>';
             echo '</td>';

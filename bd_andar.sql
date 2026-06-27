@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-06-2026 a las 22:26:04
+-- Tiempo de generación: 26-06-2026 a las 22:51:34
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,26 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `bd_andar`
 --
-
-DELIMITER $$
---
--- Funciones
---
-CREATE DEFINER=`root`@`localhost` FUNCTION `calcularStock` (`json` TEXT, `idpieza` INT, `campo` VARCHAR(20)) RETURNS INT(11)  BEGIN       
-    set @json_campo = JSON_EXTRACT(json, concat('$[*].', campo));
-    set @json_pieza = JSON_EXTRACT(json, '$[*].idpie');
-    set @res = 0;
-    set @i = 0;
-    While @i < JSON_LENGTH(@json_campo)  DO
-    	if JSON_EXTRACT(@json_pieza, CONCAT('$[', @i, ']')) = idpieza then
-            set @res = @res + JSON_EXTRACT(@json_campo, CONCAT('$[', @i, ']'));           
-        end if;
-        set @i = @i + 1;
-    END WHILE;
-	RETURN @res;
-END$$
-
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -160,6 +140,7 @@ CREATE TABLE `detalle_presupuesto` (
 INSERT INTO `detalle_presupuesto` (`idpresupuesto`, `idtorre`, `dp_torredesc`, `dp_cant`, `dp_precio`) VALUES
 (331, 276, 'TORRE LUIS 1', 2, 126.00),
 (331, 277, 'TORRE LUIS 2', 1, 166.19),
+(333, 20, 'COTIZACION MINPROCORP 0404', 1, 824.27),
 (333, 277, 'TORRE LUIS 2', 1, 626.79),
 (333, 278, 'TORRE LUIS 3', 1, 473.62);
 
@@ -192,14 +173,18 @@ CREATE TABLE `detalle_presupuesto_piezas` (
 --
 
 INSERT INTO `detalle_presupuesto_piezas` (`iddetalle_pre_pie`, `idpresupuesto`, `idtorre`, `idpieza`, `dp_cod_hist`, `dp_desc_hist`, `dp_peso_hist`, `dp_precio_hist`, `dp_cant_x_torre`, `dp_cant_x_presu`, `dp_cant_hist`, `dp_cant_enviada`, `dp_cant_devuelta`, `dp_origen`, `idproveedor`) VALUES
-(75, 333, 277, 142, '11223355', 'PIEZA LUIS 4', 10.00, 58.00, 6, 1, 6, 0, 0, 'propio', NULL),
-(76, 333, 277, 141, '11223344', 'PIEZA LUIS 3', 2.00, 5.30, 9, 1, 9, 0, 0, 'propio', NULL),
-(77, 333, 278, 143, '11223366', 'PIEZA LUIS 5', 0.55, 1.50, 6, 1, 6, 0, 0, 'propio', NULL),
-(78, 333, 278, 142, '11223355', 'PIEZA LUIS 4', 10.00, 58.00, 5, 1, 5, 0, 0, 'propio', NULL),
 (79, 331, 276, 139, '123456788', 'PIEZA LUIS 2', 0.70, 12.50, 8, 2, 16, 0, 0, 'propio', NULL),
 (80, 331, 276, 138, '123456789', 'PIEZA LUIS 1', 0.50, 10.00, 5, 2, 10, 0, 0, 'propio', NULL),
 (81, 331, 277, 142, '11223355', 'PIEZA LUIS 4', 10.00, 58.00, 6, 1, 6, 0, 0, 'propio', NULL),
-(82, 331, 277, 141, '11223344', 'PIEZA LUIS 3', 2.00, 5.30, 9, 1, 9, 0, 0, 'propio', NULL);
+(82, 331, 277, 141, '11223344', 'PIEZA LUIS 3', 2.00, 5.30, 9, 1, 9, 0, 0, 'propio', NULL),
+(90, 333, 20, 26, '2603100', 'VERTICAL 1,00', 5.52, 45.45, 7, 1, 7, 0, 0, 'propio', NULL),
+(91, 333, 20, 73, '3863109', 'BE O-PLAT. ACERO T9 1,09X0,19M', 7.00, 92.99, 1, 1, 1, 0, 0, 'propio', NULL),
+(92, 333, 20, 94, '3890109', 'PLAT. ACERO T9 LW DE 1,09X0,32M', 8.40, 99.23, 1, 1, 1, 0, 0, 'propio', NULL),
+(93, 333, 20, 138, '123456789', 'PIEZA LUIS 1', 0.50, 10.00, 1, 1, 1, 0, 0, 'propio', NULL),
+(94, 333, 277, 141, '11223344', 'PIEZA LUIS 3', 2.00, 5.30, 9, 1, 9, 0, 0, 'propio', NULL),
+(95, 333, 277, 142, '11223355', 'PIEZA LUIS 4', 10.00, 58.00, 6, 1, 6, 0, 0, 'propio', NULL),
+(96, 333, 278, 142, '11223355', 'PIEZA LUIS 4', 10.00, 58.00, 5, 1, 5, 0, 0, 'propio', NULL),
+(97, 333, 278, 143, '11223366', 'PIEZA LUIS 5', 0.55, 1.50, 6, 1, 6, 0, 0, 'propio', NULL);
 
 -- --------------------------------------------------------
 
@@ -221,6 +206,7 @@ INSERT INTO `detalle_torre` (`idtorre`, `idpieza`, `dt_cantidad`) VALUES
 (20, 26, 7),
 (20, 73, 1),
 (20, 94, 1),
+(20, 138, 1),
 (24, 13, 4),
 (24, 16, 4),
 (24, 18, 8),
@@ -3819,17 +3805,13 @@ CREATE TABLE `guia` (
   `gui_clienterecoge` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
--- --------------------------------------------------------
-
 --
--- Estructura de tabla para la tabla `guia_devolucion`
+-- Volcado de datos para la tabla `guia`
 --
 
-CREATE TABLE `guia_devolucion` (
-  `idguia_devolucion` int(10) UNSIGNED NOT NULL,
-  `idguia` int(10) UNSIGNED NOT NULL COMMENT 'Llave foránea que amarra este retorno a la guía de salida original',
-  `gd_fecha` datetime NOT NULL COMMENT 'La fecha y hora exacta en que el almacenero contó los fierros'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+INSERT INTO `guia` (`idguia`, `gui_nro`, `gui_fecha`, `gui_fechatraslado`, `gui_motivo`, `gui_motivodesc`, `gui_ptopartida`, `gui_direccionp`, `gui_ptollegada`, `gui_direccionll`, `gui_placa`, `idpresupuesto`, `idtransportista`, `idusuario2`, `gui_completa`, `gui_status`, `gui_fechaent`, `gui_fechadev`, `gui_devcompleta`, `guia_track`, `gui_clienterecoge`) VALUES
+(5, 'EG01-00000001', '2026-06-19 15:21:47', '2026-06-19', 'v', '', 30303, 'aaaaa', 20402, 'bbbb', 'ccc', 331, 6, 1, 1, 3, NULL, '2026-06-26', 0, NULL, 1),
+(6, 'EG01-00000002', '2026-06-26 22:20:53', '2026-06-26', 'i', '', 70105, 'aaa', 50505, 'bbbb', 'ccc', 333, 8, 1, 1, 3, NULL, '2026-06-26', 1, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -3839,13 +3821,35 @@ CREATE TABLE `guia_devolucion` (
 
 CREATE TABLE `guia_devolucion_detalle` (
   `idguia_dev_det` int(10) UNSIGNED NOT NULL,
-  `idguia_devolucion` int(10) UNSIGNED NOT NULL COMMENT 'Relación con el ticket de devolución',
+  `idguia` int(10) UNSIGNED NOT NULL,
   `idtorre` int(10) UNSIGNED NOT NULL,
   `idpieza` int(10) UNSIGNED NOT NULL,
   `cantidad_devuelta` int(11) NOT NULL DEFAULT 0 COMMENT 'La cantidad que entró en esta fecha',
   `dp_origen` varchar(20) NOT NULL DEFAULT 'propio' COMMENT 'propio / externo',
-  `idproveedor` int(10) UNSIGNED DEFAULT NULL COMMENT 'A qué proveedor se le descarga el andamio si era externo'
+  `idproveedor` int(10) UNSIGNED DEFAULT NULL COMMENT 'A qué proveedor se le descarga el andamio si era externo',
+  `gdd_fecha` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `guia_devolucion_detalle`
+--
+
+INSERT INTO `guia_devolucion_detalle` (`idguia_dev_det`, `idguia`, `idtorre`, `idpieza`, `cantidad_devuelta`, `dp_origen`, `idproveedor`, `gdd_fecha`) VALUES
+(45, 6, 277, 142, 2, 'propio', NULL, '2026-06-27 03:45:22'),
+(46, 6, 277, 142, 4, 'externo', 4, '2026-06-27 03:45:22'),
+(47, 5, 277, 142, 5, 'propio', NULL, '2026-06-27 03:46:07'),
+(48, 6, 20, 26, 5, 'propio', NULL, '2026-06-27 03:47:09'),
+(49, 6, 20, 26, 2, 'externo', 3, '2026-06-27 03:47:09'),
+(50, 6, 20, 73, 1, 'propio', NULL, '2026-06-27 03:47:09'),
+(51, 6, 20, 94, 1, 'propio', NULL, '2026-06-27 03:47:09'),
+(52, 6, 20, 138, 1, 'externo', 3, '2026-06-27 03:47:09'),
+(53, 6, 277, 141, 6, 'propio', NULL, '2026-06-27 03:47:09'),
+(54, 6, 277, 141, 3, 'externo', 3, '2026-06-27 03:47:09'),
+(55, 6, 277, 142, 4, 'propio', NULL, '2026-06-27 03:47:09'),
+(56, 6, 277, 142, 1, 'externo', 4, '2026-06-27 03:47:09'),
+(57, 6, 278, 143, 6, 'propio', NULL, '2026-06-27 03:47:09'),
+(58, 5, 277, 142, 1, 'propio', NULL, '2026-06-27 03:47:33'),
+(59, 5, 276, 138, 5, 'propio', NULL, '2026-06-27 03:47:44');
 
 -- --------------------------------------------------------
 
@@ -3862,6 +3866,29 @@ CREATE TABLE `guia_salida_detalle` (
   `dp_origen` varchar(20) NOT NULL DEFAULT 'propio' COMMENT 'Valores: propio / externo',
   `idproveedor` int(10) UNSIGNED DEFAULT NULL COMMENT 'ID del proveedor si el origen es externo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `guia_salida_detalle`
+--
+
+INSERT INTO `guia_salida_detalle` (`idguia_salida_det`, `idguia`, `idtorre`, `idpieza`, `cantidad_enviada`, `dp_origen`, `idproveedor`) VALUES
+(51, 5, 276, 138, 5, 'propio', NULL),
+(52, 5, 276, 138, 5, 'externo', 4),
+(53, 5, 276, 139, 8, 'propio', NULL),
+(54, 5, 276, 139, 3, 'externo', 3),
+(55, 5, 276, 139, 5, 'externo', 5),
+(56, 5, 277, 141, 9, 'propio', NULL),
+(57, 5, 277, 142, 6, 'propio', NULL),
+(78, 6, 20, 26, 5, 'propio', NULL),
+(79, 6, 20, 26, 2, 'externo', 3),
+(80, 6, 20, 73, 1, 'propio', NULL),
+(81, 6, 20, 94, 1, 'propio', NULL),
+(82, 6, 20, 138, 1, 'externo', 3),
+(83, 6, 277, 141, 6, 'propio', NULL),
+(84, 6, 277, 141, 3, 'externo', 3),
+(85, 6, 277, 142, 6, 'propio', NULL),
+(86, 6, 277, 142, 5, 'externo', 4),
+(87, 6, 278, 143, 6, 'propio', NULL);
 
 -- --------------------------------------------------------
 
@@ -4069,8 +4096,30 @@ CREATE TABLE `presupuesto` (
 --
 
 INSERT INTO `presupuesto` (`idpresupuesto`, `pre_numero`, `pre_fechareg`, `pre_correocontact`, `idusuario2`, `idcliente`, `pre_porcenprecio`, `pre_porcsem`, `pre_periodo`, `pre_periodonro`, `pre_piezas`, `pre_verpiezas`, `pre_status`, `pre_devuelto`, `pre_tcambio`, `pre_pentrega`, `pre_fpago`, `pre_voferta`, `pre_lentrega`, `pre_preciotrans`, `pre_nrodiasm`, `pre_preciomyd`, `pre_ruc`) VALUES
-(331, '0001-2026', '2026-05-27 18:52:22', NULL, 1, 37, 12.00, 12.00, 'm', 1, NULL, 1, 1, 0, 3.50, '', '', '', '', 0.00, 5, 0.00, '10108671055'),
-(333, '0002-2026', '2026-06-01 17:56:46', NULL, 1, 63, 12.00, 12.00, 'm', 4, NULL, 1, 1, 0, 3.30, '5 dias XD', 'AL CONTADO', '1 MES', 'EN OBRA', 100.00, 0, 150.00, '20614876175');
+(331, '0001-2026', '2026-05-27 18:52:22', NULL, 1, 37, 12.00, 12.00, 'm', 1, NULL, 1, 3, 0, 3.50, '', '', '', '', 0.00, 5, 0.00, '10108671055'),
+(333, '0002-2026', '2026-06-01 17:56:46', NULL, 1, 63, 12.00, 12.00, 'm', 4, NULL, 1, 3, 0, 3.30, '5 dias XD', 'AL CONTADO', '1 MES', 'EN OBRA', 100.00, 0, 150.00, '20614876175');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `proveedor`
+--
+
+CREATE TABLE `proveedor` (
+  `idproveedor` int(11) NOT NULL,
+  `pro_razon` varchar(150) NOT NULL,
+  `pro_ruc` varchar(11) NOT NULL,
+  `pro_fechareg` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `proveedor`
+--
+
+INSERT INTO `proveedor` (`idproveedor`, `pro_razon`, `pro_ruc`, `pro_fechareg`) VALUES
+(3, 'GLORIA SAA', '20100190797', '2026-06-11 02:43:33'),
+(4, 'CASA GRANDE SA', '20045879966', '2026-06-11 02:47:13'),
+(5, 'INVERSIONES YANDI SAC', '20190856329', '2026-06-11 02:47:37');
 
 -- --------------------------------------------------------
 
@@ -6581,19 +6630,12 @@ ALTER TABLE `guia`
   ADD KEY `fk_guia_transportista1_idx` (`idtransportista`);
 
 --
--- Indices de la tabla `guia_devolucion`
---
-ALTER TABLE `guia_devolucion`
-  ADD PRIMARY KEY (`idguia_devolucion`),
-  ADD KEY `fk_dev_hacia_guia` (`idguia`);
-
---
 -- Indices de la tabla `guia_devolucion_detalle`
 --
 ALTER TABLE `guia_devolucion_detalle`
   ADD PRIMARY KEY (`idguia_dev_det`),
-  ADD KEY `fk_dev_det_cabecera` (`idguia_devolucion`),
-  ADD KEY `fk_dev_det_pieza` (`idpieza`);
+  ADD KEY `fk_dev_det_pieza` (`idpieza`),
+  ADD KEY `idguia` (`idguia`);
 
 --
 -- Indices de la tabla `guia_salida_detalle`
@@ -6624,6 +6666,13 @@ ALTER TABLE `presupuesto`
   ADD UNIQUE KEY `pre_numero_UNIQUE` (`pre_numero`),
   ADD KEY `fk_presupuesto_usuario1_idx` (`idusuario2`),
   ADD KEY `fk_presupuesto_cliente1_idx` (`idcliente`);
+
+--
+-- Indices de la tabla `proveedor`
+--
+ALTER TABLE `proveedor`
+  ADD PRIMARY KEY (`idproveedor`),
+  ADD UNIQUE KEY `pro_ruc` (`pro_ruc`);
 
 --
 -- Indices de la tabla `tipousuario`
@@ -6670,7 +6719,7 @@ ALTER TABLE `cliente`
 -- AUTO_INCREMENT de la tabla `detalle_presupuesto_piezas`
 --
 ALTER TABLE `detalle_presupuesto_piezas`
-  MODIFY `iddetalle_pre_pie` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `iddetalle_pre_pie` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT de la tabla `factura`
@@ -6682,25 +6731,19 @@ ALTER TABLE `factura`
 -- AUTO_INCREMENT de la tabla `guia`
 --
 ALTER TABLE `guia`
-  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
-
---
--- AUTO_INCREMENT de la tabla `guia_devolucion`
---
-ALTER TABLE `guia_devolucion`
-  MODIFY `idguia_devolucion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idguia` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `guia_devolucion_detalle`
 --
 ALTER TABLE `guia_devolucion_detalle`
-  MODIFY `idguia_dev_det` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idguia_dev_det` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT de la tabla `guia_salida_detalle`
 --
 ALTER TABLE `guia_salida_detalle`
-  MODIFY `idguia_salida_det` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `idguia_salida_det` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
 
 --
 -- AUTO_INCREMENT de la tabla `parametros`
@@ -6719,6 +6762,12 @@ ALTER TABLE `pieza`
 --
 ALTER TABLE `presupuesto`
   MODIFY `idpresupuesto` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=334;
+
+--
+-- AUTO_INCREMENT de la tabla `proveedor`
+--
+ALTER TABLE `proveedor`
+  MODIFY `idproveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `tipousuario`
@@ -6777,17 +6826,11 @@ ALTER TABLE `guia`
   ADD CONSTRAINT `fk_guia_transportista1` FOREIGN KEY (`idtransportista`) REFERENCES `transportista` (`idtransportista`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Filtros para la tabla `guia_devolucion`
---
-ALTER TABLE `guia_devolucion`
-  ADD CONSTRAINT `fk_dev_hacia_guia` FOREIGN KEY (`idguia`) REFERENCES `guia` (`idguia`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Filtros para la tabla `guia_devolucion_detalle`
 --
 ALTER TABLE `guia_devolucion_detalle`
-  ADD CONSTRAINT `fk_dev_det_cabecera` FOREIGN KEY (`idguia_devolucion`) REFERENCES `guia_devolucion` (`idguia_devolucion`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_dev_det_pieza` FOREIGN KEY (`idpieza`) REFERENCES `pieza` (`idpieza`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_dev_det_pieza` FOREIGN KEY (`idpieza`) REFERENCES `pieza` (`idpieza`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `guia_devolucion_detalle_ibfk_1` FOREIGN KEY (`idguia`) REFERENCES `guia` (`idguia`);
 
 --
 -- Filtros para la tabla `guia_salida_detalle`

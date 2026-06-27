@@ -168,10 +168,18 @@ class PresupuestoModel extends Model{
                 AND g.idpresupuesto = dp_pie.idpresupuesto) AS dp_cant_enviada,
 
                 -- 2. RETORNOS: Sumamos todas las devoluciones parciales que se hicieron en diferentes fechas
-                (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
+                /*(SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
                 FROM guia_devolucion_detalle gdd
                 INNER JOIN guia_devolucion gd ON gdd.idguia_devolucion = gd.idguia_devolucion
                 INNER JOIN guia g ON gd.idguia = g.idguia
+                WHERE gdd.idpieza = dp_pie.idpieza 
+                AND gdd.idtorre = dp_pie.idtorre 
+                AND g.idpresupuesto = dp_pie.idpresupuesto) AS dp_cant_devuelta*/
+
+                -- 2. RETORNOS: Corregido uniendo directamente el detalle de devolución con la guía única
+                (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
+                FROM guia_devolucion_detalle gdd
+                INNER JOIN guia g ON gdd.idguia = g.idguia
                 WHERE gdd.idpieza = dp_pie.idpieza 
                 AND gdd.idtorre = dp_pie.idtorre 
                 AND g.idpresupuesto = dp_pie.idpresupuesto) AS dp_cant_devuelta
@@ -305,7 +313,7 @@ class PresupuestoModel extends Model{
         return $st->getResultArray();
     } */
 
-    public function getDetaPresuParaGuia($idpresu){
+    /* public function getDetaPresuParaGuia($idpresu){
         $query = "select dp.idpresupuesto,dp.dp_cant,dp.idtorre,tor.tor_desc,pie.idpieza,pie.pie_codigo,pie.pie_desc,pie.pie_cant stock_ini,
         dt.dt_cantidad,(dp.dp_cant * dt.dt_cantidad) cant_req
         from detalle_presupuesto dp
@@ -316,7 +324,7 @@ class PresupuestoModel extends Model{
         $st = $this->db->query($query, [$idpresu]);
 
         return $st->getResultArray();
-    }
+    } */
 
     public function getStockPieza($idpieza, $status = [1,2,3], $tipo = 'e'){//$tipo e:entrada, s: salida
         //extraer de los presupuesto las piezas
