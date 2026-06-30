@@ -25,6 +25,7 @@ $preciotrans = $presu['pre_preciotrans'];
 $nrodias     = $presu['pre_nrodiasm'];
 $preciomyd   = $presu['pre_preciomyd'];
 $pre_ruc     = $presu['pre_ruc'];
+$pre_glosa     = $presu['pre_glosa'];
 
 $cliente    = $presu['cli_nombrerazon'];
 $dniruc     = $presu['cli_dniruc'];
@@ -326,6 +327,11 @@ if( $nrodias != '' && $nrodias != 0 ) $peri = 'Días';
         <div style="font-size:11px;">
             <table cellspacing="0" cellpadding="0">
                 <tr>
+                    <td colspan="3" style="font-weight: 600; padding: 5px 0">
+                        <?=$pre_glosa != '' ? "- $pre_glosa" : ''?>
+                    </td>
+                </tr>
+                <tr>
                     <td>PLAZO DE ENTREGA&nbsp;</td>
                     <td>:</td>
                     <td>&nbsp;<?=$pentrega?></td>
@@ -348,15 +354,40 @@ if( $nrodias != '' && $nrodias != 0 ) $peri = 'Días';
             </table>
         </div>
         <br>
-        <div style="text-align:center;background-color:#ddd;padding:3px 0">
-            Cuenta Soles:
+        <div>
+            <div style="text-align:center;background-color:#ddd;padding:7px 0"></div>
+            <table width="100%">
+                <tr>
+                    <td width="50%" >
+                        <table width="100%">
+                            <tr>
+                                <td align="center"><b>Cuenta Soles:</b></td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    BCP: <b>1947314765013</b><br>
+                                    BCP cta interbancaria: <b>00219400731476501396</b><br>
+                                    Cta Detraccion: <b>00058566721</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="50%" >
+                        <table width="100%">
+                            <tr>
+                                <td align="center"><b>Cuenta Dólares:</b></td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    BCP: <b>19416839495188</b><br>
+                                    BCP cta interbancaria: <b>00219411683949518897</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </div>
-        <div style="text-align:center; font-weight:bold">
-            BBVA 00110872020009900392<br>
-            CCI 01187200020009900392<br>
-            BCP 19116373803094
-        </div>
-        <br>
         <div style="text-align:center;background-color:#ddd;padding:7px 0"></div>
         <br>
         <div style="font-size: 10px;">

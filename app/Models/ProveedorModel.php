@@ -37,8 +37,8 @@ class ProveedorModel extends Model{
         return $st;
     }
 
-    public function provTieneSalidas($id){
-        $query = "select count(idguia_salida_det) as total from guia_salida_detalle where idproveedor = ?";
+    public function verificarProTieneRegEnTablas($id, $tabla){
+        $query = "select count(idproveedor) as total from $tabla where idproveedor=?";
         $st = $this->db->query($query, [$id]);
 
         return $st->getRowArray();

@@ -38,6 +38,7 @@ echo "</pre>"; */
                     <li class='list-group-item'><b>Precio transporte:</b> <?=$presupuesto['pre_preciotrans']?></li>
                     <li class='list-group-item'><b>Días:</b> <?=$presupuesto['pre_nrodiasm']?></li>
                     <li class='list-group-item'><b>Montaje y Desmontaje:</b> <?=$presupuesto['pre_preciomyd']?></li>
+                    <li class='list-group-item'><b>Glosa:</b> <?=$presupuesto['pre_glosa']?></li>
                 </ul>
             </div>       
         </div>

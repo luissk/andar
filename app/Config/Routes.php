@@ -60,6 +60,8 @@ $routes->get('editar-presupuesto-(:num)', 'Presupuesto::nuevoPresupuesto/$1');
 $routes->get('pdf-presupuesto-(:num)', 'Presupuesto::pdfPresu/$1');
 $routes->post('eliminar-presupuesto', 'Presupuesto::eliminarPresu');
 
+$routes->get('word-presupuesto-(:num)', 'Presupuesto::wordPresu/$1');
+
 $routes->get('guias', 'Guia::index');
 $routes->post('listar-guias', 'Guia::listarGuias');
 $routes->post('listar-presu', 'Guia::listarPresu');

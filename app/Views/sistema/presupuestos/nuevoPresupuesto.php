@@ -38,6 +38,7 @@ if( isset($presu_bd) && $presu_bd ){
     $nrodias     = $presu_bd['pre_nrodiasm'];
     $preciomyd   = $presu_bd['pre_preciomyd'];
     $pre_ruc     = $presu_bd['pre_ruc'];
+    $glosa       = $presu_bd['pre_glosa'];
 
     $titulo   = "Modificar";
     $btnTexto = "MODIFICAR PRESUPUESTO";
@@ -126,6 +127,7 @@ if( isset($presu_bd) && $presu_bd ){
     $nrodias     = "";
     $preciomyd   = "";
     $pre_ruc     = "";
+    $glosa       = "";
 
     $titulo   = "Realizar";
     $btnTexto = "GENERAR PRESUPUESTO";
@@ -289,6 +291,11 @@ if( isset($presu_bd) && $presu_bd ){
                                     <option value="20614876175" <?=$pre_ruc != '' && $pre_ruc == '20614876175' ? 'selected' : ''?>>20614876175</option>
 
                                 </select>
+                            </div>
+                            <div class="col-sm-4 mb-3">
+                                <label for="glosa" class="form-label">Glosa</label>
+                                <input type="text" class="form-control" id="glosa" name="glosa" value="<?=$glosa?>" maxlength="250">
+                                <div id="msj-glosa" class="form-text text-danger"></div>
                             </div>
                             <div id="pesoT" class="fw-bolder"></div>
                             <div class="col-sm-12 text-end">
@@ -518,7 +525,7 @@ function calcular(){//calcularEnPrecioPiezas();
     let tt = items.reduce((acc,el) => acc + Number(el.tmonto),0);
     let preciotrans = $("#preciotrans").val() == '' ? 0 : $("#preciotrans").val();
     let preciomyd = $("#preciomyd").val() == '' ? 0 : $("#preciomyd").val();
-    let subtotal = Number(tt.toFixed(2)) + Number(preciotrans) + Number(preciomyd);
+    let subtotal = (Number(tt.toFixed(2)) + Number(preciotrans) + Number(preciomyd)).toFixed(2);
     $("#subT").text(subtotal);
     $("#igv").text((subtotal * 0.18).toFixed(2));
     $("#total").text((subtotal * 1.18).toFixed(2));

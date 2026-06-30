@@ -734,7 +734,7 @@ class Guia extends BaseController
         }
     }
 
-    public function pdfGuiaIngreso($id,$fecha){//ELIMINAR ESTA FUNCION
+   /*  public function pdfGuiaIngreso($id,$fecha){//ELIMINAR ESTA FUNCION
         $options = new \Dompdf\Options();
         $options->setIsRemoteEnabled(true);
         $dompdf = new \Dompdf\Dompdf($options);
@@ -756,7 +756,7 @@ class Guia extends BaseController
         }
 
         
-    }
+    } */
 
 
 

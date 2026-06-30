@@ -210,7 +210,7 @@ class Pieza extends BaseController
             $eliminar = FALSE;
             $mensaje = "";
 
-            $tablas = ['detalle_torre'];
+            $tablas = ['detalle_torre','detalle_presupuesto_piezas','guia_salida_detalle','guia_devolucion_detalle'];
             foreach( $tablas as $t ){
                 $total = $this->modeloPieza->verificarPieTieneRegEnTablas($idpieza,$t)['total'];
                 if( $total > 0 ){
@@ -302,7 +302,7 @@ class Pieza extends BaseController
         if(!session('idusuario')){
             return redirect()->to('/');
         }
-        $piezas = $this->modeloPieza->getPiezas(0, 200);
+        $piezas = $this->modeloPieza->getPiezasAjax();
 
         $tabla = '
         <table border="1">
@@ -314,6 +314,7 @@ class Pieza extends BaseController
                 <th>PRECIO</th>
                 <th>STOCK INI</th>
                 <th>STOCK ACT</th>
+                <th>STOCK ALQUILADO</th>
             </tr>
         ';
 
@@ -328,8 +329,9 @@ class Pieza extends BaseController
             $fecha    = $p['pie_fechareg'];
             $peso     = $p['pie_peso'];
             $precio   = $p['pie_precio'];
-            $stockIni = $p['pie_cant'];
-            $stockAct = $p['stockActual'];
+            $stockIni = $p['cantidad_inicial'];
+            $stockAct = $p['stock_actual_real'];
+            $stockAlq = $p['stock_alquilado_externo'];
 
             $peso_cantidad += $stockIni * $peso;
             $peso_stockact += $stockAct * $peso;
@@ -343,6 +345,7 @@ class Pieza extends BaseController
                 <td>$precio</td>
                 <td>$stockIni</td>
                 <td>$stockAct</td>
+                <td>$stockAlq</td>
             </tr>
             ";
         }
@@ -352,6 +355,7 @@ class Pieza extends BaseController
 
         $tabla .= "
         <tr>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>

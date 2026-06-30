@@ -302,7 +302,7 @@ class Torre extends BaseController
             $eliminar = FALSE;
             $mensaje = "";
 
-            $tablas = ['detalle_presupuesto'];
+            $tablas = ['detalle_presupuesto','detalle_presupuesto_piezas','guia_devolucion_detalle','guia_salida_detalle'];
             foreach( $tablas as $t ){
                 $total = $this->modeloTorre->verificarTorTieneRegEnTablas($idtorre,$t)['total'];
                 if( $total > 0 ){

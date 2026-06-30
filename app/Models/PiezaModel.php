@@ -75,6 +75,7 @@ class PiezaModel extends Model{
             p.pie_desc,
             p.pie_peso,
             p.pie_precio,
+            p.pie_fechareg,
             p.pie_cant AS cantidad_inicial,
             p.pie_cant AS stock_inicial,
             

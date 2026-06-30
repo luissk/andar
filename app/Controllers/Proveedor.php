@@ -139,10 +139,20 @@ class Proveedor extends BaseController
 
             $idprov = $this->request->getVar('id');
 
-            $tieneSalidas = $this->modeloProveedor->provTieneSalidas($idprov);
+            $eliminar = FALSE;
+            $mensaje = "";
 
-            if( $tieneSalidas['total'] > 0 ){
-                return $this->response->setJson(['status' => 'error', 'message' => 'El Proveedor no puede ser eliminado, tiene salidas de piezas en guía(s)']);
+            $tablas = ['guia_salida_detalle','guia_devolucion_detalle'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloProveedor->verificarProTieneRegEnTablas($idprov,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>El proveedor tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            }
+
+            if( $eliminar ){
+                return $this->response->setJson(['status' => 'error', 'message' => $mensaje]);
             }
 
             if( $this->modeloProveedor->eliminarProveedor($idprov) ){

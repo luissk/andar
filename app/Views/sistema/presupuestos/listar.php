@@ -53,6 +53,7 @@ if($presupuestos){
                 echo '<a href="javascript:;" class="link-danger ms-2 eliminar" title="Eliminar" data-id='.$id.'><i class="fa-solid fa-trash"></i></a>';
             echo '<a href="javascript:;" class="link-danger ms-2 detalle" title="Detalle" data-id='.$id.'><i class="fa-solid fa-search"></i></a>';
             echo '<a href="javascript:;" class="link-dark ms-2 pdf" title="Pdf" data-id='.$id.'><i class="fa-regular fa-file-pdf"></i></a>';
+             echo '<a href="word-presupuesto-'.$id.'" class="link-dark ms-2 word" title="Word" data-id='.$id.'><i class="fa-regular fa-file-word"></i></a>';
             echo '</td>';
 
             echo "</tr>";

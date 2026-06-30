@@ -207,6 +207,7 @@ class Presupuesto extends BaseController
             $nrodias     = $this->request->getVar('dias');
             $preciomyd   = $this->request->getVar('preciomyd');
             $pre_ruc     = $this->request->getVar('pre_ruc');
+            $pre_glosa   = $this->request->getVar('glosa');
 
             $arrDT = [];
             
@@ -268,7 +269,7 @@ class Presupuesto extends BaseController
                     }
                 }
 
-                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc) ){
+                if( $this->modeloPresupuesto->modificarPresupuesto($cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$idpre_e,$verP,$nroPre,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc,$pre_glosa) ){
                     if( $this->modeloPresupuesto->borrarDetallePresupuesto($idpre_e) ){
                         if( $this->modeloPresupuesto->borrarDetallePresuPiezas($idpre_e) ){
                             $res = FALSE;
@@ -317,7 +318,7 @@ class Presupuesto extends BaseController
                     exit();
                 }
 
-                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc) ){
+                if( $idpre = $this->modeloPresupuesto->insertarPresupuesto($nroPre,session('idusuario'),$cliente,$porcpre,$porcsem,$periodo,$nroperiodo,$verP,$tcambio,$pentrega,$fpago,$voferta,$lentrega,$preciotrans,$nrodias,$preciomyd,$pre_ruc,$pre_glosa) ){
                     $res = FALSE;
                     foreach( $items as $i ){
                         $idtorre    = $i['id'];
@@ -382,6 +383,23 @@ class Presupuesto extends BaseController
         // Output the generated PDF to Browser
         $dompdf->stream("presupuesto.pdf", array("Attachment" => false));
         exit();
+    }
+
+    public function wordPresu($id){
+        $data['params']          = $this->modeloParametros->getParametros();
+        $data['presu']           = $this->modeloPresupuesto->getPresupuesto($id);
+        $data['detalle']         = $this->modeloPresupuesto->getDetallePresupuesto($id);
+        $data['deta_pre_pie_bd'] = $this->modeloPresupuesto->getDetallePresupuestoPiezas($id);
+
+        // 1. Configurar los encabezados para Word
+        header('Content-Type: application/vnd.ms-word; charset=utf-8');
+        header('Content-Disposition: attachment; filename="presupuesto-'.$this->modeloPresupuesto->getPresupuesto($id)['pre_numero'].'.doc"');
+        header('Cache-Control: private, max-age=0');
+
+         echo pack("CCC", 0xef, 0xbb, 0xbf);
+
+        // 2. Cargar la vista (aquí va el diseño de tu página)
+        return view('sistema/presupuestos/word', $data);
     }
 
     public function eliminarPresu(){
