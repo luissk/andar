@@ -79,7 +79,7 @@ $routes->get('devoluciones', 'Guia::devoluciones');
 $routes->post('listar-guias-devo', 'Guia::listarGuiasDevo');
 $routes->get('devolver-(:num)', 'Guia::Devolver/$1');
 //$routes->post('generar-devolucion', 'Guia::generarDevolucion');
-//$routes->get('pdf-guia-ingreso/(:num)/(:any)', 'Guia::pdfGuiaIngreso/$1/$2');
+$routes->get('pdf-guia-ingreso-(:num)', 'Guia::imprimir_guia_devolucion/$1');
 $routes->post('eliminar-devolucion', 'Guia::eliminarDevolucion');
 
 

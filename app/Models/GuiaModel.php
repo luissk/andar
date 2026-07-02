@@ -155,6 +155,14 @@ class GuiaModel extends Model{
         return $st;
     }
 
+    public function eliminarDevolucionCabecera($idguia){
+        $query = "delete from guia_devolucion_cabecera where idguia = ?";
+
+        $st = $this->db->query($query, [$idguia]);
+
+        return $st;
+    }
+
     public function eliminarDevolucionCompleta($idguia){
         $query = "delete from guia_devolucion_detalle where idguia = ?";
 
@@ -163,33 +171,35 @@ class GuiaModel extends Model{
         return $st;
     }
 
-    public function paraDevolver($idpresupuesto, $idguia){
+    public function paraDevolver($idpresupuesto, $idguia)
+    {
         $sql_piezas = "SELECT 
-                gsd.idpieza,
-                
-                -- CAMBIO 1: Traemos el nombre de forma aislada para que las torres no dupliquen las filas
-                (SELECT dp.dp_desc_hist 
-                 FROM detalle_presupuesto_piezas dp 
-                 WHERE dp.idpresupuesto = ? AND dp.idpieza = gsd.idpieza LIMIT 1) AS pieza_nombre,
-                
-                -- 1. TOTAL ENVIADO: Sumamos todo lo que salió en esta guía específica
-                SUM(gsd.cantidad_enviada) AS cantidad_total_enviada,
+                    gsd.idpieza,
+                    
+                    -- Traemos el nombre de forma aislada para que las torres no dupliquen las filas
+                    (SELECT dp.dp_desc_hist 
+                    FROM detalle_presupuesto_piezas dp 
+                    WHERE dp.idpresupuesto = ? AND dp.idpieza = gsd.idpieza LIMIT 1) AS pieza_nombre,
+                    
+                    -- 1. TOTAL ENVIADO: Sumamos todo lo que salió en esta guía específica
+                    SUM(gsd.cantidad_enviada) AS cantidad_total_enviada,
 
-                -- 2. ENVIADO PROPIO: Cantidad neta de la empresa que salió
-                SUM(CASE WHEN gsd.dp_origen = 'propio' THEN gsd.cantidad_enviada ELSE 0 END) AS cant_enviada_propio,
+                    -- 2. ENVIADO PROPIO: Cantidad neta de la empresa que salió
+                    SUM(CASE WHEN gsd.dp_origen = 'propio' THEN gsd.cantidad_enviada ELSE 0 END) AS cant_enviada_propio,
 
-                -- 3. DEVUELTO PROPIO: Lo que ya regresó al almacén de nuestro stock para esta guía
-                (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
-                 FROM guia_devolucion_detalle gdd 
-                 WHERE gdd.idguia = gsd.idguia 
-                   AND gdd.idpieza = gsd.idpieza 
-                   AND gdd.dp_origen = 'propio') AS cant_devuelta_propio
+                    -- 3. DEVUELTO PROPIO: Lo que ya regresó al almacén de nuestro stock para esta guía
+                    (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
+                    FROM guia_devolucion_detalle gdd 
+                    WHERE gdd.idguia = gsd.idguia 
+                    AND gdd.idpieza = gsd.idpieza 
+                    AND gdd.dp_origen = 'propio') AS cant_devuelta_propio
 
-               FROM guia_salida_detalle gsd
-               -- CAMBIO 2: Eliminamos el INNER JOIN con detalle_presupuesto_piezas de aquí
-               WHERE gsd.idguia = ?
-               GROUP BY gsd.idpieza";
+                FROM guia_salida_detalle gsd
+                WHERE gsd.idguia = ?
+                GROUP BY gsd.idpieza";
 
+        // Nota: Recuerda que de acuerdo a tu flujo usamos el objeto db directamente 
+        // o el query builder según corresponda en tu constructor.
         $piezas_obra = $this->db->query($sql_piezas, [$idpresupuesto, $idguia])->getResultArray();
 
         foreach ($piezas_obra as $key => $pieza) {
@@ -197,42 +207,134 @@ class GuiaModel extends Model{
 
             // Consulta para descubrir qué proveedores externos enviaron esta pieza en esta guía
             $sql_externos = "SELECT 
-                            gsd.idproveedor,
-                            p.pro_razon, -- Asumiendo que tu tabla de proveedores se llama 'proveedor'
-                            SUM(gsd.cantidad_enviada) AS cant_enviada_ext,
-                            
-                            -- Restamos lo que ya se le devolvió a este proveedor específico
-                            (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
-                            FROM guia_devolucion_detalle gdd 
-                            WHERE gdd.idguia = gsd.idguia 
-                            AND gdd.idpieza = gsd.idpieza 
-                            AND gdd.idproveedor = gsd.idproveedor 
-                            AND gdd.dp_origen = 'externo') AS cant_devuelta_ext
-                        FROM guia_salida_detalle gsd
-                        INNER JOIN proveedor p ON gsd.idproveedor = p.idproveedor
-                        WHERE gsd.idguia = ? 
-                        AND gsd.idpieza = ? 
-                        AND gsd.dp_origen = 'externo'
-                        GROUP BY gsd.idproveedor";
+                                gsd.idproveedor,
+                                p.pro_razon, 
+                                SUM(gsd.cantidad_enviada) AS cant_enviada_ext,
+                                
+                                -- Restamos lo que ya se le devolvió a este proveedor específico
+                                (SELECT IFNULL(SUM(gdd.cantidad_devuelta), 0) 
+                                FROM guia_devolucion_detalle gdd 
+                                WHERE gdd.idguia = gsd.idguia 
+                                AND gdd.idpieza = gsd.idpieza 
+                                AND gdd.idproveedor = gsd.idproveedor 
+                                AND gdd.dp_origen = 'externo') AS cant_devuelta_ext
+                            FROM guia_salida_detalle gsd
+                            INNER JOIN proveedor p ON gsd.idproveedor = p.idproveedor
+                            WHERE gsd.idguia = ? 
+                            AND gsd.idpieza = ? 
+                            AND gsd.dp_origen = 'externo'
+                            GROUP BY gsd.idproveedor";
 
             $piezas_obra[$key]['externos'] = $this->db->query($sql_externos, [$idguia, $idpieza])->getResultArray();
 
+            // =========================================================================
+            // CAMBIO ESTRATÉGICO: Conectamos el detalle con su cabecera de viaje
+            // =========================================================================
             $sql_historial = "SELECT 
-                    gdd.idguia_dev_det,
-                    gdd.cantidad_devuelta, 
-                    gdd.dp_origen, 
-                    gdd.gdd_fecha,
-                    p.pro_razon
-                    FROM guia_devolucion_detalle gdd
-                    LEFT JOIN proveedor p ON gdd.idproveedor = p.idproveedor
-                    WHERE gdd.idguia = ? 
-                    AND gdd.idpieza = ?
-                    ORDER BY gdd.gdd_fecha DESC";
+                        gdd.idguia_dev_det,
+                        gdd.cantidad_devuelta, 
+                        gdd.dp_origen, 
+                        gdd.gdd_observacion,        -- <--- ¡AQUÍ ESTÁ! Traemos la nota específica de esta pieza
+                        gdc.idguia_dev_cab,
+                        gdc.gdc_fecha AS gdd_fecha, -- Usamos la fecha exacta del viaje de reingreso
+                        gdc.gdc_numero_ticket,      -- Traemos el ticket (Ej: DEV-000001) por si deseas mostrarlo
+                        p.pro_razon
+                        FROM guia_devolucion_detalle gdd
+                        INNER JOIN guia_devolucion_cabecera gdc ON gdd.idguia_dev_cab = gdc.idguia_dev_cab
+                        LEFT JOIN proveedor p ON gdd.idproveedor = p.idproveedor
+                        WHERE gdd.idguia = ? 
+                        AND gdd.idpieza = ?
+                        ORDER BY gdc.gdc_fecha DESC, gdd.idguia_dev_det DESC";
 
             $piezas_obra[$key]['historial_devoluciones'] = $this->db->query($sql_historial, [$idguia, $idpieza])->getResultArray();
         }
 
         return $piezas_obra;
+    }
+
+
+    public function obtenerDetalleTicket($idguia_dev_cab){
+        $query = "SELECT 
+            c.gdc_numero_ticket,
+            c.gdc_fecha,
+            gs.gui_nro AS guia_salida_numero,
+            d.idguia,
+            d.idpieza,
+            d.dp_origen,
+            d.idproveedor,
+            d.gdd_observacion,
+            pre.dp_cod_hist,
+            pre.dp_desc_hist,
+            prov.pro_razon,
+            
+            -- =========================================================================
+            -- 1. 📦 CANTIDAD ORIGINAL ENVIADA (Separación estricta por Origen/Proveedor)
+            -- =========================================================================
+            (
+                SELECT IFNULL(gsd.cantidad_enviada, 0)
+                FROM guia_salida_detalle gsd
+                WHERE gsd.idguia = d.idguia 
+                AND gsd.idpieza = d.idpieza 
+                AND gsd.dp_origen = d.dp_origen
+                AND (
+                    (d.dp_origen = 'propio' AND gsd.idproveedor IS NULL) 
+                    OR 
+                    (d.dp_origen = 'externo' AND gsd.idproveedor = d.idproveedor)
+                )
+                LIMIT 1
+            ) AS cantidad_original_enviada,
+
+            -- =========================================================================
+            -- 2. 🚛 CANTIDAD DEVUELTA EN ESTE TICKET
+            -- =========================================================================
+            d.cantidad_devuelta AS cantidad_devuelta_ticket,
+
+            -- =========================================================================
+            -- 3. 📊 SALDO REAL QUE QUEDÓ EN OBRA TRAS ESTE VIAJE
+            -- =========================================================================
+            (
+                -- A. Lo enviado originalmente (Filtrado al milímetro)
+                (
+                    SELECT IFNULL(gsd.cantidad_enviada, 0)
+                    FROM guia_salida_detalle gsd
+                    WHERE gsd.idguia = d.idguia 
+                    AND gsd.idpieza = d.idpieza 
+                    AND gsd.dp_origen = d.dp_origen
+                    AND (
+                        (d.dp_origen = 'propio' AND gsd.idproveedor IS NULL) 
+                        OR 
+                        (d.dp_origen = 'externo' AND gsd.idproveedor = d.idproveedor)
+                    )
+                    LIMIT 1
+                ) 
+                - 
+                -- B. Menos todo lo devuelto de este mismo tipo hasta la fecha del ticket
+                (
+                    SELECT IFNULL(SUM(gdd_sub.cantidad_devuelta), 0)
+                    FROM guia_devolucion_detalle gdd_sub
+                    INNER JOIN guia_devolucion_cabecera gdc_sub ON gdd_sub.idguia_dev_cab = gdc_sub.idguia_dev_cab
+                    WHERE gdd_sub.idguia = d.idguia
+                    AND gdd_sub.idpieza = d.idpieza
+                    AND gdd_sub.dp_origen = d.dp_origen
+                    AND (
+                        (d.dp_origen = 'propio' AND gdd_sub.idproveedor IS NULL) 
+                        OR 
+                        (d.dp_origen = 'externo' AND gdd_sub.idproveedor = d.idproveedor)
+                    )
+                    AND gdc_sub.gdc_fecha <= c.gdc_fecha
+                )
+            ) AS saldo_quedo_en_obra
+
+        FROM guia_devolucion_cabecera c
+        INNER JOIN guia_devolucion_detalle d ON c.idguia_dev_cab = d.idguia_dev_cab
+        INNER JOIN guia gs ON d.idguia = gs.idguia
+        INNER JOIN detalle_presupuesto_piezas pre ON gs.idpresupuesto = pre.idpresupuesto AND d.idpieza = pre.idpieza
+        LEFT JOIN proveedor prov ON d.idproveedor = prov.idproveedor
+        WHERE c.idguia_dev_cab = ?";
+
+        $st = $this->db->query($query, [$idguia_dev_cab]);
+
+        return $st->getResultArray();
     }
 
 }

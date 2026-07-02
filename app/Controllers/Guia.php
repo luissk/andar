@@ -712,6 +712,7 @@ class Guia extends BaseController
                 $db->transStart();
 
                 if( $this->modeloGuia->eliminarDevolucionCompleta($idguia) ){
+                    $this->modeloGuia->eliminarDevolucionCabecera($idguia);
                     $this->modeloGuia->modificarFechaDevolucionGuia($idguia, null, 0, 2);//cambiar el estado a la guia
                     $this->modeloPresupuesto->modificaStatusPre($idpresu, 2);//cambiar el estado al presupuesto
                 }           
@@ -766,22 +767,60 @@ class Guia extends BaseController
     public function guardar_devolucion()
     {
         // 1. Capturamos los datos clave de la vista
-        $idguia        = $this->request->getPost('idguia'); 
-        $idpresupuesto = $this->request->getPost('idpresupuesto');
-        $piezas        = $this->request->getPost('piezas'); 
+        $idguia           = $this->request->getPost('idguia'); 
+        $idpresupuesto    = $this->request->getPost('idpresupuesto');
+        $piezas           = $this->request->getPost('piezas'); 
+        $fecha_form       = $this->request->getPost('fecha_devolucion');
 
+        // Validación básica de seguridad
         if (empty($idguia) || empty($piezas) || !is_array($piezas)) {
             echo '<script>Swal.fire("Error", "No se recibieron datos válidos para procesar.", "error");</script>';
             return;
         }
 
+        // Preparar la fecha final uniendo la del calendario con la hora actual del servidor
+        if (empty($fecha_form)) {
+            $fecha_final_guardar = date('Y-m-d H:i:s');
+        } else {
+            $fecha_final_guardar = $fecha_form . ' ' . date('H:i:s');
+        }
+
         $db = \Config\Database::connect();
-        //$db->DBDebug = true;
 
         try {
             $db->transStart();
 
-            // 2. Recorremos e insertamos los nuevos reingresos parciales en caliente
+            // =========================================================================
+            // A. GENERACIÓN ALEATORIA DEL NÚMERO DE TICKET DE DEVOLUCIÓN
+            // =========================================================================
+            $existe_codigo = true;
+            $numero_ticket = '';            
+            while ($existe_codigo) {
+                // Verificamos de inmediato en la base de datos con parámetros "?" si ya existe
+                $codigo_candidato = 'DEV-'.help_stringRandom(6,1);
+                $sql_verificar = "SELECT COUNT(*) AS total FROM guia_devolucion_cabecera WHERE gdc_numero_ticket = ?";
+                $ya_existe = $db->query($sql_verificar, [$codigo_candidato])->getRow()->total;
+
+                if (intval($ya_existe) === 0) {
+                    $numero_ticket = $codigo_candidato;
+                    $existe_codigo = false; // Rompemos el bucle porque el código está limpio y disponible
+                }
+            }
+            // =========================================================================
+            // B. INSERCIÓN EN LA NUEVA TABLA CABECERA
+            // =========================================================================
+            $sql_ins_cab = "INSERT INTO guia_devolucion_cabecera (
+                idguia, gdc_numero_ticket, gdc_fecha
+            ) VALUES (?, ?, ?)";
+            
+            $db->query($sql_ins_cab, [$idguia, $numero_ticket, $fecha_final_guardar]);
+            
+            // Recuperamos el ID autoincremental de la cabecera recién creada
+            $idguia_dev_cab = $db->insertID();
+
+            // =========================================================================
+            // C. RECORRIDO DE LAS PIEZAS PARA INSERTAR EL DETALLE
+            // =========================================================================
             foreach ($piezas as $idpieza => $datos) {
 
                 // Buscamos el idtorre correspondiente en el presupuesto para mantener la consistencia
@@ -789,28 +828,33 @@ class Guia extends BaseController
                 $res_torre = $db->query($sql_torre, [$idpresupuesto, $idpieza])->getRow();
                 $idtorre = (!empty($res_torre)) ? $res_torre->idtorre : 0;
 
-                // A. REGISTRAR REINGRESO DE STOCK PROPIO
+                // C.1 REGISTRAR REINGRESO DE STOCK PROPIO
                 $cant_propia = isset($datos['propio']) ? intval($datos['propio']) : 0;
-                if ($cant_propia > 0) {
-                    $sql_ins_propio = "INSERT INTO guia_devolucion_detalle (
-                        idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor
-                    ) VALUES (?, ?, ?, ?, 'propio', NULL)";
+                $obs_propia  = isset($datos['propio_observacion']) ? trim($datos['propio_observacion']) : null;
 
-                    $db->query($sql_ins_propio, [$idguia, $idtorre, $idpieza, $cant_propia]);
+                if ($cant_propia > 0) {
+                    // Modificado para incluir el idguia_dev_cab y gdd_observacion usando parámetros '?'
+                    $sql_ins_propio = "INSERT INTO guia_devolucion_detalle (
+                        idguia_dev_cab, idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor, gdd_observacion
+                    ) VALUES (?, ?, ?, ?, ?, 'propio', NULL, ?)";
+
+                    $db->query($sql_ins_propio, [$idguia_dev_cab, $idguia, $idtorre, $idpieza, $cant_propia, $obs_propia]);
                 }
 
-                // B. REGISTRAR REINGRESO DE PROVEEDORES EXTERNOS (ALQUILERES)
+                // C.2 REGISTRAR REINGRESO DE PROVEEDORES EXTERNOS (ALQUILERES)
                 if (isset($datos['externo']) && is_array($datos['externo'])) {
                     foreach ($datos['externo'] as $alquiler) {
                         $id_prov       = intval($alquiler['id_proveedor']);
                         $cant_alquiler = intval($alquiler['cantidad']);
+                        $obs_externa   = isset($alquiler['observacion']) ? trim($alquiler['observacion']) : null;
 
                         if ($cant_alquiler > 0) {
+                            // Modificado para incluir el idguia_dev_cab y gdd_observacion usando parámetros '?'
                             $sql_ins_externo = "INSERT INTO guia_devolucion_detalle (
-                                idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor
-                            ) VALUES (?, ?, ?, ?, 'externo', ?)";
+                                idguia_dev_cab, idguia, idtorre, idpieza, cantidad_devuelta, dp_origen, idproveedor, gdd_observacion
+                            ) VALUES (?, ?, ?, ?, ?, 'externo', ?, ?)";
 
-                            $db->query($sql_ins_externo, [$idguia, $idtorre, $idpieza, $cant_alquiler, $id_prov]);
+                            $db->query($sql_ins_externo, [$idguia_dev_cab, $idguia, $idtorre, $idpieza, $cant_alquiler, $id_prov, $obs_externa]);
                         }
                     }
                 }
@@ -819,7 +863,7 @@ class Guia extends BaseController
             $db->transComplete();
 
             if ($db->transStatus() === FALSE) {
-                throw new \Exception("Error al procesar la transacción en guia_devolucion_detalle.");
+                throw new \Exception("Error al procesar la transacción maestro-detalle de la devolución.");
             }
 
             // =========================================================================
@@ -837,14 +881,13 @@ class Guia extends BaseController
             // C. Evaluamos saldos para decidir el mensaje de SweetAlert
             if (intval($tot_devuelto) >= intval($tot_enviado)) {
                 // Caso A: Obra en cero. Todo el andamiaje y piezas regresaron al almacén.
-
-                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 1, 3);//cambiar el estado a la guia
-                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3);//cambiar el estado al presupuesto
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 1, 3); // Cambiar el estado a la guía
+                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3); // Cambiar el estado al presupuesto
 
                 echo '<script>
                     Swal.fire({
                         icon: "success",
-                        title: "¡Retorno Completado!",
+                        title: "¡Retorno Completado! Ticket: ' . $numero_ticket . '",
                         text: "Se ha completado toda la devolución. No quedan saldos pendientes en obra para esta guía.",
                         confirmButtonColor: "#198754"
                     }).then(() => {
@@ -855,13 +898,14 @@ class Guia extends BaseController
                 // Caso B: Devolución parcial (Aún quedan piezas en el proyecto)
                 $pendientes = intval($tot_enviado) - intval($tot_devuelto);
 
-                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3);//cambiar el estado a la guia
-                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3);//cambiar el estado al presupuesto
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3); // Cambiar el estado a la guía
+                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3); // Cambiar el estado al presupuesto
+                
                 echo '<script>
                     Swal.fire({
                         icon: "success",
-                        title: "¡Reingreso Parcial Registrado!",
-                        text: "Se guardaron los cambios correctamente. Aún quedan ' . $pendientes . ' unidades pendientes en obra.",
+                        title: "¡Ticket ' . $numero_ticket . ' Registrado!",
+                        text: "Se guardó el reingreso parcial correctamente. Quedan ' . $pendientes . ' unidades pendientes en obra.",
                         confirmButtonColor: "#0d6efd"
                     }).then(() => {
                         window.location.reload();
@@ -879,37 +923,80 @@ class Guia extends BaseController
 
     public function eliminar_devolucion_item()
     {
+        // 1. Capturamos los parámetros que envía el script de la vista
         $idguia_dev_det = $this->request->getPost('idguia_dev_det');
-        $idguia = $this->request->getPost('idguia');
+        $idguia         = $this->request->getPost('idguia');
+        $idpresupuesto  = $this->request->getPost('idpresupuesto'); // Capturado para mantener la consistencia de estados
 
-        if (empty($idguia_dev_det)) {
-            echo '<script>Swal.fire("Error", "ID de registro no válido.", "error");</script>';
+        if (empty($idguia_dev_det) || empty($idguia)) {
+            echo '<script>Swal.fire("Error", "ID de registro o guía no válidos.", "error");</script>';
             return;
         }
 
         $db = \Config\Database::connect();
-        //$db->DBDebug = true;
 
         try {
             $db->transStart();
 
-            // Ejecutamos la eliminación usando parámetros "?" apuntando al campo PK real de tu captura
-            $sql_delete = "DELETE FROM guia_devolucion_detalle WHERE idguia_dev_det = ?";
-            $db->query($sql_delete, [$idguia_dev_det]);
+            // 2. AUDITORÍA PRE-ELIMINACIÓN: Buscamos a qué cabecera pertenece este ítem antes de borrarlo
+            $sql_buscar_cab = "SELECT idguia_dev_cab FROM guia_devolucion_detalle WHERE idguia_dev_det = ? LIMIT 1";
+            $fila_det = $db->query($sql_buscar_cab, [$idguia_dev_det])->getRow();
 
-            $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3);//cambiar el estado a la guia
+            if (!empty($fila_det)) {
+                $idguia_dev_cab = $fila_det->idguia_dev_cab;
+
+                // 3. Eliminamos físicamente el ítem de la tabla detalle usando parámetros "?"
+                $sql_delete = "DELETE FROM guia_devolucion_detalle WHERE idguia_dev_det = ?";
+                $db->query($sql_delete, [$idguia_dev_det]);
+
+                // 4. VERIFICACIÓN DE ORFANATO: Contamos cuántos ítems le quedan a ese mismo ticket/viaje
+                $sql_contar = "SELECT COUNT(*) AS total FROM guia_devolucion_detalle WHERE idguia_dev_cab = ?";
+                $restantes = $db->query($sql_contar, [$idguia_dev_cab])->getRow()->total;
+
+                // Si dio 0, significa que era el último ítem de ese ticket. Borramos la cabecera en cascada.
+                if (intval($restantes) === 0) {
+                    $sql_del_cab = "DELETE FROM guia_devolucion_cabecera WHERE idguia_dev_cab = ?";
+                    $db->query($sql_del_cab, [$idguia_dev_cab]);
+                }
+            }
+
+            // 5. REEVALUACIÓN AUTOMÁTICA DE ESTADOS GLOBAL DE LA OBRA
+            // A. Sumamos todo lo enviado originalmente en la guía de salida
+            $sql_tot_enviado = "SELECT IFNULL(SUM(cantidad_enviada), 0) AS total FROM guia_salida_detalle WHERE idguia = ?";
+            $tot_enviado = $db->query($sql_tot_enviado, [$idguia])->getRow()->total;
+
+            // B. Sumamos todo lo devuelto históricamente tras haber ejecutado la eliminación
+            $sql_tot_devuelto = "SELECT IFNULL(SUM(cantidad_devuelta), 0) AS total FROM guia_devolucion_detalle WHERE idguia = ?";
+            $tot_devuelto = $db->query($sql_tot_devuelto, [$idguia])->getRow()->total;
+
+            // C. Si tras borrar, el acumulado devuelto es menor que lo enviado, la guía y presupuesto regresan a parcial (0)
+            if (intval($tot_devuelto) < intval($tot_enviado)) {
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, date('Y-m-d'), 0, 3); // 0 = Devolución Parcial
+                
+                if (!empty($idpresupuesto)) {
+                    $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 3); // Mantiene el presupuesto en estado correcto
+                }
+            }
+
+            //TAMBIEN SI YA NO HAY CABECERAS; QUIERE DECIR QUE NO HAY DEVOLUCIONES Y POR LO TANTO DEBE REGRESAR A SU ESTADO CON GUIA (LA GUIA Y EL PRESUPUESTO)
+            $sql_cab_por_guia = "select count(idguia_dev_cab) as total from guia_devolucion_cabecera where idguia = ?";
+            $total_cab_guia = $db->query($sql_cab_por_guia, [$idguia])->getRow()->total;
+            if( $total_cab_guia == 0 ){
+                $this->modeloGuia->modificarFechaDevolucionGuia($idguia, null, 0, 2);//cambiar el estado a la guia
+                $this->modeloPresupuesto->modificaStatusPre($idpresupuesto, 2);//cambiar el estado al presupuesto
+            }            
 
             $db->transComplete();
 
             if ($db->transStatus() === FALSE) {
-                throw new \Exception("No se pudo eliminar el registro de la base de datos.");
+                throw new \Exception("No se pudo procesar la transacción de eliminación en la base de datos.");
             }
 
             echo '<script>
                 Swal.fire({
                     icon: "success",
                     title: "¡Registro Anulado!",
-                    text: "El reingreso fue eliminado del historial y los saldos fueron recalculados.",
+                    text: "El reingreso fue eliminado del historial y los saldos en obra volvieron a la normalidad.",
                     confirmButtonColor: "#198754"
                 }).then(() => {
                     window.location.reload();
@@ -921,6 +1008,101 @@ class Guia extends BaseController
             $error_mensaje = addslashes($e->getMessage());
             echo '<script>Swal.fire("Error al eliminar", "' . $error_mensaje . '", "error");</script>';
         }
+    }
+
+
+
+    public function imprimir_guia_devolucion($idguia_dev_cab)
+    {
+        // 1. Ejecutamos tu consulta nativa pasándole el ID de la cabecera
+        $detalles_bd = $this->modeloGuia->obtenerDetalleTicket($idguia_dev_cab);
+
+        if (empty($detalles_bd)) {
+            return redirect()->to('almacen/guias_lista')->with('error', 'Ticket sin materiales.');
+        }
+
+        $idguia = $detalles_bd[0]['idguia'];
+        $gdc_fecha = $detalles_bd[0]['gdc_fecha'];
+
+        // 2. 📊 OBTENER LOS TOTALES ENVIADOS ORIGINALES DE LA GUÍA DE SALIDA GENERAL (Suma de todos los orígenes)
+        // Usamos el constructor e instanciamos consultas parametrizadas con '?' para mantener tu estructura limpia
+        $db = \Config\Database::connect();
+        
+        $sql_salida_global = "SELECT idpieza, SUM(cantidad_enviada) as total_enviado_guia 
+                            FROM guia_salida_detalle 
+                            WHERE idguia = ? 
+                            GROUP BY idpieza";
+        $query_salida = $db->query($sql_salida_global, [$idguia])->getResultArray();
+        
+        // Mapeamos a un array asociativo rápido para leerlo abajo: [idpieza => total_enviado]
+        $enviados_globales = [];
+        foreach ($query_salida as $s) {
+            $enviados_globales[$s['idpieza']] = intval($s['total_enviado_guia']);
+        }
+
+        // 3. 📊 OBTENER TODO LO QUE SE HA DEVUELTO HISTÓRICAMENTE HASTA LA FECHA DE ESTE TICKET
+        $sql_dev_historico = "SELECT gdd.idpieza, SUM(gdd.cantidad_devuelta) as total_devuelto_hasta_hoy
+                            FROM guia_devolucion_detalle gdd
+                            INNER JOIN guia_devolucion_cabecera gdc ON gdd.idguia_dev_cab = gdc.idguia_dev_cab
+                            WHERE gdd.idguia = ? AND gdc.gdc_fecha <= ?
+                            GROUP BY gdd.idpieza";
+        $query_dev = $db->query($sql_dev_historico, [$idguia, $gdc_fecha])->getResultArray();
+        
+        $devueltos_historicos = [];
+        foreach ($query_dev as $d) {
+            $devueltos_historicos[$d['idpieza']] = intval($d['total_devuelto_hasta_hoy']);
+        }
+
+        // 4. 🧠 CONSOLIDACIÓN MATEMÁTICA PURA PARA EL REPORTE GENERAL
+        $materiales_unificados = [];
+
+        foreach ($detalles_bd as $fila) {
+            $idpieza = $fila['idpieza'];
+
+            if (!isset($materiales_unificados[$idpieza])) {
+                
+                // Cantidad total enviada al inicio de los tiempos de esa pieza
+                $enviado_total = isset($enviados_globales[$idpieza]) ? $enviados_globales[$idpieza] : 0;
+                
+                // Cantidad devuelta acumulada hasta este viaje incluido
+                $devuelto_acumulado = isset($devueltos_historicos[$idpieza]) ? $devueltos_historicos[$idpieza] : 0;
+                
+                // El saldo remanente real general es: Lo enviado originalmente - Lo devuelto hasta hoy
+                $saldo_general_obra = $enviado_total - $devuelto_acumulado;
+
+                $materiales_unificados[$idpieza] = [
+                    'dp_cod_hist'            => $fila['dp_cod_hist'],
+                    'dp_desc_hist'           => $fila['dp_desc_hist'],
+                    'total_original_enviada' => $enviado_total, // 16 para la pieza 2
+                    'total_devuelta_ticket'  => 0,               // Aquí sumamos solo lo de este ticket (8)
+                    'total_saldo_en_obra'    => $saldo_general_obra
+                ];
+            }
+
+            // Sumamos solo lo que entró en este viaje específico (Ticket)
+            $materiales_unificados[$idpieza]['total_devuelta_ticket'] += intval($fila['cantidad_devuelta_ticket']);
+        }
+
+        // 5. Armamos la data final para Dompdf
+        $data = [
+            'gdc_numero_ticket'  => $detalles_bd[0]['gdc_numero_ticket'],
+            'gdc_fecha'          => $detalles_bd[0]['gdc_fecha'],
+            'guia_salida_numero' => $detalles_bd[0]['guia_salida_numero'],
+            'materiales'         => $materiales_unificados,
+            'params' => $this->modeloParametros->getParametros(),
+            'guia' => $this->modeloGuia->getGuia($idguia,[3])
+        ];
+
+        $options = new \Dompdf\Options();
+        $options->setIsRemoteEnabled(true);
+        $dompdf = new \Dompdf\Dompdf($options);
+
+        $dompdf->loadHtml(view('sistema/devolucion/pdf', $data));
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $dompdf->stream("devolucion_" . $data['gdc_numero_ticket'] . ".pdf", ["Attachment" => false]);
+        exit();
     }
 
 

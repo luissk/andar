@@ -34,6 +34,20 @@ echo "</pre>"; */
                     <input type="hidden" name="idguia" value="<?= $idguia_bd; ?>">
                     <input type="hidden" name="idpresupuesto" value="<?= $idpresupuesto_bd; ?>">
 
+                    <div class="row mb-3 justify-content-end">
+                        <div class="col-md-4 col-lg-3">
+                            <label for="fecha_devolucion" class="form-label small font-weight-bold text-dark">
+                                <i class="fas fa-calendar-day text-primary"></i> Fecha Real de Retorno:
+                            </label>
+                            <input type="date" 
+                                id="fecha_devolucion" 
+                                name="fecha_devolucion" 
+                                class="form-control form-control-sm font-weight-bold" 
+                                value="<?= date('Y-m-d'); ?>" 
+                                max="<?= date('Y-m-d'); ?>">
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover align-middle mb-0" id="tablaDevoluciones">
                             <thead class="table-light text-center small text-uppercase font-weight-bold">
@@ -64,18 +78,17 @@ echo "</pre>"; */
                                         <?= $value['cantidad_total_enviada']; ?>
                                     </td>
                                     <td class="text-center table-primary font-weight-bold">
-                                        <span class="badge bg-primary fs-6 dynamic-saldo-badge" id="saldo_total_<?= $idpieza; ?>">
-                                            </span>
+                                        <span class="badge bg-primary fs-6 dynamic-saldo-badge" id="saldo_total_<?= $idpieza; ?>"></span>
                                     </td>
                                     <td>
                                         <div class="p-2 border rounded bg-light-subtle shadow-sm">
                                             
                                             <?php if ($value['cant_enviada_propio'] > 0): ?>
-                                            <div class="row align-items-center g-2 mb-2 border-bottom pb-1">
-                                                <div class="col-7 small font-weight-bold text-success text-truncate">
+                                            <div class="row align-items-center g-2 mb-2 border-bottom pb-2">
+                                                <div class="col-6 small font-weight-bold text-success text-truncate">
                                                     <i class="fas fa-warehouse"></i> Stock Propio:
                                                 </div>
-                                                <div class="col-5">
+                                                <div class="col-6">
                                                     <div class="input-group input-group-sm">
                                                         <input type="number" 
                                                             name="piezas[<?= $idpieza; ?>][propio]" 
@@ -87,6 +100,12 @@ echo "</pre>"; */
                                                         <span class="input-group-text bg-white small text-muted">Und</span>
                                                     </div>
                                                 </div>
+                                                <div class="col-12 mt-1 dynamic-note-container d-none" id="note_container_propio_<?= $idpieza; ?>">
+                                                    <input type="text" 
+                                                           name="piezas[<?= $idpieza; ?>][propio_observacion]" 
+                                                           class="form-control form-control-sm border-warning bg-warning-subtle text-dark" 
+                                                           placeholder="✍️ Nota/Observación del estado de la pieza propia..." style="font-size: 0.8rem;">
+                                                </div>
                                             </div>
                                             <?php endif; ?>
 
@@ -95,11 +114,11 @@ echo "</pre>"; */
                                                     $saldo_ext_max = intval($ext['cant_enviada_ext']) - intval($ext['cant_devuelta_ext']);
                                                     $saldo_total_obra += $saldo_ext_max; // Acumulación real del total flotante
                                                 ?>
-                                                <div class="row align-items-center g-2 mb-1">
-                                                    <div class="col-7 small font-weight-bold text-warning-emphasis text-truncate" title="<?= $ext['pro_razon']; ?>">
+                                                <div class="row align-items-center g-2 mb-1 border-bottom pb-2">
+                                                    <div class="col-6 small font-weight-bold text-warning-emphasis text-truncate" title="<?= $ext['pro_razon']; ?>">
                                                         <i class="fas fa-truck-moving text-warning"></i> <?= $ext['pro_razon']; ?>:
                                                     </div>
-                                                    <div class="col-5">
+                                                    <div class="col-6">
                                                         <div class="input-group input-group-sm">
                                                             <input type="hidden" name="piezas[<?= $idpieza; ?>][externo][<?= $index; ?>][id_proveedor]" value="<?= $ext['idproveedor']; ?>">
                                                             <input type="number" 
@@ -108,9 +127,16 @@ echo "</pre>"; */
                                                                 min="0" 
                                                                 max="<?= $saldo_ext_max; ?>" 
                                                                 placeholder="Máx: <?= $saldo_ext_max; ?>"
-                                                                data-idpieza="<?= $idpieza; ?>">
+                                                                data-idpieza="<?= $idpieza; ?>"
+                                                                data-indexext="<?= $index; ?>">
                                                             <span class="input-group-text bg-white small text-muted">Und</span>
                                                         </div>
+                                                    </div>
+                                                    <div class="col-12 mt-1 dynamic-note-container d-none" id="note_container_ext_<?= $idpieza; ?>_<?= $index; ?>">
+                                                        <input type="text" 
+                                                               name="piezas[<?= $idpieza; ?>][externo][<?= $index; ?>][observacion]" 
+                                                               class="form-control form-control-sm border-warning bg-warning-subtle text-dark" 
+                                                               placeholder="✍️ Nota/Observación para este proveedor..." style="font-size: 0.8rem;">
                                                     </div>
                                                 </div>
                                                 <?php endforeach; ?>
@@ -145,16 +171,20 @@ echo "</pre>"; */
                                                     <table class="table table-sm table-striped table-bordered mb-0 text-center align-middle" style="font-size: 0.85rem;">
                                                         <thead class="table-secondary font-weight-bold small">
                                                             <tr>
-                                                                <th>Fecha y Hora de Reingreso</th>
-                                                                <th>Destino Asignado</th>
+                                                                <th>Fecha / Ticket de Reingreso</th>
+                                                                <th>Destino Asignado / Estado</th>
                                                                 <th>Cantidad Recibida</th>
-                                                                <th style="width: 10%;">Acción</th> </tr>
+                                                                <th style="width: 15%;">Descargas / Acción</th> 
+                                                            </tr>
                                                         </thead>
                                                         <tbody>
                                                             <?php foreach ($value['historial_devoluciones'] as $hist): ?>
                                                             <tr>
                                                                 <td class="font-weight-bold text-dark">
-                                                                    <?= date('d/m/Y h:i A', strtotime($hist['gdd_fecha'])); ?>
+                                                                    <div><?= date('d/m/Y h:i A', strtotime($hist['gdd_fecha'])); ?></div>
+                                                                    <?php if(!empty($hist['gdc_numero_ticket'])): ?>
+                                                                        <span class="badge bg-dark text-warning font-weight-bold mt-1" style="font-size: 0.75rem;"><i class="fas fa-ticket-alt"></i> <?= $hist['gdc_numero_ticket']; ?></span>
+                                                                    <?php endif; ?>
                                                                 </td>
                                                                 <td class="text-start ps-3">
                                                                     <?php if ($hist['dp_origen'] == 'propio'): ?>
@@ -162,19 +192,33 @@ echo "</pre>"; */
                                                                     <?php else: ?>
                                                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-2 py-1"><i class="fas fa-truck"></i> Devuelto a: <?= $hist['pro_razon']; ?></span>
                                                                     <?php endif; ?>
+                                                                    
+                                                                    <?php if(!empty($hist['gdd_observacion'])): ?>
+                                                                        <div class="mt-1 small text-danger font-weight-bold bg-danger-subtle p-1 rounded border border-danger-subtle" style="font-size: 0.78rem;">
+                                                                            <i class="fas fa-exclamation-triangle"></i> Obs: <?= $hist['gdd_observacion']; ?>
+                                                                        </div>
+                                                                    <?php endif; ?>
                                                                 </td>
                                                                 <td class="font-weight-bold text-primary bg-white fs-6">
                                                                     <?= $hist['cantidad_devuelta']; ?> Unidades
                                                                 </td>
                                                                 <td>
-                                                                    <button type="button" 
-                                                                            class="btn btn-outline-danger btn-sm btn-eliminar-registro" 
-                                                                            data-id="<?= $hist['idguia_dev_det']; ?>" 
-                                                                            data-idguia = "<?= $idguia_bd; ?>"
-                                                                            data-idpresupuesto="<?= $idpresupuesto_bd; ?>"
-                                                                            title="Anular este reingreso">
-                                                                        <i class="fas fa-trash-alt"></i>
-                                                                    </button>
+                                                                    <div class="btn-group" role="group">
+                                                                        <a href="<?= 'pdf-guia-ingreso-'.$hist['idguia_dev_cab']; ?>" 
+                                                                           target="_blank" 
+                                                                           class="btn btn-outline-primary btn-sm font-weight-bold" 
+                                                                           title="Imprimir Guía de Devolución PDF">
+                                                                            <i class="fas fa-file-pdf text-danger"></i> PDF
+                                                                        </a>
+                                                                        <button type="button" 
+                                                                                class="btn btn-outline-danger btn-sm btn-eliminar-registro" 
+                                                                                data-id="<?= $hist['idguia_dev_det']; ?>" 
+                                                                                data-idguia = "<?= $idguia_bd; ?>"
+                                                                                data-idpresupuesto="<?= $idpresupuesto_bd; ?>"
+                                                                                title="Anular este reingreso">
+                                                                            <i class="fas fa-trash-alt"></i>
+                                                                        </button>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                             <?php endforeach; ?>
@@ -222,11 +266,30 @@ $(document).ready(function() {
         let input  = $(this);
         let valor  = parseInt(input.val()) || 0;
         let maximo = parseInt(input.attr('max')) || 0;
+        let idpieza = input.data('idpieza');
 
         // Limpieza de valores menores a cero
         if (valor < 0) {
             input.val(0);
             valor = 0;
+        }
+
+        // Mostrar u ocultar dinámicamente el campo de notas según la cantidad ingresada
+        if (input.hasClass('input-propio')) {
+            let containerNotePropio = $('#note_container_propio_' + idpieza);
+            if (valor > 0) {
+                containerNotePropio.removeClass('d-none');
+            } else {
+                containerNotePropio.addClass('d-none').find('input').val('');
+            }
+        } else if (input.hasClass('input-externo')) {
+            let indexExt = input.data('indexext');
+            let containerNoteExt = $('#note_container_ext_' + idpieza + '_' + indexExt);
+            if (valor > 0) {
+                containerNoteExt.removeClass('d-none');
+            } else {
+                containerNoteExt.addClass('d-none').find('input').val('');
+            }
         }
 
         // Candado en Caliente: Si supera el saldo real disponible en obra
@@ -238,9 +301,13 @@ $(document).ready(function() {
                 confirmButtonColor: '#0d6efd'
             });
             input.val(maximo);
-            //input.addClass('is-invalid');
-        } else {
-            //input.removeClass('is-invalid');
+            // Hacer re-evaluación del contenedor de notas tras setear el máximo
+            if (input.hasClass('input-propio')) {
+                $('#note_container_propio_' + idpieza).removeClass('d-none');
+            } else if (input.hasClass('input-externo')) {
+                let indexExt = input.data('indexext');
+                $('#note_container_ext_' + idpieza + '_' + indexExt).removeClass('d-none');
+            }
         }
     });
 
@@ -248,26 +315,27 @@ $(document).ready(function() {
     $('#formDevolucion').on('submit', function(e) {
         e.preventDefault();
 
-        // Verificamos si el almacenero ingresó datos en el patio antes de procesar
+        // Verificamos si el almacenero ingresó datos válidos (> 0) antes de procesar
         let controlCantidades = 0;
         $('.input-devolucion').each(function() {
             controlCantidades += parseInt($(this).val()) || 0;
         });
 
+        // Candado Definitivo: Si el usuario dio clic y todo está en blanco o en 0
         if (controlCantidades === 0) {
             Swal.fire({
                 icon: 'info',
-                title: 'Campos Vacíos',
-                text: 'Por favor, ingresa una cantidad válida de piezas recibidas en los casilleros antes de guardar.',
+                title: 'No hay modificaciones',
+                text: 'Por favor, ingrese al menos una cantidad válida en los casilleros de reingreso antes de guardar.',
                 confirmButtonColor: '#6c757d'
             });
-            return;
+            return; // Detiene completamente el envío
         }
 
         // Cuadro de diálogo moderno de confirmación
         Swal.fire({
             title: '¿Confirmar Reingreso?',
-            text: "Se anexarán los nuevos registros al historial de la guía y se actualizará el stock.",
+            text: "Se generará un ticket y una guía de devolución para este viaje de materiales.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#198754',
@@ -331,5 +399,4 @@ $(document).on('click', '.btn-eliminar-registro', function() {
     });
 });
 </script>
-
 <?php echo $this->endSection();?>

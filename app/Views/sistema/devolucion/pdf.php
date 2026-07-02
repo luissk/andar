@@ -1,113 +1,69 @@
-<?php
-
-$logo   = $params['par_logo'];
-$direc  = $params['par_direcc'];
-$telef  = $params['par_telef'];
-$correo = $params['par_correo'];
-
-/* echo "<pre>";
-print_r($guia);
-echo "</pre>"; */
-
-$guiNro        = $guia['gui_nro'];
-$fechatrasl    = date("d/m/Y", strtotime($guia['gui_fechatraslado']));
-$motivo        = $guia['gui_motivo'];
-$motivodesc    = $guia['gui_motivodesc'];
-$direcc_p      = $guia['gui_direccionp'];
-$direcc_ll     = $guia['gui_direccionll'];
-$depap         = $guia['depap'];
-$provp         = $guia['provp'];
-$distp         = $guia['distp'];
-$depall        = $guia['depall'];
-$provll        = $guia['provll'];
-$distll        = $guia['distll'];
-$trans_telef   = $guia['tra_telef'];
-$trans_dni     = $guia['tra_dni'];
-$transportista = $guia['tra_nombres']." ".$guia['tra_apellidos'];
-$placa         = $guia['gui_placa'];
-$cliente       = $guia['cli_nombrerazon'];
-$dniruc        = $guia['cli_dniruc'];
-$clicontact    = $guia['cli_nombrecontact'];
-$clicorreocont = $guia['cli_correocontact'];
-$clitelefcont  = $guia['cli_telefcontact'];
-$track_bd      = json_decode($guia['guia_track'], true);
-
-$idpresupuesto = $guia['idpresupuesto'];
-
-$pre_piezas = json_decode($guia['pre_piezas'], true);
-
-if( $motivo == 'v' ) $motivo = "Venta";
-if( $motivo == 'e' ) $motivo = "Exportación";
-if( $motivo == 'i' ) $motivo = "Importación";
-if( $motivo == 'o' ) $motivo = "Otros";
-?>
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Devolución Ingreso</title>
+    <meta charset="UTF-8">
+    <title>Guía de Devolución General <?= $gdc_numero_ticket; ?></title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; margin: 15px; }
+        .info-header { width: 100%; margin-bottom: 30px; border-collapse: collapse; }
+        .tabla-pdf { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+        .tabla-pdf th { background-color: #212529; color: #ffffff; padding: 10px; font-weight: bold; text-transform: uppercase; font-size: 10px; border: 1px solid #212529; }
+        .tabla-pdf td { padding: 10px; border: 1px solid #adadad; vertical-align: middle; }
+        .text-center { text-align: center; }
+        .text-danger { color: #dc3545; font-weight: bold; }
+        .text-success { color: #198754; font-weight: bold; }
 
-<style type="text/css">
-    * {
-        font-family: Verdana, Arial, sans-serif;
-        color: #333;
-    }
-    @page { 
-        margin: 170px 50px 80px 60px;
-    }
-    header {
-        position: fixed;
-        top: -140px;
-        left: 0px;
-        right: 0px;
-        height: 120px;
+        * {
+            font-family: Verdana, Arial, sans-serif;
+            color: #333;
+        }
+        @page { 
+            margin: 170px 50px 80px 60px;
+        }
+        header {
+            position: fixed;
+            top: -140px;
+            left: 0px;
+            right: 0px;
+            height: 120px;
 
-        /** Extra personal styles **/
-        text-align: center;
-        border-bottom: 2px solid #444;
+            /** Extra personal styles **/
+            text-align: center;
+            border-bottom: 2px solid #444;
 
-    }
+        }
 
-    footer {
-        position: fixed; 
-        bottom: -60px; 
-        left: 0px; 
-        right: 0px;
-        height: 50px; 
+        footer {
+            position: fixed; 
+            bottom: -60px; 
+            left: 0px; 
+            right: 0px;
+            height: 50px; 
 
-        /** Extra personal styles **/
-        border-top: 2px solid #444;
-        text-align: center;
-        line-height: 2;
-        font-size: 13px;
-    }
+            /** Extra personal styles **/
+            border-top: 2px solid #444;
+            text-align: center;
+            line-height: 2;
+            font-size: 13px;
+        }
 
-    .pagenum:before {
-        content: counter(page);
-    }
-
-    .tablapdf thead tr th{
-        background-color: #ddd;
-        padding: 5px 0;
-    }
-    .tablapdf tbody tr td{
-        padding: 5px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-    .tablapdf tbody tr td.left{
-        text-align: left;
-    }
-</style>
-
+        .pagenum:before {
+            content: counter(page);
+        }
+    </style>
 </head>
 <body>
+    <?php
+    $logo   = $params['par_logo'];
+    $direc  = $params['par_direcc'];
+    $telef  = $params['par_telef'];
+    $correo = $params['par_correo'];
+    ?>
     <header>
         <table style="width: 100%; height: 119px;" cellpadding="5" cellspacing="0">
             <tr>
                 <td valign="top" width="150px">
-                    <img src="<?=base_url('public/images/logo/'.$logo.'')?>" alt="logo" width="100%"/>
+                    <img src="<?=base_url('public/images/logo/'.$logo.'')?>" alt="logo" width="80%"/>
                 </td>
                 <td align="center" valign="top" width="280px">
                     <h3 style="font-size: 20px;margin:0" align="center">ANDAMIOS ANDAR</h3>
@@ -117,13 +73,13 @@ if( $motivo == 'o' ) $motivo = "Otros";
                         <?=$telef?> / 957323010
                     </p>
                 </td>
-                <td align="center">
+                <!-- <td align="center">
                     <div style="border:1px solid black; font-size: 12px;font-weight:600;border-radius:3px;padding-top:5px;padding-bottom:5px;font-family:Arial">
-                        RUC: 20100150112<br>
+                        RUC: <?= $guia['cli_dniruc'] ?><br>
                         GUIA DE RECEPCION<br>
-                        <span style="font-size:13px">N° <?=$guiNro?></span>
+                        <span style="font-size:13px">N° <?=$guia_salida_numero?></span>
                     </div>                    
-                </td>
+                </td> -->
             </tr>
         </table>
     </header>
@@ -135,72 +91,60 @@ if( $motivo == 'o' ) $motivo = "Otros";
         </table>
     </footer>
 
-    <section style='font-size:12px'>
-        <table cellpadding="0" cellspacing="0">
+    <table class="info-header">
+        <tr>
+            <td>
+                <h2 style="margin: 0; color: #212529; font-size: 20px;">GUÍA DE REINGRESO DE MATERIALES</h2>
+                <p style="margin: 6px 0 0 0; font-size: 12px; color: #495057;">
+                    <strong>Guía de Salida Referencial:</strong> <?= $guia_salida_numero; ?>
+                </p>
+            </td>
+            <td align="right" valign="top">
+                <div style="border: 2px solid #212529; padding: 10px; background-color: #f8f9fa; text-align: center; width: 190px;">
+                    <span style="font-size: 9px; color: #6c757d; font-weight: bold;">TICKET DE DEVOLUCIÓN</span><br>
+                    <strong style="font-size: 16px; color: #212529;"><?= $gdc_numero_ticket; ?></strong>
+                </div>
+                <p style="font-size: 11px; margin: 8px 0 0 0;"><strong>Fecha Operación:</strong> <?= date('d/m/Y h:i A', strtotime($gdc_fecha)); ?></p>
+            </td>
+        </tr>
+    </table>
+
+    <table class="tabla-pdf">
+        <thead>
             <tr>
-                <td width="250px">
-                    <b>Fecha de Traslado:</b> <?=$fecha?><br><br>
-                </td>
+                <th width="15%">Código</th>
+                <th width="49%">Descripción del Material</th>
+                <th width="12%" class="text-center">Cant. Enviada</th>
+                <th width="12%" class="text-center">Devuelto (Hoy)</th>
+                <th width="12%" class="text-center">Saldo en Obra</th>
             </tr>
-        </table>
-        <div style="padding-top:10px">
-            <b>Ingresados: </b> 
-        </div>
-        <div style="padding-top:8px"></div>
-        <?php
-       /*  $presuModel = model('PresupuestoModel');
-        $torreModel = model('TorreModel'); */
-        $piezaModel = model('PiezaModel');
+        </thead>
+        <tbody>
+            <?php foreach ($materiales as $item): ?>
+                <tr>
+                    <td class="text-center" style="font-weight: bold; color: #495057;">
+                        <?= $item['dp_cod_hist']; ?>
+                    </td>
+                    <td>
+                        <strong style="color: #212529; font-size: 11px;"><?= $item['dp_desc_hist']; ?></strong>
+                    </td>
+                    <td class="text-center" style="background-color: #f8f9fa;">
+                        <?= $item['total_original_enviada']; ?> Und
+                    </td>
+                    <td class="text-center" style="font-weight: bold; background-color: #e8f4fd; color: #0d6efd;">
+                        <?= $item['total_devuelta_ticket']; ?> Und
+                    </td>
+                    <td class="text-center" style="font-weight: bold; background-color: #fffbfb;">
+                        <?php if ((int)$item['total_saldo_en_obra'] <= 0): ?>
+                            <span class="text-success">0 (Completo)</span>
+                        <?php else: ?>
+                            <span class="text-danger"><?= $item['total_saldo_en_obra']; ?> Und</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 
-        $arr_track = array_filter($track_bd, fn($v) => $v['fecha'] == str_replace("-","/",$fecha));
-        $arr_track = array_values($arr_track);
-        /* echo "<pre>";
-        print_r($arr_track);
-        echo "</pre>";
-        exit(); */      
-        ?>
-        <div>
-            <table cellspacing="0" cellpadding="0" width="100%" class="tablapdf">
-                <thead>
-                    <tr>
-                        <th>Nro</th>
-                        <th>Cod. Bien</th>
-                        <th>Descripción</th>
-                        <th>Salió</th>
-                        <th>Ingresó</th>
-                        <th>Saldo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php
-                $cont = 0;
-                foreach( $arr_track[0]['items'] as $pi ){                                                     
-                    $cont++;
-                    $idpieza  = $pi['idpieza'];
-                    $pieza_bd = $piezaModel->getPieza($idpieza);
-
-                    $piecodigo    = $pieza_bd['pie_codigo'];
-                    $piedesc      = $pieza_bd['pie_desc'];
-                    $salio        = $pi['salio'];
-                    $nuevoingreso = $pi['nuevoingreso'];
-                    $resetear     = $pi['resetear'];
-
-                    //$reset = $resetear == 1 ? '<b>(reset)</b>' : '';
-                    $saldo = $salio - $nuevoingreso;
-
-                    echo "<tr>";
-                    echo "<td>$cont</td>";
-                    echo "<td>$piecodigo</td>";
-                    echo "<td class='left'>$piedesc</td>";
-                    echo "<td>$salio</td>";
-                    echo "<td>$nuevoingreso</td>";
-                    echo "<td>$saldo</td>";
-                    echo "</tr>";
-                }
-                ?>
-                </tbody>
-            </table>
-        </div>
-    </section>
 </body>
 </html>
