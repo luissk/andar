@@ -170,12 +170,13 @@ $(function(){
             // 3. Recorrer los registros y sumar (Peso * Cantidad)
             datos.each(function(row) {
                 let pesoUnidad = parseFloat(row.peso) || 0;
-                let cantInicial = parseInt(row.cantidad) || 0;
-                let cantActual  = parseInt(row.stock_act) || 0;
+                let cantInicial = parseInt(row.inicial) || 0;
+                let cantActual  = parseInt(row.stock_actual) || 0;
 
                 totalPesoInicial += (pesoUnidad * cantInicial);
                 totalPesoActual  += (pesoUnidad * cantActual);
-            });
+                //console.log(row.peso, row.inicial, row.stock_actual)
+            });            
             // Convertimos a toneladas
             let toneladasInicial = totalPesoInicial / 1000;
             let toneladasActual  = totalPesoActual / 1000;
@@ -184,7 +185,7 @@ $(function(){
             $('#pesoActual').text(toneladasActual.toFixed(2));
         },
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+            "url": "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
         }
     });
 

@@ -12,14 +12,7 @@ class PiezaModel extends Model{
     }
 
     public function getPieza($idpieza){//MODIFICAR MAS ADELANTE
-        $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant,
-        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0) as salidas,
-        ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) as entradas,
-        (
-            pie_cant + 
-            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'ingresa')) from presupuesto where pre_status in(3) ), 0) - 
-            ifnull(( select sum(calcularStock(pre_piezas, idpieza, 'st_sale')) from presupuesto where pre_status in(2,3) ), 0)
-        ) as stockActual
+        $query = "select idpieza, pie_codigo, pie_desc,pie_fechareg,pie_peso,pie_precio,pie_cant 
         from pieza where idpieza = ?";
 
         $st = $this->db->query($query, [$idpieza]);
