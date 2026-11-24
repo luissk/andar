@@ -379,4 +379,18 @@ class Pieza extends BaseController
     }
 
 
+
+    public function lineasFamiliaMarca()
+    {
+        if( !session('idusuario') ){
+            return redirect()->to('/');
+        }
+        
+        $data['title']           = "Linea Familia Marca del Sistema | ".help_nombreWeb();
+        $data['lineaFamMarLinkActive'] = 1;        
+
+        return view('sistema/piezas/lineaFamMarca', $data);
+    }
+
+
 }

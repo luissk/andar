@@ -168,7 +168,14 @@ if(!session('idusuario')){
                                         <i class="nav-icon fa-solid fa-users"></i>
                                         <p>Clientes</p>
                                     </a>
-                                </li><li class="nav-item">
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?=base_url('linea-familia-marca')?>" class="nav-link ps-4 <?php echo isset($lineaFamMarLinkActive) ? 'active': ''?>">
+                                        <i class="nav-icon fa-solid fa-wrench"></i>
+                                        <p>Linea Familia Marca</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="<?=base_url('piezas')?>" class="nav-link ps-4 <?php echo isset($piezasLinkActive) ? 'active': ''?>">
                                         <i class="nav-icon fa-solid fa-wrench"></i>
                                         <p>Piezas</p>

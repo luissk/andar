@@ -38,6 +38,8 @@ $routes->post('registro-pieza', 'Pieza::registrarPieza');
 $routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
 $routes->get('piezas-a-excel', 'Pieza::reporteExcel');
 
+$routes->get('linea-familia-marca', 'Pieza::lineasFamiliaMarca');
+
 $routes->get('torres', 'Torre::index');
 $routes->get('piezas-select-ajax', 'Torre::listarPiezasAjaxSelect2');
 $routes->post('torres-ajax', 'Torre::listarTorresAjax');
