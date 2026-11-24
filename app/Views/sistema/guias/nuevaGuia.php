@@ -10,9 +10,6 @@
 <?php echo $this->section('contenido');?>
 <?php
 if( isset($guia_bd) && $guia_bd ){
-    /* echo "<pre>";
-    print_r($guia_bd);
-    echo "</pre>"; */
     $idguia_bd     = $guia_bd['idguia'];
     $idtrans_bd    = $guia_bd['idtransportista'];
     $fechatrasl_bd = $guia_bd['gui_fechatraslado'];
@@ -207,26 +204,12 @@ if( isset($guia_bd) && $guia_bd ){
                             <div class="col-sm-12 table-responsive">                           
                                 <table class="table">
                                 <?php
-                                /* $presuModel = model('PresupuestoModel');
-                                $torreModel = model('TorreModel');
-                                $piezaModel = model('PiezaModel'); */
-
                                 echo "<pre>";
                                 $piezas_acumuladas = array_values(array_reduce($deta_pre_pie_bd, function ($acumulador, $item) {
-                                    // Creamos la llave única
                                     $llave = $item['idpieza'];                                    
-                                    // Sumamos la cantidad si ya existe, si no, inicializamos el registro
                                     isset($acumulador[$llave]) ? $acumulador[$llave]['dp_cant_hist'] += $item['dp_cant_hist'] : $acumulador[$llave] = $item;                                    
                                     return $acumulador;
                                 }, []));
-
-                                /* print_r($piezas_acumuladas);
-                                print_r($stockDePiezasUnicas);
-                                print_r($detalle_guia);
-                                print_r($deta_pre_pie_bd);
-                                exit(); */
-
-                                //echo "<pre>";print_r($guia_guardada);echo "</pre>";//cuando es editar
 
                                 $guiacompleta = TRUE;
 
@@ -234,8 +217,7 @@ if( isset($guia_bd) && $guia_bd ){
                                 echo "<th>N°</th>";
                                 echo "<th>Piezas</th>";                                    
                                 echo "<td class='text-center'>Requerido</td>";
-                                //if( $idguia_bd == '' )
-                                    echo "<td class='text-center'>Stock Act</td>";                                    
+                                echo "<td class='text-center'>Stock Act</td>";                                    
                                 echo "<td class='text-center'>Stock sale</td>";
                                 echo "<td class='text-center'>Faltantes</td>";
                                 echo "</tr>";
@@ -245,57 +227,40 @@ if( isset($guia_bd) && $guia_bd ){
                                     $cont++;
                                     $stockAct = $stockDePiezasUnicas[ array_search($pa['idpieza'], array_column($stockDePiezasUnicas, 'idpieza')) ]['stock_actual_real'];
 
-                                    /* $stock_que_sale = $stockAct >= $pa['dp_cant_hist'] ? $pa['dp_cant_hist'] : $pa['dp_cant_hist'] - $stockAct;
-                                    $faltantes = $stockAct < $pa['dp_cant_hist'] ? abs($stockAct - $pa['dp_cant_hist']) : 0; */
-                                    // 1. SI ES EDICIÓN: Le devolvemos virtualmente lo propio que ya se envió en esta guía para simular el pasado
                                     if (!empty($idguia_bd) && isset($guia_guardada[$pa['idpieza']]['propio'])) {
                                         $stockAct += $guia_guardada[$pa['idpieza']]['propio'];
                                     }
 
-                                    // 2. CONTROL DE CANTIDADES Y SALDOS SEGÚN EL MODO
                                     if (!empty($idguia_bd) && isset($guia_guardada[$pa['idpieza']])) {
-                                        // En edición sumamos lo propio + los alquileres externos guardados en la BD
                                         $stock_que_sale = $guia_guardada[$pa['idpieza']]['propio'];
-        
-                                        // El faltante visual es 0 porque los externos ya cubrieron el resto en la BD
                                         $faltantes = 0;
-
-                                        // EL CANDADO SEGURO: Calculamos la diferencia real entre el presupuesto y el stock propio enviado
-                                        $limite_modal = intval($pa['dp_cant_hist']) - intval($stock_que_sale);
-
-                                        // NUEVO CANDADO PARA EL BOTÓN "A": 
-                                        // Evaluamos matemáticamente si originalmente requería externos, para obligar a que pinte el botón "A"
-                                        $requeria_externos = ($stockAct < $pa['dp_cant_hist']) || !empty($guia_guardada[$pa['idpieza']]['externo']);
+                                        $limite_modal = intval($pa['dp_cant_hist']);
                                     } else {
-                                        // Modo Nuevo: Tu lógica matemática exacta sobre el stock en tiempo real
-                                        $requeria_externos = false;
                                         if ($stockAct >= $pa['dp_cant_hist']) {
                                             $stock_que_sale = $pa['dp_cant_hist'];
                                             $faltantes = 0;
-                                            $limite_modal = 0;
+                                            $limite_modal = intval($pa['dp_cant_hist']);
                                         } else {
                                             $stock_que_sale = $stockAct;
                                             $faltantes = $pa['dp_cant_hist'] - $stockAct;
-                                            $limite_modal = $faltantes;
+                                            $limite_modal = intval($pa['dp_cant_hist']);
                                             $guiacompleta = false;
-                                            $requeria_externos = true;
                                         }
                                     }
 
                                     $resaltar = "";
-                                    $boton_faltantes = "";
-                                    if( $faltantes > 0 || $requeria_externos){
+                                    $clase_boton_a = ($faltantes > 0) ? "btn-danger" : "btn-secondary";
+                                    if( $faltantes > 0 ){
                                         $resaltar = "bg-danger-subtle";
                                         $guiacompleta = FALSE;
-                                        $boton_faltantes = "<a class='btn btn-sm btn-danger ml-2' data-idpieza=".$pa['idpieza']." onclick='alquilar(".$pa['idpieza'].",\"".$pa['dp_desc_hist']."\",$limite_modal,$stockAct)'>A</a>";
                                     }
+                                    $boton_faltantes = "<a class='btn btn-sm $clase_boton_a ml-2' data-idpieza=".$pa['idpieza']." onclick='alquilar(".$pa['idpieza'].",\"".$pa['dp_desc_hist']."\",$limite_modal,$stockAct)'>A</a>";
 
-                                    echo "<tr class='$resaltar' id='fila_pieza_".$pa['idpieza']."'>";
+                                    echo "<tr class='$resaltar' id='fila_pieza_".$pa['idpieza']."' data-stock-real='$stockAct'>";
                                     echo "<td>$cont</td>";
                                     echo "<td>".$pa['dp_desc_hist']."</td>";                                            
                                     echo "<td class='text-center columna-requerido'>".$pa['dp_cant_hist']."</td>";
-                                    //if( $idguia_bd == '' )
-                                        echo "<td class='text-center'>$stockAct</td>";                                          
+                                    echo "<td class='text-center columna-stock-act'>$stockAct</td>";                                          
                                     echo "<td class='text-center columna-stock-sale'>$stock_que_sale</td>";
                                     echo "<td class='text-center columna-faltante'>$faltantes $boton_faltantes</td>";
                                     echo "</tr>";
@@ -307,7 +272,6 @@ if( isset($guia_bd) && $guia_bd ){
                             </div>
                             <div class="col-sm-12 pb-3 fw-bolder">
                             <?php
-
                             foreach($detalle_guia as $d){
                                 $idtorre  = $d['idtorre'];
                                 $dp_cant  = $d['dp_cant'];
@@ -334,31 +298,39 @@ if( isset($guia_bd) && $guia_bd ){
     </div>
 </div>
 
+<!-- MODAL DE ASIGNACIÓN DE ORIGEN (PROPIO / EXTERNO) -->
 <div class="modal fade" id="modalAlquiler" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalAlquilerLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       
       <div class="modal-header bg-dark text-white py-2">
-        <h5 class="modal-title fs-6" id="modalAlquilerLabel">Asignar Alquiler Externo</h5>
+        <h5 class="modal-title fs-6" id="modalAlquilerLabel">Asignar Origen de Piezas (Propio / Alquiler Externo)</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
         <input type="hidden" id="modal_idpieza" value="">
         <input type="hidden" id="modal_limite_faltante" value="0">
+        <input type="hidden" id="modal_stock_propio_max" value="0">
 
-        <div class="alert alert-secondary py-2 mb-3 shadow-sm">
-          <div class="fw-bold" id="modal_txt_pieza">PIEZA LUIS X</div>
-          <small class="text-danger fw-bold">Cantidad requerida por cubrir: <span id="modal_txt_faltante">0</span> und.</small>
+        <div class="alert alert-secondary py-2 mb-3 shadow-sm d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold" id="modal_txt_pieza">PIEZA</div>
+            <small class="text-danger fw-bold">Cantidad total requerida: <span id="modal_txt_faltante">0</span> und.</small>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-info text-dark">Stock Propio Disp.: <span id="modal_badge_stock">0</span> und.</span>
+          </div>
         </div>
 
         <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
           <div class="col-md-7">
-            <label class="form-label small fw-bold mb-1">Seleccionar Proveedor</label>
+            <label class="form-label small fw-bold mb-1">Origen / Proveedor</label>
             <select class="form-select form-select-sm" id="modal_select_proveedor">
               <option value="">-- Seleccione --</option>
+              <!-- La opción PROPIO se inyecta dinámicamente si stock > 0 -->
               <?php foreach ($proveedores as $prov): ?>
-                <option value="<?= $prov['idproveedor']; ?>">
+                <option value="<?= $prov['idproveedor']; ?>" class="opt-externo">
                   <?= $prov['pro_ruc'] . ' - ' . $prov['pro_razon']; ?>
                 </option>
               <?php endforeach; ?>
@@ -379,14 +351,14 @@ if( isset($guia_bd) && $guia_bd ){
           <table class="table table-sm table-striped mb-0" id="tabla_modal_desglose">
             <thead class="table-light sticky-top">
               <tr>
-                <th class="small py-1">Proveedor</th>
+                <th class="small py-1">Origen / Proveedor</th>
                 <th class="small py-1 text-end" style="width: 80px;">Cant.</th>
                 <th class="small py-1 text-center" style="width: 50px;">Acción</th>
               </tr>
             </thead>
             <tbody>
               <tr id="fila_modal_vacia">
-                <td colspan="3" class="text-center text-muted small py-2">Ningún proveedor asignado aún.</td>
+                <td colspan="3" class="text-center text-muted small py-2">Ningún origen asignado aún.</td>
               </tr>
             </tbody>
           </table>
@@ -499,7 +471,7 @@ $(function(){
         else if( direccionp == '' ) men = 'Seleccione una dirección de partida';
         else if( departamentoll == '' ) men = 'Seleccione un departamento de llegada';
         else if( provinciall == '' ) men = 'Seleccione una provincia de llegada';
-        else if( distritoll == '' ) men = 'Seleccione un distrito de llegada';
+        else if( distritoll == '' ) men = 'Seleccione una distrito de llegada';
         else if( direccionll == '' ) men = 'Seleccione una dirección de llegada';
         else if( placa == '' ) men = 'Ingrese la placa del vehículo';
         else if( nroguia == '' ) men = 'Ingrese el Nro de Guía';
@@ -523,34 +495,23 @@ $(function(){
 
     });
 
-    <?php //cuando es editar
+    <?php 
     if( isset($guia_bd) && $guia_bd ){
     ?>
     $("#motivo").trigger('change');
-
     $("#departamentop").trigger('change');
-
     $("#departamentoll").trigger('change');
     <?php
     }
     ?>
 });
 
-
-/////
-// ==========================================
-// SOURCE OF TRUTH (CEREBRO DE LA PANTALLA)
-// ==========================================
-// Validamos si la variable viene precargada desde PHP (Modo Edición), sino inicia vacía
 let guia_materiales_db = <?= isset($guia_guardada) ? json_encode($guia_guardada) : 'null'; ?>;
 let guia_materiales = (typeof guia_materiales_db !== 'undefined' && guia_materiales_db !== null) ? guia_materiales_db : {};
 
 $(document).ready(function() {
-    // Inicializar TODAS las piezas usando selectores de clase seguros
     $('[id^="fila_pieza_"]').each(function() {
         let idpieza = parseInt($(this).attr('id').replace('fila_pieza_', ''));
-        
-        // Buscamos la celda por su clase. Ya no importa si ocultas columnas a la izquierda o derecha.
         let stockPropio = parseInt($(this).find('.columna-stock-sale').text().trim()) || 0;
 
         if (!guia_materiales[idpieza]) {
@@ -561,50 +522,55 @@ $(document).ready(function() {
         }
     });
 
-    // Ahora que todo está mapeado en memoria, mandamos a renderizar e inyectar inputs ocultos
     renderizarTablaPrincipal();
 
     // ==========================================
-    // INTERACCIÓN INTERNA DEL MODAL
+    // AGREGAR ORIGEN (PROPIO O PROVEEDOR) AL MODAL
     // ==========================================
-
-    // --- BOTÓN: AGREGAR PROVEEDOR A LA LISTA TEMPORAL DEL MODAL ---
     $('#btn_modal_agregar_lista').on('click', function() {
         let idprov = $('#modal_select_proveedor').val();
         let textProv = $('#modal_select_proveedor option:selected').text().trim();
         let cant = parseInt($('#modal_input_cantidad').val());
         let limite = parseInt($('#modal_limite_faltante').val());
+        let stockPropioMax = parseInt($('#modal_stock_propio_max').val()) || 0;
 
-        if (!idprov) { alert('Debe seleccionar un proveedor.'); return; }
+        if (!idprov) { alert('Debe seleccionar un origen o proveedor.'); return; }
         if (isNaN(cant) || cant <= 0) { alert('Ingrese una cantidad válida mayor a 0.'); return; }
 
-        // Validar si el proveedor ya está en la lista del modal
+        // Validar límite específico si seleccionó STOCK PROPIO
+        if (idprov === 'PROPIO' && cant > stockPropioMax) {
+            alert(`No puedes asignar más de ${stockPropioMax} und. de tu stock propio disponible.`);
+            return;
+        }
+
+        // Validar si el origen ya está en la lista del modal
         let existe = false;
         $('#tabla_modal_desglose tbody tr').each(function() {
             if ($(this).data('idprov') == idprov) { existe = true; }
         });
-        if (existe) { alert('Este proveedor ya está en la lista.'); return; }
+        if (existe) { alert('Este origen/proveedor ya está agregado en la lista.'); return; }
 
-        // Calcular la suma de lo que ya se va agregando en el modal
+        // Calcular suma actual en el modal
         let sumaActual = 0;
         $('#tabla_modal_desglose tbody tr').each(function() {
             let c = parseInt($(this).data('cant'));
             if (!isNaN(c)) { sumaActual += c; }
         });
 
-        // Validar que no pase el límite estricto de los faltantes
         if ((sumaActual + cant) > limite) {
-            alert(`No puedes superar los faltantes requeridos (${limite} und). Quedan disponibles: ${limite - sumaActual} und.`);
+            alert(`No puedes superar la cantidad total requerida (${limite} und). Quedan por cubrir: ${limite - sumaActual} und.`);
             return;
         }
 
-        // Quitar fila vacía si existe
         $('#fila_modal_vacia').remove();
 
-        // Inyectar fila en la tablita del modal
+        let badgeOrigen = (idprov === 'PROPIO') 
+            ? `<span class="badge bg-primary me-1">PROPIO</span> Almacén Interno` 
+            : textProv;
+
         $('#tabla_modal_desglose tbody').append(`
             <tr data-idprov="${idprov}" data-cant="${cant}">
-                <td class="small align-middle">${textProv}</td>
+                <td class="small align-middle">${badgeOrigen}</td>
                 <td class="small align-middle text-end fw-bold text-secondary">${cant}</td>
                 <td class="text-center">
                     <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-eliminar-prov-modal">X</button>
@@ -612,14 +578,13 @@ $(document).ready(function() {
             </tr>
         `);
 
-        // Resetear campos de entrada básicos
         $('#modal_select_proveedor').val('');
         $('#modal_input_cantidad').val(1);
 
         calcularProgresoModal();
     });
 
-    // --- BOTÓN: ELIMINAR PROVEEDOR DE LA TABLITA DEL MODAL ---
+    // Eliminar fila del modal
     $(document).on('click', '.btn-eliminar-prov-modal', function() {
         $(this).closest('tr').remove();
         
@@ -629,67 +594,102 @@ $(document).ready(function() {
         calcularProgresoModal();
     });
 
-    // --- BOTÓN VERDE: CONFIRMAR Y APLICAR CAMBIOS AL OBJETO GLOBAL ---
+    // ==========================================
+    // CONFIRMAR Y APLICAR CAMBIOS DESDE EL MODAL
+    // ==========================================
     $('#btn_modal_confirmar').on('click', function() {
         let idpieza = $('#modal_idpieza').val();
+        let filaPrincipal = $(`#fila_pieza_${idpieza}`);
+        let stockReal = parseInt(filaPrincipal.data('stock-real')) || 0;
+        let requerido = parseInt(filaPrincipal.find('.columna-requerido').text().trim()) || 0;
 
-        // Vaciamos el sub-array externo para reconstruirlo con lo que quedó en la tablita
         guia_materiales[idpieza].externo = [];
+        let nuevoStockPropio = 0;
+        let filasTablaModal = $('#tabla_modal_desglose tbody tr[data-idprov]');
 
-        $('#tabla_modal_desglose tbody tr').each(function() {
-            let idprov = $(this).data('idprov');
-            let cant = $(this).data('cant');
-            
-            if (idprov && cant) {
-                guia_materiales[idpieza].externo.push({
-                    id_proveedor: idprov,
-                    cantidad: cant
-                });
-            }
-        });
+        if (filasTablaModal.length === 0) {
+            // Si el usuario vació toda la tabla del modal y confirmó, vuelve al comportamiento automático por defecto
+            nuevoStockPropio = Math.min(stockReal, requerido);
+        } else {
+            // Si configuró filas en el modal, respetamos estrictamente lo que puso (si no puso PROPIO, propio será 0)
+            filasTablaModal.each(function() {
+                let idprov = $(this).data('idprov');
+                let cant = parseInt($(this).data('cant')) || 0;
 
-        // El modal CUMPLE su único objetivo: Alterar la data. Ahora mandamos a redibujar la pantalla.
+                if (idprov === 'PROPIO') {
+                    nuevoStockPropio = cant;
+                } else if (idprov && cant > 0) {
+                    guia_materiales[idpieza].externo.push({
+                        id_proveedor: idprov,
+                        cantidad: cant
+                    });
+                }
+            });
+        }
+
+        guia_materiales[idpieza].propio = nuevoStockPropio;
+
         renderizarTablaPrincipal();
 
-        // Cerramos el modal limpiamente
         let modalEl = document.getElementById('modalAlquiler');
         bootstrap.Modal.getInstance(modalEl).hide();
     });
 });
 
 // ==========================================
-// FUNCIONES CENTRALES (LOGICA LOGÍSTICA)
+// ABRIR MODAL Y PRECARGAR OPCIONES
 // ==========================================
-
-// 1. FUNCIÓN QUE ACTIVA TU BOTÓN DE FALTANTES EN LA TABLA PRINCIPAL
-function alquilar(idpieza, pieza, faltantes, stockActual) {
+function alquilar(idpieza, pieza, limiteMaximo, stockActual) {
     idpieza = parseInt(idpieza);
-    faltantes = parseInt(faltantes);
+    limiteMaximo = parseInt(limiteMaximo);
     stockActual = parseInt(stockActual);
 
-    // PASO CLAVE: Si la pieza no existe en nuestro objeto global, la inicializamos sin romper data existente
     if (!guia_materiales[idpieza]) {
         guia_materiales[idpieza] = {
-            propio: stockActual, // Captura dinámicamente tu parámetro real
-            externo: []          // Nace vacío listo para recibir proveedores
+            propio: stockActual,
+            externo: []          
         };
     }
 
-    // Setear controles ocultos y textos estéticos del modal
     $('#modal_idpieza').val(idpieza);
-    $('#modal_limite_faltante').val(faltantes);
+    $('#modal_limite_faltante').val(limiteMaximo);
+    $('#modal_stock_propio_max').val(stockActual);
     $('#modal_txt_pieza').text(pieza.toUpperCase());
-    $('#modal_txt_faltante').text(faltantes);
-    $('#modal_txt_total_esperado').text(faltantes);
+    $('#modal_txt_faltante').text(limiteMaximo);
+    $('#modal_txt_total_esperado').text(limiteMaximo);
+    $('#modal_badge_stock').text(stockActual);
 
-    // Limpiar tabla interna del modal
+    // Limpiar opción previa de STOCK PROPIO en el select e insertarla solo si hay stock disponible
+    $('#modal_select_proveedor option[value="PROPIO"]').remove();
+    if (stockActual > 0) {
+        $('#modal_select_proveedor option:first').after(
+            `<option value="PROPIO" class="fw-bold text-primary">[STOCK PROPIO] Almacén Interno (Disp: ${stockActual} und.)</option>`
+        );
+    }
+
     ponerFilaVaciaModal();
     $('#modal_select_proveedor').val('');
     $('#modal_input_cantidad').val(1);
 
-    // SI EL OBJETO YA TIENE PROVEEDORES (Cargados por edición o aperturas previas), LOS DIBUJAMOS EN EL MODAL
+    let tieneAsignaciones = false;
+
+    // 1. Si ya hay stock propio asignado y además hay externos (o es edición), lo mostramos en la tabla del modal
+    if (guia_materiales[idpieza].propio > 0 && (guia_materiales[idpieza].externo.length > 0 || $('#idguia_bd').val() !== '')) {
+        if (!tieneAsignaciones) { $('#fila_modal_vacia').remove(); tieneAsignaciones = true; }
+        $('#tabla_modal_desglose tbody').append(`
+            <tr data-idprov="PROPIO" data-cant="${guia_materiales[idpieza].propio}">
+                <td class="small align-middle"><span class="badge bg-primary me-1">PROPIO</span> Almacén Interno</td>
+                <td class="small align-middle text-end fw-bold text-secondary">${guia_materiales[idpieza].propio}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-eliminar-prov-modal">X</button>
+                </td>
+            </tr>
+        `);
+    }
+
+    // 2. Si hay proveedores externos asignados, los mostramos en la tabla del modal
     if (guia_materiales[idpieza].externo.length > 0) {
-        $('#fila_modal_vacia').remove();
+        if (!tieneAsignaciones) { $('#fila_modal_vacia').remove(); tieneAsignaciones = true; }
         
         guia_materiales[idpieza].externo.forEach(item => {
             let textProveedor = $(`#modal_select_proveedor option[value="${item.id_proveedor}"]`).text().trim();
@@ -708,12 +708,13 @@ function alquilar(idpieza, pieza, faltantes, stockActual) {
 
     calcularProgresoModal();
 
-    // Abrir Modal
     let myModal = new bootstrap.Modal(document.getElementById('modalAlquiler'));
     myModal.show();
 }
 
-// 2. LA FUNCIÓN SUPREMA: Lee el objeto global 'guia_materiales' y dibuja la interfaz completa
+// ==========================================
+// RENDERIZAR TABLA PRINCIPAL
+// ==========================================
 function renderizarTablaPrincipal() {
     let piezasConFaltantes = 0;
 
@@ -721,45 +722,38 @@ function renderizarTablaPrincipal() {
         let dataPieza = guia_materiales[idpieza];
         let filaPrincipal = $(`#fila_pieza_${idpieza}`);
 
-        // 1. Limpieza absoluta de sub-filas hijas previas
         $(`.hija_pieza_${idpieza}`).remove();
 
-        // 2. EVALUACIÓN DE ESTADO
-        // Buscamos cualquier elemento con la clase .btn (sea <a> o <button>) dentro de la columna faltante
         let celdaFaltante = filaPrincipal.find('.columna-faltante');
         let botonModal = celdaFaltante.find('.btn').detach();
+        let celdaStockSale = filaPrincipal.find('.columna-stock-sale');
+        let textoRequerido = filaPrincipal.find('.columna-requerido').text().trim();
+        let requerido = parseInt(textoRequerido) || 0;
 
-        if (dataPieza.externo.length > 0) {
-            // ESCENARIO A: Ya se asignaron proveedores externos
+        // Actualizamos la columna Stock Sale con el valor exacto (puede ser 0 si todo se alquiló a externos)
+        celdaStockSale.text(dataPieza.propio);
+
+        let sumaExternos = dataPieza.externo.reduce((acc, curr) => acc + parseInt(curr.cantidad), 0);
+        let faltanteCalculado = Math.max(0, requerido - dataPieza.propio - sumaExternos);
+
+        if (sumaExternos > 0) {
             filaPrincipal.removeClass('table-danger bg-danger-subtle'); 
-            
-            // Cambiamos el color del botón "A" a gris para denotar que ya está gestionado
             botonModal.removeClass('btn-danger').addClass('btn-secondary');
-            
-            // Seteamos el valor 0 y le regresamos el botón
-            celdaFaltante.html('0 ').append(botonModal);           
+            celdaFaltante.html(faltanteCalculado + ' ').append(botonModal);           
         } else {
-            // ESCENARIO B: No hay proveedores externos asignados
-            let textoRequerido = filaPrincipal.find('.columna-requerido').text().trim();
-            let requerido = parseInt(textoRequerido) || 0;
-            
-            let faltanteOriginal = requerido - dataPieza.propio;
-
-            if (faltanteOriginal > 0) {
+            if (faltanteCalculado > 0) {
                 filaPrincipal.addClass('table-danger bg-danger-subtle'); 
                 botonModal.removeClass('btn-secondary').addClass('btn-danger');
-                
-                celdaFaltante.html(faltanteOriginal + ' ').append(botonModal);
+                celdaFaltante.html(faltanteCalculado + ' ').append(botonModal);
                 piezasConFaltantes++; 
             } else {
                 filaPrincipal.removeClass('table-danger bg-danger-subtle');
                 botonModal.removeClass('btn-danger').addClass('btn-secondary');
-                
-                celdaFaltante.html('0 ').append(botonModal);
+                celdaFaltante.html(faltanteCalculado + ' ').append(botonModal);
             }
         }
 
-        // 3. Dibujamos las sub-filas
+        // Dibujar sub-filas de alquiler externo
         dataPieza.externo.forEach(item => {
             let textProveedor = $(`#modal_select_proveedor option[value="${item.id_proveedor}"]`).text().trim();
 
@@ -785,29 +779,19 @@ function renderizarTablaPrincipal() {
         }
     });
 
-    // =================================================================
-    // CONTROL INTELIGENTE DEL BOTÓN PRINCIPAL
-    // =================================================================
     let cantidadPiezasInteractuadas = Object.keys(guia_materiales).length;
-
     if (cantidadPiezasInteractuadas === 0) {
-        console.log("No hay interacción aún. Se respeta el estado inicial de PHP.");
         return; 
     }
 
     let faltantesRealesEnPantalla = 0;
-    
-    // Validamos usando la clase fija que agregamos en el PHP
     $('.columna-faltante').each(function() {
         let textoFaltante = $(this).text().trim(); 
         let valor = parseInt(textoFaltante) || 0;
-        
         if (valor > 0) {
             faltantesRealesEnPantalla++;
         }
     });
-
-    console.log("Piezas con faltantes reales en la pantalla:", faltantesRealesEnPantalla);
 
     if (faltantesRealesEnPantalla > 0) {
         $('#btn_generar_guia').prop('disabled', true).addClass('disabled');
@@ -816,12 +800,8 @@ function renderizarTablaPrincipal() {
     }
 }
 
-// ==========================================
-// HELPERS / AUXILIARES
-// ==========================================
 function calcularProgresoModal() {
     let limite = parseInt($('#modal_limite_faltante').val());
-    // FILTRO DE SEGURIDAD: Si el límite es NaN o vacío, lo forzamos a ser 0
     if (isNaN(limite)) { limite = 0; }
     let sumaTotal = 0;
 
@@ -832,15 +812,13 @@ function calcularProgresoModal() {
 
     $('#modal_txt_progreso').text(sumaTotal);
 
-    // NUEVA REGLA: El botón se activa si completaste el límite estricto O si limpiaste por completo la tabla (sumaTotal === 0)
     if (sumaTotal === limite && limite > 0) {
         $('#modal_txt_progreso').removeClass('text-primary text-danger').addClass('text-success');
-        $('#btn_modal_confirmar').prop('disabled', false); // Candado abierto por completar saldo
+        $('#btn_modal_confirmar').prop('disabled', false); 
     } else if (sumaTotal === 0) {
         $('#modal_txt_progreso').removeClass('text-success text-primary').addClass('text-danger');
-        $('#btn_modal_confirmar').prop('disabled', false); // ¡Candado abierto para permitir limpiar/resetear la fila!
+        $('#btn_modal_confirmar').prop('disabled', false); 
     } else {
-        // Si está a medias (ej: faltan 8 y va sumando 3) se bloquea
         $('#modal_txt_progreso').removeClass('text-success text-danger').addClass('text-primary');
         $('#btn_modal_confirmar').prop('disabled', true);  
     }
@@ -849,7 +827,7 @@ function calcularProgresoModal() {
 function ponerFilaVaciaModal() {
     $('#tabla_modal_desglose tbody').html(`
         <tr id="fila_modal_vacia">
-            <td colspan="3" class="text-center text-muted small py-2">Ningún proveedor asignado aún.</td>
+            <td colspan="3" class="text-center text-muted small py-2">Ningún origen asignado aún.</td>
         </tr>
     `);
 }
