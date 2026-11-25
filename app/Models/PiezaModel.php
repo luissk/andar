@@ -178,4 +178,139 @@ class PiezaModel extends Model{
         return $st;
     }
 
+
+    //LINEAS FAMILIAS MARCAS
+    //LINEAS
+    public function getLineas(){
+        $query = "select * from piezalinea";
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
+    public function getLinea($idlinea){
+        $query = "select * from piezalinea where idlinea=?";
+        $st = $this->db->query($query, [$idlinea]);
+
+        return $st->getRowArray();
+    }
+    public function insertarLinea($data){
+        $query = "insert into piezalinea(linea,lineadesc,idusuario) values(?,upper(?),?)";
+        $st = $this->db->query($query, [
+            $data['linea'], $data['desclinea'], $data['idusuario']
+        ]);
+
+        return $st;
+    }
+    public function modificarLinea($data, $idlinea){
+        $query = "update piezalinea set linea=?,lineadesc=? where idlinea=?";
+        $st = $this->db->query($query, [
+            $data['linea'], $data['desclinea'], $idlinea
+        ]);
+
+        return $st;
+    }
+    public function verificarLineaTieneRegEnTablas($id, $tabla){
+        $query = "select count(idlinea) as total from $tabla where idlinea=?";
+        $st = $this->db->query($query, [$id]);
+
+        return $st->getRowArray();
+    }
+    public function eliminarLinea($id){
+        $query = "delete from piezalinea where idlinea = ?";
+        $st = $this->db->query($query, [
+            $id
+        ]);
+
+        return $st;
+    }
+
+    //FAMILIAS
+    public function getFamilias(){
+        $query = "select * from piezafamilia";
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
+    public function getFamilia($idfamilia){
+        $query = "select * from piezafamilia where idfamilia=?";
+        $st = $this->db->query($query, [$idfamilia]);
+
+        return $st->getRowArray();
+    }
+    public function insertarFamilia($data){
+        $query = "insert into piezafamilia(familia,familiadesc,idusuario) values(?,upper(?),?)";
+        $st = $this->db->query($query, [
+            $data['familia'], $data['descfamilia'], $data['idusuario']
+        ]);
+
+        return $st;
+    }
+    public function modificarFamilia($data, $idfamilia){
+        $query = "update piezafamilia set familia=?,familiadesc=? where idfamilia=?";
+        $st = $this->db->query($query, [
+            $data['familia'], $data['descfamilia'], $idfamilia
+        ]);
+
+        return $st;
+    }
+    public function verificarFamiliaTieneRegEnTablas($id, $tabla){
+        $query = "select count(idfamilia) as total from $tabla where idfamilia=?";
+        $st = $this->db->query($query, [$id]);
+
+        return $st->getRowArray();
+    }
+    public function eliminarFamilia($id){
+        $query = "delete from piezafamilia where idfamilia = ?";
+        $st = $this->db->query($query, [
+            $id
+        ]);
+
+        return $st;
+    }
+
+    //MARCAS
+    public function getMarcas(){
+        $query = "select * from piezamarca";
+        $st = $this->db->query($query);
+
+        return $st->getResultArray();
+    }
+    public function getMarca($idmarca){
+        $query = "select * from piezamarca where idmarca=?";
+        $st = $this->db->query($query, [$idmarca]);
+
+        return $st->getRowArray();
+    }
+    public function insertarMarca($data){
+        $query = "insert into piezamarca(marca,idusuario) values(upper(?),?)";
+        $st = $this->db->query($query, [
+            $data['marca'], $data['idusuario']
+        ]);
+
+        return $st;
+    }
+    public function modificarMarca($data, $idmarca){
+        $query = "update piezamarca set marca=? where idmarca=?";
+        $st = $this->db->query($query, [
+            $data['marca'], $idmarca
+        ]);
+
+        return $st;
+    }
+    public function verificarMarcaTieneRegEnTablas($id, $tabla){
+        $query = "select count(idmarca) as total from $tabla where idmarca=?";
+        $st = $this->db->query($query, [$id]);
+
+        return $st->getRowArray();
+    }
+    public function eliminarMarca($id){
+        $query = "delete from piezamarca where idmarca = ?";
+        $st = $this->db->query($query, [
+            $id
+        ]);
+
+        return $st;
+    }
+
+
 }

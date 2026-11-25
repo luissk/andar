@@ -379,7 +379,7 @@ class Pieza extends BaseController
     }
 
 
-
+    //LINEA FAMILIA MARCA
     public function lineasFamiliaMarca()
     {
         if( !session('idusuario') ){
@@ -391,6 +391,355 @@ class Pieza extends BaseController
 
         return view('sistema/piezas/lineaFamMarca', $data);
     }
+
+    //LINEAS
+    function ListarLineas(){
+        if ($this->request->isAJAX()) {
+            if (!session('idusuario')) {
+                exit();
+            }
+
+            $lineas = $this->modeloPieza->getLineas();
+            
+            $data = [];
+
+            foreach ($lineas as $row) {
+                $data[] = [
+                    "id"          => $row['idlinea'],
+                    "linea"       => $row['linea'],
+                    "descripcion" => $row['lineadesc'],
+                    "idusuario"   => $row['idusuario'],
+                ];
+            }
+
+            echo json_encode(["data" => $data]);
+        }
+    }
+
+    public function registrarLinea(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            //print_r($_POST);exit();
+            $linea       = trim($this->request->getVar('linea'));
+            $descripcion = trim($this->request->getVar('desclinea'));
+            $idlinea = $this->request->getVar('idlinea_e');//para editar
+
+            $validation = \Config\Services::validation();
+
+            $data = [
+                'linea'     => $linea,
+                'desclinea' => $descripcion,
+            ];
+
+            $regla_linea = 'required|regex_match[/^[0-9]+$/]|greater_than_equal_to[10]|less_than_equal_to[99]|is_unique[piezalinea.linea]';
+            if( !empty($idlinea) ){
+                $regla_linea = "required|regex_match[/^[0-9]+$/]|greater_than_equal_to[10]|less_than_equal_to[99]|is_unique[piezalinea.linea,idlinea,$idlinea]";
+            }
+
+            $rules = [
+                'desclinea' => [
+                    'label' => 'Descripción', 
+                    'rules' => 'required|max_length[100]',
+                    'errors' => [
+                        'required'    => '* La {field} es requerida.',
+                        'max_length'  => '* La {field} debe contener máximo 100 caracteres.'
+                    ]
+                ],
+                'linea' => [
+                    'label' => 'Linea', 
+                    'rules' => $regla_linea,
+                    'errors' => [
+                        'required'              => '* La {field} es requerida.',
+                        'greater_than_equal_to' => '* {field} min 10',
+                        'less_than_equal_to'    => '* {field} max 99',
+                        'regex_match'           => '* La {field} es numérico.',
+                        'is_unique'             => '* La {field} es único.'
+                    ]
+                ],
+            ];
+
+            $validation->setRules($rules);
+
+            if (!$validation->run($data)) {
+                return $this->response->setJson(['status' => 'error', 'errors' => $validation->getErrors()]);
+            }
+
+            $linea_bd = $this->modeloPieza->getLinea($idlinea);
+
+            $data['idusuario'] = session('idusuario');
+
+            if( $linea_bd ){
+                if( $this->modeloPieza->modificarLinea($data, $idlinea) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Linea Modificada']);
+                }
+            }else{
+                if( $this->modeloPieza->insertarLinea($data) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Linea Registrada']);
+                }
+            }
+        }
+
+    }
+
+    public function eliminarLinea(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idlinea = $this->request->getVar('id');
+
+            $eliminar = FALSE;
+            $mensaje = "";
+
+            /* $tablas = ['pieza'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloPieza->verificarLineaTieneRegEnTablas($idlinea,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>La linea tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            } */
+
+            if( $eliminar ){
+                return $this->response->setJson(['status' => 'error', 'message' => $mensaje]);
+            }
+
+            if( $this->modeloPieza->eliminarLinea($idlinea) ){
+                return $this->response->setJson(['status' => 'ok', 'message' => 'Linea Eliminada.']);
+            }
+
+        }
+    }
+
+    //FAMILIAS
+    function ListarFamilias(){
+        if ($this->request->isAJAX()) {
+            if (!session('idusuario')) {
+                exit();
+            }
+
+            $familias = $this->modeloPieza->getFamilias();
+            
+            $data = [];
+
+            foreach ($familias as $row) {
+                $data[] = [
+                    "id"          => $row['idfamilia'],
+                    "familia"     => $row['familia'],
+                    "descripcion" => $row['familiadesc'],
+                    "idusuario"   => $row['idusuario'],
+                ];
+            }
+
+            echo json_encode(["data" => $data]);
+        }
+    }
+
+    public function registrarFamilia(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            //print_r($_POST);exit();
+            $familia     = trim($this->request->getVar('familia'));
+            $descripcion = trim($this->request->getVar('descfamilia'));
+            $idfamilia   = $this->request->getVar('idfamilia_e');//para editar
+
+            $validation = \Config\Services::validation();
+
+            $data = [
+                'familia'     => $familia,
+                'descfamilia' => $descripcion,
+            ];
+
+            $regla_familia = 'required|regex_match[/^[0-9]+$/]|greater_than_equal_to[100]|less_than_equal_to[999]|is_unique[piezafamilia.familia]';
+            if( !empty($idfamilia) ){
+                $regla_familia = "required|regex_match[/^[0-9]+$/]|greater_than_equal_to[100]|less_than_equal_to[999]|is_unique[piezafamilia.familia,idfamilia,$idfamilia]";
+            }
+
+            $rules = [
+                'descfamilia' => [
+                    'label' => 'Descripción', 
+                    'rules' => 'required|max_length[200]',
+                    'errors' => [
+                        'required'    => '* La {field} es requerida.',
+                        'max_length'  => '* La {field} debe contener máximo 200 caracteres.'
+                    ]
+                ],
+                'familia' => [
+                    'label' => 'Familia', 
+                    'rules' => $regla_familia,
+                    'errors' => [
+                        'required'              => '* La {field} es requerida.',
+                        'greater_than_equal_to' => '* {field} min 100',
+                        'less_than_equal_to'    => '* {field} max 999',
+                        'regex_match'           => '* La {field} es numérico.',
+                        'is_unique'             => '* La {field} es único.'
+                    ]
+                ],
+            ];
+
+            $validation->setRules($rules);
+
+            if (!$validation->run($data)) {
+                return $this->response->setJson(['status' => 'error', 'errors' => $validation->getErrors()]);
+            }
+
+            $familia_bd = $this->modeloPieza->getFamilia($idfamilia);
+
+            $data['idusuario'] = session('idusuario');
+
+            if( $familia_bd ){
+                if( $this->modeloPieza->modificarFamilia($data, $idfamilia) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Familia Modificada']);
+                }
+            }else{
+                if( $this->modeloPieza->insertarFamilia($data) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Familia Registrada']);
+                }
+            }
+        }
+
+    }
+
+    public function eliminarFamilia(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idfamilia = $this->request->getVar('id');
+
+            $eliminar = FALSE;
+            $mensaje = "";
+
+            /* $tablas = ['pieza'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloPieza->verificarFamiliaTieneRegEnTablas($idfamilia,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>La familia tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            } */
+
+            if( $eliminar ){
+                return $this->response->setJson(['status' => 'error', 'message' => $mensaje]);
+            }
+
+            if( $this->modeloPieza->eliminarFamilia($idfamilia) ){
+                return $this->response->setJson(['status' => 'ok', 'message' => 'Familia Eliminada.']);
+            }
+
+        }
+    }
+
+    //MARCAS
+    function ListarMarcas(){
+        if ($this->request->isAJAX()) {
+            if (!session('idusuario')) {
+                exit();
+            }
+
+            $marcas = $this->modeloPieza->getMarcas();
+            
+            $data = [];
+
+            foreach ($marcas as $row) {
+                $data[] = [
+                    "id"        => $row['idmarca'],
+                    "marca"     => $row['marca'],
+                    "idusuario" => $row['idusuario'],
+                ];
+            }
+
+            echo json_encode(["data" => $data]);
+        }
+    }
+
+    public function registrarMarca(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')){
+                exit();
+            }
+            //print_r($_POST);exit();
+            $marca   = trim($this->request->getVar('marca'));
+            $idmarca = $this->request->getVar('idmarca_e');//para editar
+
+            $validation = \Config\Services::validation();
+
+            $data = [
+                'marca'     => $marca,
+            ];
+
+            $regla_marca = 'required|max_length[50]|min_length[1]|is_unique[piezamarca.marca]';
+            if( !empty($idfamilia) ){
+                $regla_marca = "required|max_length[50]|min_length[1]|is_unique[piezamarca.marca,idmarca,$idmarca]";
+            }
+
+            $rules = [
+                'marca' => [
+                    'label' => 'Marca', 
+                    'rules' => $regla_marca,
+                    'errors' => [
+                        'required'    => '* La {field} es requerida.',
+                        'max_length'  => '* {field} max 50',
+                        'min_length'  => '* {field} min 1',
+                        'is_unique'   => '* La {field} es único.'
+                    ]
+                ],
+            ];
+
+            $validation->setRules($rules);
+
+            if (!$validation->run($data)) {
+                return $this->response->setJson(['status' => 'error', 'errors' => $validation->getErrors()]);
+            }
+
+            $marca_bd = $this->modeloPieza->getMarca($idmarca);
+
+            $data['idusuario'] = session('idusuario');
+
+            if( $marca_bd ){
+                if( $this->modeloPieza->modificarMarca($data, $idmarca) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Marca Modificada']);
+                }
+            }else{
+                if( $this->modeloPieza->insertarMarca($data) ){
+                    return $this->response->setJson(['status' => 'ok', 'message' => 'Marca Registrada']);
+                }
+            }
+        }
+
+    }
+
+    public function eliminarMarca(){
+        if( $this->request->isAJAX() ){
+            if(!session('idusuario')) exit();
+
+            $idmarca = $this->request->getVar('id');
+
+            $eliminar = FALSE;
+            $mensaje = "";
+
+            /* $tablas = ['pieza'];
+            foreach( $tablas as $t ){
+                $total = $this->modeloPieza->verificarMarcaTieneRegEnTablas($idmarca,$t)['total'];
+                if( $total > 0 ){
+                    $mensaje .= "<div class='text-start'>La marca tiene $total registros en la tabla '$t'.</div>";
+                    $eliminar = TRUE;
+                }
+            } */
+
+            if( $eliminar ){
+                return $this->response->setJson(['status' => 'error', 'message' => $mensaje]);
+            }
+
+            if( $this->modeloPieza->eliminarMarca($idmarca) ){
+                return $this->response->setJson(['status' => 'ok', 'message' => 'Marca Eliminada.']);
+            }
+
+        }
+    }
+
 
 
 }

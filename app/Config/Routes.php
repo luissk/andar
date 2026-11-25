@@ -39,6 +39,19 @@ $routes->post('eliminar-pieza', 'Pieza::eliminarPieza');
 $routes->get('piezas-a-excel', 'Pieza::reporteExcel');
 
 $routes->get('linea-familia-marca', 'Pieza::lineasFamiliaMarca');
+$routes->get('listar-lineas', 'Pieza::ListarLineas');
+$routes->post('registrar-linea', 'Pieza::registrarLinea');
+$routes->post('eliminar-linea', 'Pieza::eliminarLinea');
+
+$routes->get('listar-familias', 'Pieza::ListarFamilias');
+$routes->post('registrar-familia', 'Pieza::registrarFamilia');
+$routes->post('eliminar-familia', 'Pieza::eliminarFamilia');
+
+$routes->get('listar-marcas', 'Pieza::ListarMarcas');
+$routes->post('registrar-marca', 'Pieza::registrarMarca');
+$routes->post('eliminar-marca', 'Pieza::eliminarMarca');
+
+
 
 $routes->get('torres', 'Torre::index');
 $routes->get('piezas-select-ajax', 'Torre::listarPiezasAjaxSelect2');
