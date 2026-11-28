@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-11-2026 a las 20:28:57
+-- Tiempo de generación: 27-11-2026 a las 20:34:10
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -8031,19 +8031,22 @@ ALTER TABLE `pieza`
 -- Indices de la tabla `piezafamilia`
 --
 ALTER TABLE `piezafamilia`
-  ADD PRIMARY KEY (`idfamilia`);
+  ADD PRIMARY KEY (`idfamilia`),
+  ADD UNIQUE KEY `uq_familia` (`familia`);
 
 --
 -- Indices de la tabla `piezalinea`
 --
 ALTER TABLE `piezalinea`
-  ADD PRIMARY KEY (`idlinea`);
+  ADD PRIMARY KEY (`idlinea`),
+  ADD UNIQUE KEY `uq_linea` (`linea`);
 
 --
 -- Indices de la tabla `piezamarca`
 --
 ALTER TABLE `piezamarca`
-  ADD PRIMARY KEY (`idmarca`);
+  ADD PRIMARY KEY (`idmarca`),
+  ADD UNIQUE KEY `uq_marca` (`marca`);
 
 --
 -- Indices de la tabla `presupuesto`
